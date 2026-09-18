@@ -101,6 +101,28 @@ def test_old_decoder_state_requires_explicit_old_config():
         decoder("exclusive-v1").restore(decoder().state())
 
 
+@pytest.mark.parametrize("index,action", list(enumerate(MOTOR_TYPES))[:4])
+def test_sustained_direction_comes_only_from_decaying_neural_activity(index, action):
+    d = decoder("sustained-v3")
+    assert d.choose(np.zeros(7), 0.24)[0] == "wait"
+    counts = np.zeros(7)
+    counts[index], counts[4] = 3, 3
+    assert d.choose(counts, 0.24)[0] == action + "+a"
+    assert d.choose(np.zeros(7), 0.24)[0] == action  # Functions never latch.
+    clone = decoder("sustained-v3")
+    clone.restore(d.state())
+    for _ in range(12):
+        result = d.choose(np.zeros(7), 0.24)
+        assert result == clone.choose(np.zeros(7), 0.24)
+    assert result[0] == "wait"  # No endlessly forced movement.
+
+
+def test_sustained_model_still_allows_opposing_neural_commands():
+    d = decoder("sustained-v3")
+    assert d.choose(np.array([3, 0, 0, 0, 0, 0, 0]), 0.24)[0] == "up"
+    assert d.choose(np.array([0, 20, 0, 0, 0, 0, 0]), 0.24)[0] == "down"
+
+
 @pytest.mark.parametrize("bad", [float("nan"), float("inf"), -1])
 def test_invalid_spikes_cannot_press_buttons(bad):
     with pytest.raises(ValueError):

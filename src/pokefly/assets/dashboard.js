@@ -256,6 +256,9 @@ async function init() {
     setLabel("motor-detail", "Fixed readouts · MN9 → A",
       "Seven fixed neural readouts; MN9 / CB0701 proboscis extension maps to A. No physical fly body is simulated; motor function remains unvalidated.");
     $("learning-detail").textContent = "Waiting for synaptic measurements";
+    if (state.motor_arbitration === "sustained-v3") {
+      $("motor-detail").title += " Sustained directional readout: decaying past motor spikes can maintain a direction during a silent sample. Functions require current spikes. Button pulses are not additional neural spikes.";
+    }
   }
   $("brain-size").textContent = `${state.neurons.toLocaleString()} neurons · ${Math.round(state.neural_seconds_per_sample * 1000)} ms/sample`;
   $("synapses").textContent = `${state.connections.toLocaleString()} connections · `

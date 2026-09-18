@@ -22,6 +22,7 @@ from pokefly.plasticity import (
     dan_target_gates,
 )
 from pokefly.runtime import configure_runtime
+from pokefly.score_plasticity import LikelihoodPlasticity
 
 
 @dataclass(frozen=True)
@@ -47,10 +48,14 @@ class BrainConfig:
             if self.dynamics.profile != "hybrid-v1":
                 raise ValueError("Intrinsic calibration requires hybrid dynamics")
         if (
-            self.plasticity.rule == "sensorimotor-perturb-v1"
+            self.plasticity.rule.startswith("sensorimotor-perturb-")
             and self.dynamics.profile != "hybrid-v1"
         ):
             raise ValueError("Neural-perturbation credit requires hybrid dynamics")
+        if self.plasticity.rule.startswith("sensorimotor-score-") and (
+            self.dynamics.spike_temperature <= 0 or self.plasticity.slow_eligibility_seconds
+        ):
+            raise ValueError("Likelihood credit requires stochastic spiking and one trace")
 
 
 class CheckpointNoise:
@@ -96,10 +101,7 @@ class InternalBrain(PixelBrain):
             pre.extend([int(cell)] * len(selected))
             offsets.extend(selected)
         self.csc_offsets = np.asarray(offsets, np.int64)
-        sensorimotor = config.plasticity.rule in (
-            "sensorimotor-rstdp-v1",
-            "sensorimotor-perturb-v1",
-        )
+        sensorimotor = config.plasticity.rule.startswith("sensorimotor-")
         if sensorimotor:
             # Anatomy only, independent of the selected motor-to-button registry.
             eligible_post = np.isin(
@@ -111,8 +113,10 @@ class InternalBrain(PixelBrain):
         args = (np.asarray(pre), post, b.weights[self.csc_offsets], b.n, config.plasticity)
         if sensorimotor:
             rule = (
-                NeuralPerturbationPlasticity
-                if config.plasticity.rule == "sensorimotor-perturb-v1"
+                LikelihoodPlasticity
+                if config.plasticity.rule.startswith("sensorimotor-score-")
+                else NeuralPerturbationPlasticity
+                if config.plasticity.rule.startswith("sensorimotor-perturb-")
                 else SensorimotorPlasticity
             )
             self.plasticity = rule(*args)
@@ -148,6 +152,7 @@ class InternalBrain(PixelBrain):
         if config.dynamics.profile == "hybrid-v1":
             self.hybrid = HybridDynamics(b, self.groups, config.dynamics)
             self.hybrid.track_noise = isinstance(self.plasticity, NeuralPerturbationPlasticity)
+            self.hybrid.track_score = isinstance(self.plasticity, LikelihoodPlasticity)
             b.step = self.hybrid.step
         self.intrinsic_calibration_info = None
         if config.intrinsic_calibration:
@@ -210,7 +215,15 @@ class InternalBrain(PixelBrain):
         return drive
 
     def _observe_plasticity(self, fired):
-        if isinstance(self.plasticity, NeuralPerturbationPlasticity):
+        if isinstance(self.plasticity, LikelihoodPlasticity):
+            self.plasticity.observe(
+                fired, self.brain.dt,
+                release=self.hybrid.previous_release,
+                probability=self.hybrid.last_probability,
+                membrane_decay=float(self.brain.decay), gain=self.brain.gain,
+                temperature=self.config.dynamics.spike_temperature,
+            )
+        elif isinstance(self.plasticity, NeuralPerturbationPlasticity):
             self.plasticity.observe(
                 fired,
                 self.brain.dt,
@@ -311,14 +324,17 @@ class InternalBrain(PixelBrain):
         stored["config"]["dynamics"] = dict(stored["config"]["dynamics"])
         stored["config"]["dynamics"].setdefault("isolate_nonvisual_sensory", False)
         stored["config"]["dynamics"].setdefault("quiescent_nonvisual_sensory", False)
+        stored["config"]["dynamics"].setdefault("spike_temperature", 0.0)
         stored["config"]["motor"] = dict(stored["config"]["motor"])
         stored["config"]["motor"].setdefault("arbitration", "exclusive-v1")
+        stored["config"]["motor"].setdefault("direction_trace_seconds", 1.0)
         stored["config"]["plasticity"] = dict(stored["config"]["plasticity"])
         stored["config"]["plasticity"].setdefault("rule", "centered-v1")
         stored["config"]["plasticity"].setdefault("activity_reference_hz", 5.0)
         stored["config"]["plasticity"].setdefault("reward_expectation_seconds", 30.0)
         stored["config"]["plasticity"].setdefault("normalize_inputs", False)
         stored["config"]["plasticity"].setdefault("input_budget_fraction", 0.0)
+        stored["config"]["plasticity"].setdefault("slow_eligibility_seconds", 0.0)
         if weights_only:
             # New seed/backend allowed for retention evaluation; circuit settings stay fixed.
             stored["device"] = identity["device"]

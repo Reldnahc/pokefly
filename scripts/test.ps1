@@ -40,8 +40,19 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Sensory-isolated stream smoke test failed.' }
         & $projectPython scripts/smoke_internal.py --device $Device --config configs/sensory-isolated-v1.json
         if ($LASTEXITCODE -ne 0) { throw 'Sensory-isolated exact-resume smoke test failed.' }
-        foreach ($candidateProfile in @('stream-v1', 'endpoint-v1', 'quiescent-v1', 'compartment-ema-v1', 'intrinsic-v1', 'sensorimotor-v1', 'sensorimotor-normalized-v1', 'sensorimotor-bounded-v1', 'sensorimotor-budget-v1', 'sensorimotor-perturb-v1')) {
+        foreach ($candidateProfile in @('stream-v1', 'endpoint-v1', 'quiescent-v1',
+            'compartment-ema-v1', 'intrinsic-v1', 'sensorimotor-v1',
+            'sensorimotor-normalized-v1', 'sensorimotor-bounded-v1', 'sensorimotor-budget-v1',
+            'sensorimotor-perturb-v1', 'sensorimotor-perturb-v2', 'sensorimotor-perturb-v3',
+            'sensorimotor-reset-v2', 'compartment-reset-v2', 'sensorimotor-low-noise-v1',
+            'sensorimotor-delayed-v1', 'sensorimotor-dual-v1', 'sensorimotor-centered-v1',
+            'sensorimotor-score-v1', 'sensorimotor-score-v2', 'sensorimotor-sustained-v1')) {
             $candidateConfig = "configs/$candidateProfile.json"
+            $candidateCalibration = (Get-Content -Raw -LiteralPath $candidateConfig | ConvertFrom-Json).brain.intrinsic_calibration
+            if ($candidateCalibration -and -not (Test-Path -LiteralPath $candidateCalibration)) {
+                Write-Host "SKIPPED ${candidateProfile}: generate its optional calibration first (MODEL_VARIANTS.md)."
+                continue
+            }
             & $projectPython scripts/smoke_watch.py --device $Device --autonomous --config $candidateConfig
             if ($LASTEXITCODE -ne 0) { throw "$candidateProfile live-display smoke test failed." }
             & $projectPython scripts/smoke_internal.py --device $Device --config $candidateConfig

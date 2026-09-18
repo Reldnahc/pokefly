@@ -16,7 +16,8 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 async function harness({manual = true, autonomous = false, mode = "learn", graded = false, isolated = false,
                         speedControl = autonomous, speedError = false, hz = 5,
-                        visualTiming = "snapshot-v1", quiescent = false, intrinsic = false} = {}) {
+                        visualTiming = "snapshot-v1", quiescent = false, intrinsic = false,
+                        motorArbitration = "parallel-v2"} = {}) {
   const elements = new Map(), requests = [], intervals = [], pendingImages = new Map();
   let stream, now = 10000, speedDelay = null;
   let pacing = {target_hz: hz, revision: 0};
@@ -57,6 +58,7 @@ async function harness({manual = true, autonomous = false, mode = "learn", grade
     groups: Object.fromEntries(populationNames.map((key) => [key, []])),
     graded_indices: graded ? [0, 2] : [], dynamics_profile: graded ? "hybrid-v1" : "baseline",
     visual_timing: visualTiming,
+    motor_arbitration: motorArbitration,
     intrinsic_calibration: intrinsic ? {rule: "uniform-neutral-rate-homeostasis-v1"} : null,
     sensory_isolation: {enabled: isolated, neurons: isolated ? 2 : 0,
                         mode: quiescent ? "nonvisual-quiescent-v1" : "nonvisual-incoming-v1"},
@@ -394,4 +396,11 @@ test("desktop stylesheet declares a viewport-bounded grid and preserves canvas p
   assert.match(html, /#brain\s*\{[^}]*object-fit:contain/);
   assert.doesNotMatch(html, /@media\s*\(max-width/);
   assert.match(html, /SYNTHETIC D/);
+});
+
+test("sustained motor traces are labeled separately from new spikes", async () => {
+  const ui = await harness({manual: false, autonomous: true, motorArbitration: "sustained-v3"});
+  assert.match(ui.elements.get("motor-detail").title, /past motor spikes/);
+  assert.match(ui.elements.get("motor-detail").title, /not additional neural spikes/);
+  assert.equal(ui.elements.get("motor-detail").textContent, "Fixed readouts · MN9 → A");
 });

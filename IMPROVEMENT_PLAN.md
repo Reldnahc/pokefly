@@ -26,6 +26,143 @@ test proves eventual game completion.
 
 ### Follow-through evidence and live work
 
+Latest checkpoint of work (older entries below are a chronological lab log):
+
+- 07:24 UTC: dual-trace independent battle confirmation completed 6/8 versus
+  original 3/8 (`controlled-battle-learning-20260918T070446Z-946834`). Fresh
+  autonomous dual-trace seed 401 obtained Bulbasaur at 4,243 and won the rival
+  at 6,561, reaching 307 positions by 10,000. Entire recorded run replayed
+  exactly (`recorded-replay-proof-20260918T071938Z-2a9fff`); images are playback,
+  not extra successes. Literal launcher now continues that game to 40,000
+  (`internal-learn-20260918T071854Z-26737e`), no diagnostic-trained weights.
+- Score-v1 visual discrimination failed to improve over shuffled at 2,048;
+  symmetric wrong-choice diagnostic feedback also failed. Score-v2 tests a
+  synapse-size preconditioner, not an added policy; no success claimed.
+- Separate fixed-adapter hypothesis: longer, decaying directional motor traces
+  may permit coherent walking bouts without altering buttons/rewards or learning
+  outside the brain. Opt-in sustained-v3 applies the same rule to all directions;
+  functions retain the old immediate-spike rule. Frozen matched two-seed Route-1
+  comparison is running via `evaluate_movement_bouts.py`; reset to recorded
+  sample 1,882 is a labeled diagnostic intervention. Do not attribute this to
+  learning or promote before useful results. Legacy decoder stays exact.
+
+- 07:13 UTC: stochastic likelihood-score variant implemented as opt-in
+  `sensorimotor-score-v1`; finite-difference/zero-mean-score tests pass.
+  191 Python and 21 JS tests pass. Actual-ROM exact resume/frozen/no-reward
+  passed (`internal-smoke-20260918T070537Z-cca273`), live pixels/buttons/speed
+  passed, and original user's next 20 recorded decisions still match exactly
+  (`legacy-resume-score-20260918`). All ten protected hashes match.
+  Calibration `intrinsic-probe-20260918T070346Z-1ad5bd` is neutral-only.
+  Initial visual curve: 46.6% pre, 49.1% at 512, 50.8% at 2,048; still NOT a
+  behavioral solution. Matched shuffled controls running. Separately test
+  equal +/-1 correct/wrong competing-choice feedback ONLY in the ROM-free
+  diagnostic to distinguish discrimination from general Left/Right activation.
+  No game reward or diagnostic-weight transfer is changed/allowed.
+- Perturb-v3 16,384 curve completed: 53.8% paired versus 37.1% shuffled
+  conditional accuracy, target rates 25.5%/24.0%. Still lacks repeatable
+  acquisition/reversal. Bounded black/white -> Up/Down two-seed/full-reversal
+  assay also completed without passing every seed/mapping; raw results retained
+  in `visual-learning-up-down-bounded-20260918`.
+- Dual-trace motor confirmation completed including initial Down seed 602:
+  paired Down 47.7% then reversal Up 34.8%, shuffled 27.3% then 22.3%, frozen
+  exactly pre. Initial actual-battle panel 6/8 versus reused baseline 4/8;
+  independent 1101..1108 pending. Fresh literal application seed 401 is running
+  from the common outdoor start (`internal-learn-20260918T070458Z-6a8fc0`),
+  with no synthetic training and no route. No new profile promoted.
+
+- 07:00 UTC: long-credit actual application continuation completed at sample
+  19,276 (`internal-learn-20260918T062745Z-ecfad9`): six maps, 425 sampled
+  positions; Route 1 remained y=28..35 and no further battle victories. This
+  does NOT resolve long-run exploration. Both short and long-credit battle
+  weights won 5/8 on confirmation seeds 1101..1108 versus the same original 3/8.
+- Dual fast/slow eligibility retains operant acquisition/reversal on seeds
+  501 and 601, with unchanged frozen controls; counterbalanced 602 and actual
+  battle retention are running. Centered covariance and low-noise visual
+  variants failed their exploratory learning curves. Perturb-v3 at 16,384
+  training decisions plateaus at 53.8% conditional accuracy (control pending).
+- Next bounded mechanism test: an OPTIONAL stochastic-spiking model with a
+  local likelihood-score eligibility signal, instead of a heuristic firing
+  covariance. Motivation: Florian 2007's stochastic-neuron derivation, not a
+  claim of measured fly physiology. Keep original topology, pixel input,
+  anatomy-only plastic targets, fixed decoder and general game rewards.
+  Refit neutral excitability without images/actions/rewards from the task;
+  verify the score by finite differences before visual/operant assays. Never
+  transfer synthetic-assay weights to the game. Defaults and legacy checkpoints
+  must stay reproducible. This tests a specific credit-assignment failure,
+  not another arbitrary batch of unchanged gameplay trials.
+
+- Full live continuation completed: `internal-learn-20260918T055141Z-c23a10`,
+  source seed-401 checkpoint continued from 6,000 to 24,000 decisions. It reached
+  399 cumulative sampled positions but no additional battle wins/new towns.
+  Route 1 sampling stayed within y=26..35: the movement defect is improved,
+  but useful exploration beyond the lower route remains unsolved. Up pulses
+  actually move the player; do not describe this plateau as success.
+- Controlled battle retention completed: original 4/8 wins, after eight actual
+  battle-learning episodes 6/8 wins, same frozen evaluation seeds 1001..1008.
+  Artifact `controlled-battle-learning-20260918T053123Z-7acd46`. Independent
+  confirmation seeds 1101..1108 are running in `...T060731Z-eda3d8`, with no
+  additional learning. Small-sample positive evidence, not robust mastery.
+- Longer-credit candidate changes ONLY eligibility duration, 0.6 to 30 neural
+  seconds. Same generic outcome rewards. Reuses the identical frozen baseline
+  transparently (not counted as fresh trials); config/input hashes are checked.
+  `controlled-battle-learning-20260918T060231Z-564dc5` is running. New battle
+  assays export standard application checkpoints as well as raw neural arrays.
+- `sensorimotor-perturb-v2` completed both seeds/mappings without reliable
+  visual learning. `sensorimotor-perturb-v3` additionally centers presynaptic
+  activity against its previous local 10 s mean. Same anatomy and input budget;
+  no action/cue identity enters the rule. Seed 501 after 2,048 decisions:
+  paired conditional accuracy 50.0%, shuffled 43.0%, pretest 43.1%. NOT a pass.
+  Full-state continuation to 8,192 decisions is running from
+  `visual-learning-curve-20260918T060003Z-607331`; no restart/cherry-picking.
+- Reset-conditioned neutral calibration (`--reset-every 200`) removes most of
+  the KC/MBON post-reset silence: three held-out seeds give KC 0.52--0.67 Hz,
+  MBON 0.85--1.13 Hz. Artifact `intrinsic-probe-20260918T055315Z-45e2c3`.
+  However, compartment learning with this calibration failed the full two-cue
+  assay: `visual-learning-compartment-reset-v2-20260918`. Activity is not memory.
+- Read-only latency probe `visual-latency-probe-20260918T061633Z-f2b2e1`: four
+  independent noise seeds, constant and switched cues. Offline nearest-centroid
+  measurements distinguish cues at visual projection, descending and motor-input
+  populations (8/8 constant and 12/12 in each switch window), but not reliably
+  at KC/MBON populations. This diagnostic classifier is NEVER a game policy.
+  It rules out missing/delayed motor-pathway visual information as the whole
+  explanation, not a proof of behavior or statistical significance.
+- A read-only frozen-input capacity calculation indicates +/-25% individual
+  excitatory bounds cannot reverse either DNa02 direct mean cue preference;
+  the wider 0.25--4x/input-budget profile can. This is a first-order estimate
+  with presynaptic activity fixed, not an optimized controller to deploy.
+- Next signal-to-noise hypothesis: smaller neural perturbations (0.08 versus
+  0.22), with the SAME neutral-reset calibration procedure refitted to retain
+  activity. Separately versioned artifact/profile; no motor-label fitting.
+  Original calibration/default remain unchanged. Require held-out/shuffled
+  behavioral checks before any promotion.
+- Verification now includes 181 Python and 21 JS tests; v2 and v3 actual-ROM
+  exact resume/frozen/no-reward tests passed. Browser connection retried and
+  still unavailable; HTTP/SSE was live through decision 18,367, not visual QA.
+
+- Public repository created and audited source/docs pushed with `gh` outside
+  the sandbox: https://github.com/Reldnahc/pokefly , initial commit `121f2a4`.
+  No ROM, saves, model data, checkpoints or raw runs uploaded.
+- Held-out retained-gameplay comparison completed: starters 3/3 retained versus
+  1/3 original, but battle wins 0/3 versus 1/3. Per-seed positions were
+  333/244/254 retained versus 257/264/208 original. Do not claim general strategy.
+- Literal default launcher seed 64 left the bedroom/house at decision 350;
+  257 positions, no starter in 6,000 decisions. All 10 protected hashes unchanged.
+- Full pre-v2 validation passed: 178 Python, 21 JS, 27 live checks/13 profiles.
+  Legacy user's checkpoint continuation exactly matched 20 original decisions.
+- Longer visual perturb-v1 trial failed: paired conditional accuracy 48.1%
+  versus shuffled 53.2% after 8,192 decisions. Raw cue contrasts at motor inputs
+  persist into the second half of 256-decision probes (Left 22.9%, Right 24.1%);
+  missing information is not simply an initial image-transient problem.
+- Testing `sensorimotor-perturb-v2`: clipping asymmetric Bernoulli innovations
+  creates negative expected eligibility (proved by enumerating outcomes).
+  New version keeps a linear eligibility trace; v1 and default stay unchanged.
+  Numerical regression and actual-ROM exact resume passed. Two seeds, both
+  visual mappings, acquisition/reversal and shuffled/frozen controls running.
+- Controlled actual-battle experiment is running: 8 frozen baseline seeds,
+  8 learning episodes with explicit resets, then the same 8 held-out seeds.
+  Original win count is 4/8; retained result pending. These resets are diagnostic
+  interventions, not autonomous whole-game progression. Existing rewards only.
+
 - Neutral intrinsic calibration is an explicit new modeling hypothesis: all
   non-sensory spiking neurons, never a button-specific group, adapt excitability
   using the same 1 Hz target on uniform gray for 10,000 neural steps (seed 707).

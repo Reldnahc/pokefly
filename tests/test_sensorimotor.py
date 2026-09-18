@@ -164,3 +164,79 @@ def test_perturbation_credit_uses_actual_neural_noise_not_output_action():
 def test_perturbation_capture_requires_supported_dynamics():
     with pytest.raises(ValueError, match="requires hybrid"):
         BrainConfig(plasticity=PlasticityConfig(rule="sensorimotor-perturb-v1"))
+
+
+def test_linear_perturbation_trace_is_conditionally_zero_mean():
+    means = {}
+    for rule in ("sensorimotor-perturb-v1", "sensorimotor-perturb-v2", "sensorimotor-perturb-v3"):
+        outcomes = []
+        for event in (False, True):
+            p = NeuralPerturbationPlasticity(
+                np.array([0]),
+                np.array([1]),
+                np.array([0.2]),
+                2,
+                PlasticityConfig(rule=rule, activity_reference_hz=1, eligibility_seconds=0.6),
+            )
+            p.pre_trace[0] = 0.1
+            p.observe(
+                np.array([], dtype=int),
+                0.02,
+                perturbation=np.array([False, event]),
+                probability=0.024,
+            )
+            outcomes.append(float(p.eligibility[0]))
+        means[rule] = 0.976 * outcomes[0] + 0.024 * outcomes[1]
+    assert abs(means["sensorimotor-perturb-v2"]) < 1e-6
+    assert abs(means["sensorimotor-perturb-v3"]) < 1e-6
+    assert means["sensorimotor-perturb-v1"] < -0.01
+
+
+def test_centered_input_perturbation_uses_past_local_activity_and_allows_negative_contrast():
+    p = NeuralPerturbationPlasticity(
+        np.array([0]),
+        np.array([1]),
+        np.array([0.2]),
+        2,
+        PlasticityConfig(rule="sensorimotor-perturb-v3", activity_reference_hz=1),
+    )
+    p.pre_trace[0] = 0.01
+    p.post_baseline[0] = 0.05
+    p.observe(np.array([0]), 0.02, perturbation=np.array([False, True]), probability=0.024)
+    assert p.eligibility[0] < 0  # This step's presynaptic spike is not read early.
+
+
+def test_dual_eligibility_retains_delayed_activity_and_restores_exactly():
+    cfg = replace(learner().config, slow_eligibility_seconds=30)
+    args = (np.array([0]), np.array([1]), np.array([0.2]), 2, cfg)
+    p, q = SensorimotorPlasticity(*args), SensorimotorPlasticity(*args)
+    for _ in range(12):
+        p.observe(np.array([0, 1]), 0.02)
+    for _ in range(500):
+        p.observe(np.array([], dtype=int), 0.02)
+    assert abs(p.slow_eligibility[0]) > abs(p.eligibility[0]) * 100
+    q.restore(p.arrays(), p.metrics())
+    for reward in (1, 0, 0, 1):
+        for model in (p, q):
+            model.observe(np.array([0, 1]), 0.02)
+            model.reinforce(reward)
+        for key in p.arrays():
+            np.testing.assert_array_equal(p.arrays()[key], q.arrays()[key])
+    assert p.weights[0] != p.base[0]
+    p.reset_modulation()
+    assert not p.slow_eligibility.any()
+
+
+def test_centered_covariance_credits_past_input_contrast_not_current_cofiring():
+    p = SensorimotorPlasticity(
+        np.array([0]),
+        np.array([1]),
+        np.array([0.2]),
+        2,
+        PlasticityConfig(rule="sensorimotor-rstdp-v2", activity_reference_hz=1),
+    )
+    p.pre_trace[0], p.post_baseline[0] = 0.01, 0.05
+    p.observe(np.array([0, 1]), 0.02)
+    assert p.eligibility[0] < 0
+    p.reinforce(1)
+    assert p.weights[0] < p.base[0]

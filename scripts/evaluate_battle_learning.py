@@ -9,20 +9,35 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections import Counter
+from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
 
-from pokefly.checkpoint import sha256
+from pokefly.checkpoint import save_checkpoint, sha256
 from pokefly.emulator import RedEmulator
-from pokefly.experiment import load_config
+from pokefly.experiment import ExperimentConfig, load_config
 from pokefly.internal_brain import InternalBrain
 from pokefly.rewards import GeneralRewards, RewardHooks
 from pokefly.rom import resolve_rom
 from pokefly.runner import run_directory, write_json
 
 
-def episode(c, rom, state_path, ledger_path, seed, *, enabled, maximum, log_path, reward_config):
+def episode(
+    c,
+    rom,
+    state_path,
+    ledger_path,
+    seed,
+    *,
+    enabled,
+    maximum,
+    log_path,
+    reward_config,
+    checkpoint_output=None,
+    experiment_config=None,
+):
     mean = c.plasticity.reward_mean.copy() if enabled else None
     c.reset_dynamics(seed)
     if mean is not None:
@@ -32,15 +47,18 @@ def episode(c, rom, state_path, ledger_path, seed, *, enabled, maximum, log_path
     if rewards.active is None:
         raise ValueError("Recorded reward ledger must contain the active battle")
     events, finished = [], False
+    actions, spike_totals = Counter(), Counter()
     with RedEmulator(rom) as game:
         game.load(state_path, advance=False)
         if not game.state().battle:
             raise ValueError("Recorded game state is not in a battle")
         frame = game.screen()
-        with RewardHooks(game, rewards), log_path.open("x", encoding="utf-8") as log:
+        with RewardHooks(game, rewards) as hooks, log_path.open("x", encoding="utf-8") as log:
             for index in range(maximum):
                 observation = c.observe(frame)
                 action, _ = c.choose(observation)
+                actions[action] += 1
+                spike_totals.update(observation.groups)
                 game.act(action, 24)
                 reward, new_events = rewards.drain()
                 c.reinforce(reward, enabled=enabled)
@@ -62,6 +80,27 @@ def episode(c, rom, state_path, ledger_path, seed, *, enabled, maximum, log_path
                 if rewards.active is None:
                     finished = True
                     break
+            checkpoint = None
+            if checkpoint_output is not None:
+                checkpoint = save_checkpoint(
+                    checkpoint_output,
+                    c,
+                    game,
+                    hooks,
+                    rewards,
+                    frame=frame,
+                    experiment={
+                        "sample": index + 1,
+                        "mode": "learn",
+                        "config": asdict(experiment_config),
+                        "actions": dict(actions),
+                        "spike_totals": dict(spike_totals),
+                        "visited_this_trial": [],
+                        "first_house_exit": None,
+                        "starts_in_house": False,
+                        "intervention": "Explicit reset to recorded battle for diagnostic training",
+                    },
+                )
         result = {
             "seed": seed,
             "decisions": index + 1,
@@ -70,6 +109,7 @@ def episode(c, rom, state_path, ledger_path, seed, *, enabled, maximum, log_path
             "events": events,
             "final": game.state().telemetry(),
             "learning": c.plasticity.metrics(),
+            "checkpoint": str(checkpoint) if checkpoint else None,
         }
     return result
 
@@ -82,11 +122,30 @@ def main():
     p.add_argument("--training-episodes", type=int, default=8)
     p.add_argument("--maximum", type=int, default=3000)
     p.add_argument("--eval-seeds", nargs="+", type=int, default=list(range(1001, 1009)))
+    p.add_argument(
+        "--initial-neural",
+        type=Path,
+        help="Saved neural NPZ from actual battle training; paired JSON required",
+    )
+    p.add_argument(
+        "--reference-control",
+        type=Path,
+        help="Reuse an identical frozen baseline, never counted as new trials",
+    )
     args = p.parse_args()
-    if min(args.training_episodes, args.maximum) < 1 or len(args.eval_seeds) < 2:
-        p.error("Positive training/budget and at least two evaluation seeds required")
+    if (
+        args.training_episodes < 0
+        or args.maximum < 1
+        or len(args.eval_seeds) < 2
+        or (args.training_episodes == 0 and args.initial_neural is None)
+    ):
+        p.error(
+            "Positive budget, two evaluation seeds, and training or saved neural weights required"
+        )
     output = run_directory("controlled-battle-learning")
     config = load_config(args.config)
+    if config.frames != 24 or config.visual_timing != "snapshot-v1":
+        raise ValueError("Battle assay currently implements only 24-frame snapshot timing")
     c = InternalBrain(device="cuda", config=config.brain)
     initial, initial_state = c.snapshot()
     rom = resolve_rom(None, Path.cwd())
@@ -95,6 +154,7 @@ def main():
         "Existing rewards only; no chosen-button feedback or forced actions. "
         "Fresh and retained evaluations frozen with matched starts/noise seeds.",
         "config": str(args.config),
+        "config_snapshot": asdict(config),
         "state": str(args.state),
         "ledger": str(args.ledger),
         "state_sha256": sha256(args.state),
@@ -105,14 +165,49 @@ def main():
         "eval_seeds": args.eval_seeds,
         "rows": [],
     }
+    if args.initial_neural:
+        report["initial_neural"] = str(args.initial_neural)
+        report["initial_neural_sha256"] = sha256(args.initial_neural)
+        report["initial_neural_metadata_sha256"] = sha256(args.initial_neural.with_suffix(".json"))
+    if args.reference_control:
+        reference = json.loads(args.reference_control.read_text())
+        old_config = asdict(
+            ExperimentConfig.from_dict(reference["config_snapshot"])
+            if reference.get("config_snapshot")
+            else load_config(Path(reference["config"]))
+        )
+        current_config = asdict(config)
+        # Passive eligibility traces cannot affect frozen forward dynamics. Fail closed
+        # if ANY other configuration parameter or trial input differs.
+        for record in (old_config, current_config):
+            record["brain"]["plasticity"].pop("eligibility_seconds")
+            record["brain"]["plasticity"].pop("slow_eligibility_seconds")
+        if old_config != current_config or any(
+            reference[key] != report[key]
+            for key in ("state_sha256", "ledger_sha256", "eval_seeds", "maximum_decisions")
+        ):
+            raise ValueError("Reference control differs beyond passive eligibility traces")
+        originals = [r for r in reference["rows"] if r["phase"] == "original"]
+        if [r["seed"] for r in originals] != args.eval_seeds:
+            raise ValueError("Incomplete reference control")
+        report["rows"].extend(dict(r, reused_from=str(args.reference_control)) for r in originals)
+        report["reference_control_sha256"] = sha256(args.reference_control)
     write_json(output / "report.json", report)
     for phase, seeds in (
         ("original", args.eval_seeds),
         ("training", report["training_seeds"]),
         ("retained", args.eval_seeds),
     ):
+        if phase == "original" and args.reference_control:
+            continue
         if phase == "training":
-            c.restore(initial, initial_state, weights_only=True)
+            if args.initial_neural:
+                with np.load(args.initial_neural, allow_pickle=False) as archive:
+                    learned_arrays = {k: archive[k].copy() for k in archive.files}
+                learned_state = json.loads(args.initial_neural.with_suffix(".json").read_text())
+                c.restore(learned_arrays, learned_state, weights_only=True)
+            else:
+                c.restore(initial, initial_state, weights_only=True)
         for seed in seeds:
             row = {
                 "phase": phase,
@@ -126,6 +221,8 @@ def main():
                     maximum=args.maximum,
                     log_path=output / f"{phase}-{seed}.jsonl",
                     reward_config=config.rewards,
+                    checkpoint_output=output / f"training-{seed}" if phase == "training" else None,
+                    experiment_config=config,
                 ),
             }
             report["rows"].append(row)

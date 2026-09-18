@@ -17,8 +17,14 @@ excitability calibration increased Up from 3.9% to 22.1% and exploration from
 25 to 232 positions in a matched 6,000-decision comparison. Bounded internal
 plasticity learns and reverses motor preferences against frozen/shuffled controls.
 Actual learning runs obtained starters; one won the first rival battle and
-entered Route 1. Held-out retained-gameplay and visual-choice tests are ongoing;
-these early results do not prove eventual game completion. Failed earlier
+entered Route 1. Saved weights obtained starters in 3/3 held-out trials versus
+1/3 with original weights, but did not improve battle wins in that whole-game
+panel. Separately, a dual-trace candidate trained on eight explicitly reset
+rival encounters won 6/8 on each of two frozen test panels, versus 4/8 and 3/8
+with original weights. This is limited battle retention, not whole-game
+autonomy or statistical proof. Screen-conditioned learning remains unproven;
+experiments continue. These early results do not
+prove eventual game completion. Failed earlier
 experiments remain in [RESULTS.md](RESULTS.md), with the continuing protocol in
 [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 

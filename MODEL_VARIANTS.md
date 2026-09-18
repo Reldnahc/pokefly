@@ -41,6 +41,14 @@ in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 | `sensorimotor-bounded-v1` | Current launcher: every eligible edge bounded to 0.75--1.25x original. |
 | `sensorimotor-budget-v1` | Wider individual edge range, total incoming strength bounded +/-25%. |
 | `sensorimotor-perturb-v1` | Same bounded input budget, credit from actual neural-noise perturbations. |
+| `sensorimotor-perturb-v2` | Linear, unclipped noise eligibility to remove the v1 clipping bias. |
+| `sensorimotor-perturb-v3` | Also centers presynaptic history against its local 10 s baseline. |
+| `sensorimotor-centered-v1` | Pre/post-centered spike covariance, without neural-noise credit. |
+| `sensorimotor-delayed-v1` | Default's bounded synapses, but a 30 s credit trace. |
+| `sensorimotor-dual-v1` | Equal mixture of 0.6 s and 30 s local eligibility traces. |
+| `sensorimotor-reset-v2` | Default rule with calibration fitted across repeated neural resets. |
+| `compartment-reset-v2` | Partial KC/MBON rule with reset-conditioned calibration. |
+| `sensorimotor-low-noise-v1` | Perturbation-v3 with smaller noise and separately refitted calibration. |
 
 Use `-Profile NAME` for a **new** experiment. `-Resume` and `-Weights` restore
 the saved profile; neither silently converts a saved brain into another model.
@@ -101,6 +109,50 @@ noise amplitude, neural dynamics and button mapping are unchanged. This is a
 finite-noise/filtered-trace approximation inspired by
 [Fiete & Seung](https://doi.org/10.1103/PhysRevLett.97.048104), not their
 conductance model, an exact gradient guarantee, or validated fly biology.
+
+Version 1 clips eligibility to +/-5 like the covariance rule. That clipping is
+not neutral for rare Bernoulli noise: positive innovations are rare and large,
+so clipping makes expected eligibility negative even with fixed presynaptic
+history. Version 2 keeps the eligibility filter linear (incoming activity is
+still bounded, and weights retain the same bounds/input budget). An enumerated
+two-outcome regression checks zero conditional mean. This corrects that specific
+mathematical bias; it does not prove useful behavioral learning. Version 1 remains
+unchanged for exact old-checkpoint continuation. Version 2 is opt-in and is not
+the launcher default.
+
+Perturbation-v3 uses the previous local 10 s spike average to center presynaptic
+history too, clipping that input contrast to [-5,5]. The covariance-v2 rule in
+`sensorimotor-centered-v1` tests the same local contrast with postsynaptic spike
+innovation instead of noise. Its presynaptic trace uses only past spikes, not
+the same step's new presynaptic spike. These are engineering hypotheses, not
+external encoders or learned button classifiers.
+
+The delayed-credit candidate changes eligibility from 0.6 to 30 neural seconds.
+It improves the tested battle outcomes but weakens immediate operant acquisition.
+The dual candidate maintains BOTH traces on the same existing synapses and
+uses their arithmetic mean in the unchanged reward update. It has no game-state,
+reward-category or action-dependent switch. Both traces are checkpointed; old
+models receive an inactive `slow_eligibility_seconds=0` default and no new arrays.
+The fused dual kernel matches two independent trace updates exactly.
+
+Optional calibration research (not needed for the default):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/probe_intrinsic.py --calibration-only `
+  --device cuda --reset-every 200 --reset-probe-decisions 256 `
+  --export fly-data/intrinsic-neutral-reset-v2.npz
+.\.venv\Scripts\python.exe scripts/probe_intrinsic.py --calibration-only `
+  --device cuda --reset-every 200 --noise-amplitude 0.08 `
+  --export fly-data/intrinsic-neutral-reset-low-noise-v1.npz
+```
+
+The reset fit uses seed `707 + reset index` and the same neutral gray/uniform
+homeostasis equation. The low-noise profile uses amplitude 0.08, not 0.22;
+its calibration is separately fitted at that amplitude. No game or motor-label
+feedback enters either fit. The reset fit improves KC/MBON activity but did not
+establish visual learning. The low-noise candidate has not passed either.
+Live verification explicitly skips optional profiles whose calibration artifact
+has not been generated; it does not silently substitute another model.
 
 Checkpoints retain weights, eligibility, presynaptic/baseline traces, slow reward
 expectation and all dynamics. Exact resume keeps them; `--weights` intentionally
@@ -320,6 +372,76 @@ must be learnable through these particular synapses.
 The completed three-seed comparison did not establish reliable target-specific
 choices or reversal for either rule. The candidate remains experimental and
 opt-in; stored weight changes alone did not justify promotion.
+
+## Optional likelihood-score model: sensorimotor-score-v1
+
+This is a separate engineering hypothesis, not a promotion or a biological
+validation. The existing connectome, graded retina, input isolation and fixed
+button decoder remain. Spiking neurons use logistic escape probability
+`p = sigmoid((voltage - 1) / 0.05)`, with independent checkpointed neural
+randomness, in addition to the original background current noise. Graded cells
+never spike. Temperature zero retains the original threshold model exactly.
+
+For an existing excitatory synapse with original weight `base` and factor `f`,
+the local membrane-sensitivity trace uses actual previous transmitter release:
+
+```text
+z = membrane_decay * z + previous_presynaptic_release
+score = (postsynaptic_spike - p) * base * neural_gain * z / temperature
+eligibility = exp(-dt / 0.6) * eligibility + score
+z = 0 if the postsynaptic neuron spiked, otherwise z
+f += 0.5 * (tanh(reward) - previous_reward_mean) * eligibility
+```
+
+As in the budget variant, factors are limited to 0.25--4 and each postsynaptic
+positive-input total to +/-25% of its original value. The instantaneous score
+has zero conditional expectation and matches a finite-difference derivative of
+a fixed neural spike trajectory including hard resets. Discounting, online
+updates and constraints mean this is NOT a guarantee of whole-game convergence.
+The motivation is stochastic-neuron reward learning in
+[Florian (2007)](https://florian.io/papers/2007_Florian_Modulated_STDP.pdf);
+our discrete logistic/hard-reset model is not that paper's exact simulation.
+No desired spike train, chosen button, cue identity, RAM or external critic
+enters the learner. All plastic connections still belong to the original fly.
+
+The separately generated fixed calibration uses only neutral gray:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/probe_intrinsic.py --calibration-only --device cuda --spike-temperature 0.05 --reset-every 200 --reset-probe-decisions 128 --export fly-data/intrinsic-neutral-score-v1.npz
+```
+
+Calibration files are immutable; do not overwrite an existing artifact. The
+same neutral procedure and 1 Hz target apply to every nonsensory spiking cell,
+without motor labels or game rewards. Initial held-out neutral probes yielded
+KC 0.54--0.56 Hz and MBON 0.86--0.91 Hz. These are activity checks, not learning
+results. Behavioral and actual-ROM checks are recorded in the active plan.
+
+`sensorimotor-score-v2` uses the SAME firing model/calibration and raw score,
+but divides eligibility by original synaptic magnitude before the factor
+update, with learning rate 0.002. This positive diagonal preconditioner changes
+absolute weight updates from proportional to `base^2` to `base`; it gives weak
+existing inputs a less disadvantaged learning scale. Bounds and local input
+budgets are unchanged. No task labels determine this scaling. It is another
+opt-in hypothesis, not evidence of a successful fly visual learner.
+
+## Optional fixed movement bouts: sensorimotor-sustained-v1
+
+Same calibrated dual-trace brain, but a separately versioned `sustained-v3`
+fixed decoder. All four direction rates use a 1.0 neural-second exponential
+trace and remain eligible during brief spike gaps until their trace drops below
+the unchanged 0.5 Hz threshold. Opposing neural activity can immediately win
+the competition. A/B/Start retain the existing 0.15 s trace, current-spike
+requirement and Start cooldown. Every game pulse still explicitly releases.
+No synthetic direction, wall detection, action quota, RAM feature or reward
+input enters this adapter. Its constants are not learned; this is an engineering
+interpretation of a movement bout, not a simulated body or measured fly duration.
+
+The normal decoder/default remain unchanged. `evaluate_movement_bouts.py`
+compares original versus sustained decoding with frozen original weights,
+matched recorded starts and two noise seeds. The starting-state reset is a
+diagnostic intervention. Any improvement here establishes control capacity,
+NOT learning. Sustained choices, including ones driven by residual traces,
+must not be described as new spikes in the dashboard or reports.
 
 ## Display interpretation (kept out of the showcase layout)
 

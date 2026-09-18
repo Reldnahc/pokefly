@@ -115,18 +115,92 @@ report are in `runs/recorded-replay-proof-20260918T050823Z-fffce0/`.
 These images are **recorded playback**, not additional autonomous successes.
 
 Progress alone cannot attribute improvement to learning: the frozen calibrated
-brain also sometimes gets a starter. Three held-out seeds (701/702/703), each
-with original versus retained weights and learning disabled, are in progress.
-Each gets the same starting state and 6,000 decisions. All results will remain
-in the report, including regressions and failures.
+brain also sometimes gets a starter. The preselected seed-401 checkpoint was
+tested on three held-out seeds, with learning disabled in both arms, the same
+starting state and 6,000 decisions each:
+
+| Seed | Original / retained positions | Original / retained starter decision | Original / retained battle wins |
+| --- | --- | --- | --- |
+| 701 | 257 / 333 | None / 2,123 | 0 / 0 |
+| 702 | 264 / 244 | None / 1,996 | 0 / 0 |
+| 703 | 208 / 254 | 5,025 / 1,081 | 1 / 0 |
+
+Saved weights obtained a starter in 3/3 trials versus 1/3, but did not improve
+battle wins and reduced exploration in one seed. This is limited positive
+retention evidence for early interactions, not general learned strategy or a
+statistical significance claim. Report: `retained-gameplay-20260918T045336Z-0fbf64`.
+All six trials, including the regression, are retained.
+
+The literal PowerShell launcher was also tested from the bedroom with its
+default profile and default neural seed 64: house exit at decision 350, 257
+positions and 1,325 Up commands in 6,000 decisions. It did not obtain a starter.
+Artifact: `internal-learn-20260918T050029Z-0936da`.
+
+## Controlled actual-battle learning
+
+Each training episode explicitly resets the recorded first rival battle. This
+is a diagnostic intervention, not autonomous whole-game progression. Eight
+training episodes use only existing win/rival rewards; no action rewards or
+forced moves. Original and retained evaluations freeze weights and match game
+state and neural noise. The same baseline is reused across trace-duration
+candidates because inactive eligibility cannot affect frozen forward dynamics;
+reused results are identified, not counted as additional trials.
+
+| Frozen evaluation panel | Original weights | Trained 0.6 s trace | Trained 30 s trace | Trained dual trace |
+| --- | ---: | ---: | ---: | ---: |
+| Seeds 1001--1008 | 4/8 wins | 6/8 | 8/8 | 6/8 |
+| New seeds 1101--1108 | 3/8 wins | 5/8 | 5/8 | 6/8 |
+
+This is positive, retained actual-battle evidence across two panels, with
+regressions in individual seeds. It is not statistical proof of general battle
+strategy: one starting matchup, small samples and multiple investigated models.
+The long trace does NOT retain the default's strong immediate operant learning
+within 512 training decisions. A two-timescale candidate is being evaluated to
+retain both capabilities before changing the launcher default.
+
+Artifacts: `controlled-battle-learning-20260918T053123Z-7acd46`,
+`...T060231Z-564dc5`, `...T060731Z-eda3d8`, `...T062851Z-a7d336`.
+The long-trace brain also ran in the actual launcher from its final training
+checkpoint: `internal-learn-20260918T062745Z-ecfad9`. It finished at sample
+19,276, with 425 sampled positions across six maps, but no further wins/towns
+and Route 1 limited to y=28..35. The battle-training resets are an explicit
+intervention; this continuation does not prove general learned exploration.
+
+The dual-trace candidate (`controlled-battle-learning-20260918T064014Z-dd2d6d`,
+confirmation `...T070446Z-946834`)
+also retained operant acquisition/reversal on discovery 501 and confirmation
+601/602, including initially rewarding Down. Corresponding paired target rates
+were Up 35.2%, Up 29.7%, Down 47.7%; after reversal Down 44.5%, Down 44.9%,
+Up 34.8%. Shuffled controls were 25.4/21.5%, 19.1/25.4%, 27.3/22.3%.
+These assay-trained weights are never used in Pokemon. The default remains the
+bounded single-trace profile while dual-trace longer-gameplay checks continue.
+
+Fresh dual-trace seed 401, without battle pretraining, obtained Bulbasaur at
+decision 4,243 and won the rival at 6,561. It reached 307 positions by 10,000.
+Recorded playback matches every state/reward event (10,000 samples), artifact
+`recorded-replay-proof-20260918T071938Z-2a9fff`. The unreset live continuation
+entered Route 1 at 10,632 and recorded a wild-battle win at 11,967. It has not
+yet demonstrated reaching another town. These are additional actual gameplay
+outcomes, not a learned-strategy attribution; longer observation is ongoing.
+
+## Longer gameplay exposes a remaining plateau
+
+The original bounded seed-401 game was continued without resets from decision
+6,000 through 24,000. It reached 399 cumulative positions but no further battle
+wins or new towns. Route 1 observations stayed in its lower section (y=26..35).
+Artifact: `internal-learn-20260918T055141Z-c23a10`. This is a real remaining
+exploration failure; successful Up delivery is not the whole solution.
 
 ## What still needs evidence
 
 - Useful learned gameplay across repeated independent trials, rather than
   changed weights, greater activity, or a lucky route.
-- Screen-conditioned choices. Two-cue/reversal tests currently have mixed
-  results. Increased Left/Right activity alone is not visual discrimination;
-  conditional accuracy and cue-reversed/shuffled controls also matter.
+- Screen-conditioned choices. Bounded, input-budget and perturbation-v1
+  two-cue tests failed to establish both arbitrary associations and reversal.
+  Increased Left/Right activity alone is not visual discrimination. A longer
+  perturbation-v1 trial at 8,192 decisions still gave only 48.1% conditional
+  accuracy versus 53.2% with shuffled feedback (192 held-out test decisions).
+  Artifact: `visual-learning-curve-20260918T052012Z-af13f4`.
 - Sustained progress beyond the early game; battle/capture competence and badges.
 - Faithful biological dynamics. Connectome connectivity alone does not provide
   calibrated physiological parameters or a complete natural learning mechanism.
@@ -135,6 +209,27 @@ Two further opt-in hypotheses are being tested: bounded total synaptic input
 with flexible individual connections (`sensorimotor-budget-v1`), and credit
 from actual existing neural-noise perturbations (`sensorimotor-perturb-v1`).
 Neither is promoted merely because it changes weights or passes a motor assay.
+The separately versioned `sensorimotor-perturb-v2` fixes a demonstrated negative
+bias caused by clipping an asymmetric, supposedly zero-mean neural-noise trace.
+Eligibility is now linear; synaptic weight bounds and input budgets remain.
+Its numerical and exact-resume tests pass, but the completed visual-choice
+screen did not establish both associations/reversal. Version 3 centers local
+presynaptic history as well. Its single-seed learning curve at 8,192 decisions
+reaches 54.3% conditional accuracy versus 39.2% shuffled and 43.1% pretraining;
+the target-action rates are 26.6%, 20.8% and 16.1%. This is an exploratory trend,
+not a passed full counterbalanced/reversal test. Saved training continues to
+16,384 decisions. No diagnostic-trained weights enter Pokemon.
+Artifacts: `visual-learning-curve-20260918T060003Z-607331` and
+`visual-learning-curve-20260918T061356Z-a8f1b1`.
+
+Read-only neural diagnostics distinguish current cues at motor inputs across
+independent noise seeds, including shortly after switches. A frozen-input
+capacity bound finds that the default's tight individual edge bounds cannot
+reverse the direct mean left/right preference; the wider input-budget profile
+can. These are OFFLINE measurements, not classifiers or fitted weights deployed
+in the game: `visual-latency-probe-20260918T061633Z-f2b2e1` and
+`visual-capacity-audit-20260918T063501Z-0407b1`.
+The launcher default remains unchanged while these candidates are tested.
 
 ## Verification so far
 
@@ -142,10 +237,14 @@ Neither is promoted merely because it changes weights or passes a motor assay.
 - Frozen and zero-reinforcement controls leave original weights unchanged.
 - Real live stream matches input pixels, neural buttons and releases; live speed
   changes work with autonomous human controls disabled.
-- 178 Python tests, 21 JavaScript tests; lint passing. Additional full-profile
-  live checks are pending. A fused eligibility update matches the NumPy rule
+- 178 Python tests and 21 JavaScript tests passed before the v2 addition, plus
+  27 live checks across 13 profiles. The v2 correction adds a zero-mean unit
+  regression and passes its actual-ROM exact-resume/frozen/no-reward smoke.
+  A fused eligibility update matches the preserved NumPy rule
   bit-for-bit; its isolated kernel benchmark was about 4x faster, not the game.
 - Protected ROM/model/user-run hashes match the original manifest. ROM and
   generated artifacts remain Git-ignored.
+- The original user's checkpoint also reproduced the next 20 recorded decisions
+  exactly after the acceleration: `legacy-resume-followthrough-20260918`.
 - In-app browser unavailable despite retries. No claim of browser-rendered
   visual layout verification; actual application/emulator/HTTP checks did run.

@@ -29,12 +29,12 @@ def warmup(c, seed):
         c.observe(test_patterns()["black"])
 
 
-def test_choices(c, *, seed, decisions=48, first_only=False):
+def test_choices(c, *, seed, decisions=48, first_only=False, cues=("left", "right")):
     patterns = test_patterns()
     result = []
     original = c.plasticity.weights.copy()
     for noise_seed in (seed + 100000, seed + 200000):
-        for cue in ("left", "right"):
+        for cue in cues:
             warmup(c, noise_seed)
             counts = Counter()
             for _ in range(decisions):
@@ -50,33 +50,52 @@ def test_choices(c, *, seed, decisions=48, first_only=False):
     return result
 
 
-def score(rows, reverse):
+def score(rows, reverse, *, buttons=("left", "right"), cues=("left", "right")):
     hits, choices, total = 0, 0, 0
     for row in rows:
-        target = ("right" if row["cue"] == "left" else "left") if reverse else row["cue"]
+        target = buttons[cues.index(row["cue"]) ^ int(reverse)]
         for action, n in row["actions"].items():
-            buttons = pressed_buttons(action)
-            hits += n * (target in buttons)
-            choices += n * bool(set(buttons) & {"left", "right"})
+            pressed = pressed_buttons(action)
+            hits += n * (target in pressed)
+            choices += n * bool(set(pressed) & set(buttons))
             total += n
     return {
         "target_rate": hits / total,
         "conditional_accuracy": hits / choices if choices else None,
-        "left_right_choices": choices,
+        "competing_choices": choices,
+        **({"left_right_choices": choices} if buttons == ("left", "right") else {}),
         "decisions": total,
     }
 
 
-def train_phase(c, *, seed, reverse, arm, schedule=None, decisions=256, preserve_feedback=False):
-    mean = c.plasticity.reward_mean.copy() if preserve_feedback else None
+def train_phase(
+    c,
+    *,
+    seed,
+    reverse,
+    arm,
+    schedule=None,
+    decisions=256,
+    preserve_feedback=False,
+    buttons=("left", "right"),
+    cues=("left", "right"),
+):
+    feedback_name = next(
+        (name for name in ("reward_mean", "reward_expectation") if hasattr(c.plasticity, name)),
+        None,
+    )
+    mean = (
+        getattr(c.plasticity, feedback_name).copy() if preserve_feedback and feedback_name else None
+    )
     warmup(c, seed)
     if mean is not None:
-        c.plasticity.reward_mean[...] = mean
+        getattr(c.plasticity, feedback_name)[...] = mean
     patterns = test_patterns()
-    pulses, actions, cues = [], [], []
+    pulses, actions, presented = [], [], []
     for index in range(decisions):
-        cue = ("left", "right")[(index // 16) % 2]
-        target = ("right" if cue == "left" else "left") if reverse else cue
+        cue_index = (index // 16) % 2
+        cue = cues[cue_index]
+        target = buttons[cue_index ^ int(reverse)]
         action = c.choose(c.observe(patterns[cue]))[0]
         reward = (
             float(target in pressed_buttons(action)) if schedule is None else float(schedule[index])
@@ -84,8 +103,8 @@ def train_phase(c, *, seed, reverse, arm, schedule=None, decisions=256, preserve
         c.reinforce(reward, enabled=arm != "frozen")
         pulses.append(reward)
         actions.append(action)
-        cues.append(cue)
-    return {"rewards": pulses, "actions": actions, "cues": cues, "total_reward": sum(pulses)}
+        presented.append(cue)
+    return {"rewards": pulses, "actions": actions, "cues": presented, "total_reward": sum(pulses)}
 
 
 def unpair(training, seed):
@@ -95,11 +114,37 @@ def unpair(training, seed):
     rewards = np.asarray(training["rewards"], float)
     cues = np.asarray(training["cues"])
     result = rewards.copy()
-    for cue in ("left", "right"):
+    for cue in np.unique(cues):
         mask = cues == cue
         result[mask] = rng.permutation(rewards[mask])
         assert result[mask].sum() == rewards[mask].sum()
     return result
+
+
+def compare_arms(paired, unpaired, reverse, *, buttons=("left", "right"), cues=("left", "right")):
+    """Activity increases alone cannot pass a cue-discrimination screen."""
+    acquired, reversed_score = (s["score"] for s in paired["stages"])
+    before_reversal = score(
+        paired["stages"][0]["retention"], not reverse, buttons=buttons, cues=cues
+    )
+    deltas = {}
+    for metric in ("target_rate", "conditional_accuracy"):
+        for label, after, before in (
+            ("acquisition_minus_pre", acquired, paired["pre_score"]),
+            ("acquisition_minus_unpaired", acquired, unpaired["stages"][0]["score"]),
+            ("reversal_minus_before_reversal", reversed_score, before_reversal),
+            ("reversal_minus_unpaired", reversed_score, unpaired["stages"][1]["score"]),
+        ):
+            a, b = after[metric], before[metric]
+            deltas[f"{metric}_{label}"] = None if a is None or b is None else a - b
+    return {
+        **deltas,
+        "screen_pass": all(v is not None and v >= 0.05 for v in deltas.values())
+        and all(
+            r["conditional_accuracy"] is not None and r["conditional_accuracy"] >= 0.55
+            for r in (acquired, reversed_score)
+        ),
+    }
 
 
 def main():
@@ -110,7 +155,26 @@ def main():
     parser.add_argument("--config", type=Path)
     parser.add_argument("--training", type=int, default=256)
     parser.add_argument("--preserve-feedback", action="store_true")
+    parser.add_argument(
+        "--buttons",
+        nargs=2,
+        default=["left", "right"],
+        choices=("up", "down", "left", "right", "a", "b", "start"),
+    )
+    parser.add_argument(
+        "--cues", nargs=2, default=["left", "right"], choices=tuple(test_patterns())
+    )
     args = parser.parse_args()
+    buttons, cues = tuple(args.buttons), tuple(args.cues)
+    if (
+        len(set(buttons)) != 2
+        or len(set(cues)) != 2
+        or not any(
+            set(buttons) <= channel
+            for channel in ({"up", "down", "left", "right"}, {"a", "b", "start"})
+        )
+    ):
+        parser.error("Two distinct images and two competing buttons from the same channel required")
     if len(args.seeds) < 2 or not args.output.is_dir():
         parser.error("At least two seeds and an existing output directory required")
     if args.training < 32:
@@ -134,14 +198,19 @@ def main():
             "arms": ["paired", "unpaired_within_cue", "frozen"],
             "warmup_decisions": 8,
             "counterbalanced_mappings": 2,
+            "cue_images": cues,
+            "rewarded_button_pair": buttons,
             "retention": "fresh dynamics and zero reward; weights persist",
             "reload_check": (
                 "First 48-decision held-out cue/noise action histogram matches after disk reload"
             ),
             "reversal": "opposite cue-to-direction contingencies, same training budget",
-            "criterion": "Exploratory screen, not a significance test: paired target rate must "
+            "criterion_version": 2,
+            "criterion": "Exploratory screen, not a significance test: BOTH paired target rate "
+            "and conditional competing-button accuracy must "
             "improve >=0.05 over both pretest and unpaired at retention; after reversal the "
-            "new target rate must improve >=0.05 over pre-reversal and unpaired. Require "
+            "new target metrics must improve >=0.05 over pre-reversal and unpaired. "
+            "Both retained conditional accuracies must also be >=0.55. Require "
             "this for every seed/mapping before testing independent confirmation seeds.",
         },
         "rows": [],
@@ -154,7 +223,7 @@ def main():
         for seed in args.seeds:
             for reverse in (False, True):
                 c.restore(baseline_arrays, baseline_state, weights_only=True)
-                pretest = test_choices(c, seed=seed)
+                pretest = test_choices(c, seed=seed, cues=cues)
                 schedules = {}
                 for arm in ("paired", "unpaired_within_cue", "frozen"):
                     c.restore(baseline_arrays, baseline_state, weights_only=True)
@@ -176,6 +245,8 @@ def main():
                             schedule=schedule,
                             decisions=args.training,
                             preserve_feedback=args.preserve_feedback,
+                            buttons=buttons,
+                            cues=cues,
                         )
                         if arm == "paired":
                             schedules[stage] = training
@@ -187,12 +258,12 @@ def main():
                         archive = args.output / (label + ".npz")
                         np.savez_compressed(archive, **arrays)
                         write_json(args.output / (label + ".json"), state)
-                        retention = test_choices(c, seed=seed)
+                        retention = test_choices(c, seed=seed, cues=cues)
                         # Reload the on-disk weights and repeat one held-out stream.
                         with np.load(archive, allow_pickle=False) as data:
                             restored = {k: data[k].copy() for k in data.files}
                         c.restore(restored, state, weights_only=True)
-                        repeat = test_choices(c, seed=seed, first_only=True)
+                        repeat = test_choices(c, seed=seed, first_only=True, cues=cues)
                         assert repeat == retention[:1], (
                             "Saved learned weights changed the retention result"
                         )
@@ -205,7 +276,7 @@ def main():
                                 "training": training,
                                 "learning": metrics,
                                 "retention": retention,
-                                "score": score(retention, mapping),
+                                "score": score(retention, mapping, buttons=buttons, cues=cues),
                                 "reload_exact": True,
                                 "checkpoint": str(archive),
                             }
@@ -216,7 +287,7 @@ def main():
                         "initial_reverse_mapping": reverse,
                         "arm": arm,
                         "pretest": pretest,
-                        "pre_score": score(pretest, reverse),
+                        "pre_score": score(pretest, reverse, buttons=buttons, cues=cues),
                         "stages": stage_rows,
                     }
                     report["rows"].append(row)
@@ -250,26 +321,12 @@ def main():
                     and r["initial_reverse_mapping"] == reverse
                 }
                 paired, unpaired = arms["paired"], arms["unpaired_within_cue"]
-                acquisition = paired["stages"][0]["score"]["target_rate"]
-                reversal = paired["stages"][1]["score"]["target_rate"]
-                before_reversal = score(paired["stages"][0]["retention"], not reverse)[
-                    "target_rate"
-                ]
-                deltas = {
-                    "acquisition_minus_pre": acquisition - paired["pre_score"]["target_rate"],
-                    "acquisition_minus_unpaired": acquisition
-                    - unpaired["stages"][0]["score"]["target_rate"],
-                    "reversal_minus_before_reversal": reversal - before_reversal,
-                    "reversal_minus_unpaired": reversal
-                    - unpaired["stages"][1]["score"]["target_rate"],
-                }
                 results.append(
                     {
                         "rule": rule,
                         "seed": seed,
                         "initial_reverse_mapping": reverse,
-                        **deltas,
-                        "screen_pass": all(v >= 0.05 for v in deltas.values()),
+                        **compare_arms(paired, unpaired, reverse, buttons=buttons, cues=cues),
                     }
                 )
     report["comparisons"] = results

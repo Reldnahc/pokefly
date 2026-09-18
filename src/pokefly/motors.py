@@ -49,16 +49,20 @@ class MotorConfig:
     threshold_hz: float = 0.5
     start_cooldown_seconds: float = 1.0
     arbitration: str = "parallel-v2"
+    direction_trace_seconds: float = 1.0
 
     def __post_init__(self):
-        if self.arbitration not in ("exclusive-v1", "parallel-v2"):
+        if self.arbitration not in ("exclusive-v1", "parallel-v2", "sustained-v3"):
             raise ValueError("Unknown fixed motor arbitration")
         if not np.isfinite(
-            [self.trace_seconds, self.threshold_hz, self.start_cooldown_seconds]
+            [self.trace_seconds, self.threshold_hz, self.start_cooldown_seconds,
+             self.direction_trace_seconds]
         ).all():
             raise ValueError("Motor parameters must be finite")
         if self.trace_seconds <= 0 or self.threshold_hz <= 0 or self.start_cooldown_seconds < 0:
             raise ValueError("Invalid fixed motor parameters")
+        if self.direction_trace_seconds <= 0:
+            raise ValueError("Directional trace duration must be positive")
 
 
 class MotorDecoder:
@@ -100,13 +104,24 @@ class MotorDecoder:
             raise ValueError("Nonnegative spike counts and positive time required")
         observed = np.array([counts[idx].mean() / seconds for idx in self.groups.values()])
         decay = np.exp(-seconds / self.config.trace_seconds)
+        if self.config.arbitration == "sustained-v3":
+            # Fixed movement-bout interpretation, identical for every direction.
+            # Trace magnitude still comes only from actual motor spikes. No
+            # position, collision, reward or action-frequency target is used.
+            decay = np.array(
+                [np.exp(-seconds / self.config.direction_trace_seconds)] * 4 + [decay] * 3
+            )
         self.rates = decay * self.rates + (1 - decay) * observed
         self.time += seconds
         scores = self.rates.copy()
         if self.time < self.start_ready:
             scores[6] = 0
-        # A residual trace alone cannot press a button after all its neurons go silent.
-        scores[observed == 0] = 0
+        # Legacy/function channels require current spikes. The optional sustained
+        # direction readout permits a decaying trace, never a forced button timer.
+        if self.config.arbitration == "sustained-v3":
+            scores[4:][observed[4:] == 0] = 0
+        else:
+            scores[observed == 0] = 0
         if self.config.arbitration == "exclusive-v1":
             index, self.tie_cursor = self._winner(scores, self.tie_cursor)
             selected = [] if index is None else [index]
@@ -128,9 +143,9 @@ class MotorDecoder:
             "start_ready": self.start_ready,
             "tie_cursor": self.tie_cursor,
         }
-        if self.config.arbitration == "parallel-v2":
+        if self.config.arbitration != "exclusive-v1":
             state.update(
-                arbitration="parallel-v2",
+                arbitration=self.config.arbitration,
                 direction_cursor=self.direction_cursor,
                 function_cursor=self.function_cursor,
             )
@@ -145,7 +160,7 @@ class MotorDecoder:
         time, ready = float(state["time"]), float(state["start_ready"])
         cursor = int(state["tie_cursor"])
         direction, function = 0, 0
-        if self.config.arbitration == "parallel-v2":
+        if self.config.arbitration != "exclusive-v1":
             direction, function = int(state["direction_cursor"]), int(state["function_cursor"])
         if (
             not np.isfinite([time, ready]).all()

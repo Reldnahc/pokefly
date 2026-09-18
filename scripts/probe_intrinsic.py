@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -29,17 +30,36 @@ def main():
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--calibration-steps", type=int, default=10000)
     parser.add_argument("--target-hz", type=float, default=1.0)
+    parser.add_argument("--noise-amplitude", type=float, default=0.22)
+    parser.add_argument("--noise-hz", type=float, default=1.2)
+    parser.add_argument("--spike-temperature", type=float, default=0.0)
     parser.add_argument("--calibration-only", action="store_true")
+    parser.add_argument(
+        "--reset-every",
+        type=int,
+        default=0,
+        help="Optional neutral fitting resets, in neural steps; 0 preserves v1",
+    )
+    parser.add_argument(
+        "--reset-probe-decisions",
+        type=int,
+        default=0,
+        help="Frozen neutral-image decisions per independent reset seed",
+    )
     parser.add_argument("--export", type=Path)
     args = parser.parse_args()
     if args.calibration_steps < 2 or not np.isfinite(args.target_hz) or args.target_hz <= 0:
         parser.error("Positive finite rate and at least two neural steps required")
+    if args.reset_every < 0 or args.reset_probe_decisions < 0:
+        parser.error("Reset intervals and probe lengths cannot be negative")
     if not args.calibration_only and args.source_run is None:
         parser.error("--source-run is required for the optional game-image probes")
     if args.export and args.export.exists():
         parser.error("Export target already exists; calibration files are immutable")
     output = run_directory("intrinsic-probe")
     cfg = load_config(Path("configs/sensory-isolated-v1.json")).brain
+    cfg = replace(cfg, noise_amplitude=args.noise_amplitude, noise_hz=args.noise_hz)
+    cfg = replace(cfg, dynamics=replace(cfg.dynamics, spike_temperature=args.spike_temperature))
     c = InternalBrain(device=args.device, config=cfg)
     b, h, xp = c.brain, c.hybrid, c.brain.xp
     bias = xp.zeros((b.n, 1), xp.float32)
@@ -58,6 +78,8 @@ def main():
     c.reset_dynamics(707)
     counts = np.zeros(b.n, np.int32)
     for step in range(args.calibration_steps):
+        if args.reset_every and step and step % args.reset_every == 0:
+            c.reset_dynamics(707 + step // args.reset_every)
         fired = b.step(eye_drive=drive)
         bias[allowed, 0] += np.float32(0.001 * args.target_hz * b.dt)
         bias[b.fired, 0] -= np.float32(0.001)
@@ -67,7 +89,11 @@ def main():
             counts[fired] += 1
     calibrated = bias.copy()
     protocol = {
-        "rule": "uniform-neutral-rate-homeostasis-v1",
+        "rule": (
+            "uniform-neutral-rate-homeostasis-reset-v2"
+            if args.reset_every
+            else "uniform-neutral-rate-homeostasis-v1"
+        ),
         "seed": 707,
         "neutral_gray": 128,
         "steps": args.calibration_steps,
@@ -76,6 +102,9 @@ def main():
         "bounds": [-0.14, 0.2],
         "config": c.identity(),
     }
+    if args.reset_every:
+        protocol["reset_every_neural_steps"] = args.reset_every
+        protocol["reset_seed_schedule"] = "707 + reset index"
     host_bias = bias if xp is np else bias.get()
     artifact = dict(
         bias=host_bias, mask=mask, body_ids=c.body_ids, protocol=np.array(json.dumps(protocol))
@@ -97,6 +126,26 @@ def main():
         "motor_bias": {key: host_bias[idx, 0].tolist() for key, idx in c.motors.items()},
         "rows": [],
     }
+    if args.reset_probe_decisions:
+        report["frozen_reset_probes"] = []
+        for seed in (301, 302, 303):
+            c.reset_dynamics(seed)
+            probe_counts = np.zeros(b.n, np.int32)
+            for _ in range(args.reset_probe_decisions):
+                probe_counts += c.observe(gray).counts
+            report["frozen_reset_probes"].append(
+                {
+                    "seed": seed,
+                    "decisions": args.reset_probe_decisions,
+                    "population_hz": {
+                        key: float(
+                            probe_counts[idx].mean()
+                            / (args.reset_probe_decisions * c.brain_steps * b.dt)
+                        )
+                        for key, idx in c.groups.items()
+                    },
+                }
+            )
     write_json(output / "report.json", report)
     if args.calibration_only:
         print("Calibration:", args.export or output / "calibration.npz", flush=True)

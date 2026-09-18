@@ -88,9 +88,31 @@ def test_config_roundtrip_and_validation():
         {"isolate_nonvisual_sensory": "false"},
         {"isolate_nonvisual_sensory": 1},
         {"isolate_nonvisual_sensory": True},  # Baseline must not silently ignore it.
+        {"spike_temperature": 0.05},
+        {"profile": "hybrid-v1", "spike_temperature": -1},
     ):
         with pytest.raises(ValueError):
             DynamicsConfig(**bad)
+
+
+def test_stochastic_spikes_report_actual_probability_and_resume_exactly():
+    config = DynamicsConfig(profile="hybrid-v1", spike_temperature=0.05)
+    first, restored = toy(config), toy(config)
+    for h in (first, restored):
+        h.track_score = True
+    for _ in range(20):
+        first.step(np.array([0.3]))
+    restored.brain.v[:] = first.brain.v
+    restored.brain.rng.generator.bit_generator.state = first.brain.rng.generator.bit_generator.state
+    restored.restore({"hybrid_" + k: v.copy() for k, v in first.arrays().items()})
+    for _ in range(20):
+        previous = first.release.copy()
+        np.testing.assert_array_equal(first.step(np.array([0.8])), restored.step(np.array([0.8])))
+        np.testing.assert_array_equal(first.previous_release, previous)
+        np.testing.assert_array_equal(first.brain.v, restored.brain.v)
+        np.testing.assert_array_equal(first.last_probability, restored.last_probability)
+        assert np.all(first.last_probability[:2] == 0)  # Graded vision never spikes.
+        assert np.all((first.last_probability >= 0) & (first.last_probability <= 1))
 
 
 def test_isolation_selects_sensory_annotations_but_preserves_visual_and_motor_cells():

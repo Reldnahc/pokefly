@@ -1,0 +1,8 @@
+{
+  "brain": {
+    "intrinsic_calibration": "fly-data/intrinsic-neutral-reset-v2.npz",
+    "dynamics": {"profile": "hybrid-v1", "isolate_nonvisual_sensory": true},
+    "motor": {"arbitration": "parallel-v2"},
+    "plasticity": {"rule": "compartment-ema-v1"}
+  }
+}

@@ -26,6 +26,7 @@ class DynamicsConfig:
     kc_adaptation_seconds: float = 1.0
     isolate_nonvisual_sensory: bool = False
     quiescent_nonvisual_sensory: bool = False
+    spike_temperature: float = 0.0
 
     def __post_init__(self):
         if self.profile not in ("baseline", "hybrid-v1"):
@@ -43,6 +44,10 @@ class DynamicsConfig:
             raise ValueError("graded_vision must be boolean")
         if self.isolate_nonvisual_sensory and self.profile != "hybrid-v1":
             raise ValueError("Sensory isolation requires hybrid-v1 dynamics")
+        if not 0 <= self.spike_temperature <= 0.5 or (
+            self.spike_temperature and self.profile != "hybrid-v1"
+        ):
+            raise ValueError("Stochastic spiking requires hybrid dynamics and temperature <= 0.5")
         if min(self.graded_seconds, self.kc_adaptation_seconds) <= 0:
             raise ValueError("Dynamics time constants must be positive")
         if not 0 < self.graded_release <= 1 or not 0 <= self.lamina_rest <= 1:
@@ -90,6 +95,7 @@ class HybridDynamics:
         )
         self.intrinsic_bias = None  # Optional fixed, neutral-calibration model data.
         self.track_noise = False
+        self.track_score = False
         self.reset()
 
     def reset(self):
@@ -97,6 +103,7 @@ class HybridDynamics:
         self.adaptation = b.xp.zeros((b.n, 1), b.xp.float32)
         self.release = b.xp.zeros(b.n, b.xp.float32)
         self.last_noise = None  # Consumed in the same neural step; not persistent state.
+        self.last_probability = self.previous_release = None
 
     def current(self, release):
         if self.brain.device == "cuda":
@@ -112,6 +119,10 @@ class HybridDynamics:
     def step(self, eye_drive=None, inject=()):
         b, c = self.brain, self.config
         xp = b.xp
+        if self.track_score:
+            self.previous_release = (
+                self.release.copy() if xp is np else self.release.get()
+            )
         current = self.current(self.release) * b.gain
         if self.intrinsic_bias is not None:
             current += self.intrinsic_bias
@@ -143,7 +154,19 @@ class HybridDynamics:
             b.v[self.isolated] = 0
         for idx, amount in inject:
             b.v[xp.asarray(idx)] += b._amount(amount)
-        active = b.v[:, 0] >= 1
+        if c.spike_temperature:
+            # Optional escape-noise model. Independent of the background
+            # current noise above. The zero-temperature legacy path is exact.
+            logits = (b.v[:, 0] - 1) / np.float32(c.spike_temperature)
+            probability = 1 / (1 + xp.exp(-xp.clip(logits, -80, 80)))
+            probability[self.graded] = 0
+            if c.quiescent_nonvisual_sensory:
+                probability[self.isolated] = 0
+            active = b.rng.random((b.n,)) < probability
+            if self.track_score:
+                self.last_probability = probability if xp is np else probability.get()
+        else:
+            active = b.v[:, 0] >= 1
         active[self.graded] = False
         fired = xp.flatnonzero(active)
         b.v[fired] = 0

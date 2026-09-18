@@ -27,6 +27,7 @@ class PlasticityConfig:
     reward_expectation_seconds: float = 30.0
     normalize_inputs: bool = False
     input_budget_fraction: float = 0.0
+    slow_eligibility_seconds: float = 0.0
 
     def __post_init__(self):
         if self.rule not in (
@@ -34,7 +35,12 @@ class PlasticityConfig:
             "dan-targeted-v1",
             "compartment-ema-v1",
             "sensorimotor-rstdp-v1",
+            "sensorimotor-rstdp-v2",
             "sensorimotor-perturb-v1",
+            "sensorimotor-perturb-v2",
+            "sensorimotor-perturb-v3",
+            "sensorimotor-score-v1",
+            "sensorimotor-score-v2",
         ):
             raise ValueError("Unknown plasticity rule")
         if not isinstance(self.normalize_inputs, bool):
@@ -49,6 +55,14 @@ class PlasticityConfig:
             raise ValueError("Activity reference must be positive")
         if self.reward_expectation_seconds <= 0:
             raise ValueError("Reward expectation time constant must be positive")
+        if self.slow_eligibility_seconds < 0 or (
+            self.slow_eligibility_seconds
+            and (
+                self.slow_eligibility_seconds <= self.eligibility_seconds
+                or not self.rule.startswith("sensorimotor-")
+            )
+        ):
+            raise ValueError("Optional slow eligibility requires a longer sensorimotor trace")
         if not 0 <= self.input_budget_fraction < 1:
             raise ValueError("Input budget fraction must be in [0,1)")
         if self.normalize_inputs and self.input_budget_fraction:
@@ -177,6 +191,19 @@ class SensorimotorPlasticity(EligibilityPlasticity):
         self.reward_mean = np.array(0.0, np.float64)
         self.feedback_elapsed = np.array(0.0, np.float64)
         self.prediction_error = np.array(0.0, np.float64)
+        self.slow_eligibility = (
+            np.zeros_like(self.eligibility) if self.config.slow_eligibility_seconds else None
+        )
+
+    def _slow_trace_options(self, dt):
+        return (
+            {
+                "slow_eligibility": self.slow_eligibility,
+                "slow_decay": np.exp(-dt / self.config.slow_eligibility_seconds),
+            }
+            if self.slow_eligibility is not None
+            else {}
+        )
 
     def observe(self, fired, dt):
         from pokefly.fast_plasticity import sensorimotor_eligibility
@@ -186,19 +213,29 @@ class SensorimotorPlasticity(EligibilityPlasticity):
         c = self.config
         decay = np.exp(-dt / c.pre_trace_seconds)
         self.pre_trace *= decay
-        self.pre_trace += (1 - decay) * spike
+        centered = c.rule == "sensorimotor-rstdp-v2"
+        pre_decay = decay
+        if not centered:
+            self.pre_trace += (1 - decay) * spike
+        incoming = (
+            self.pre_trace - np.float32(decay) * self.post_baseline if centered else self.pre_trace
+        )
         scale = dt * c.activity_reference_hz
         decay = np.exp(-dt / c.eligibility_seconds)
         sensorimotor_eligibility(
             self.pre,
             self.post,
-            self.pre_trace,
+            incoming,
             self.post_baseline,
             spike,
             self.eligibility,
             scale,
             decay,
+            **({"incoming_floor": -5.0} if centered else {}),
+            **self._slow_trace_options(dt),
         )
+        if centered:
+            self.pre_trace += (1 - pre_decay) * spike
         decay = np.exp(-dt / c.post_baseline_seconds)
         self.post_baseline *= decay
         self.post_baseline += (1 - decay) * spike
@@ -214,9 +251,8 @@ class SensorimotorPlasticity(EligibilityPlasticity):
             if self.config.learning_rate and self.prediction_error != 0:
                 old = self.weights.copy()
                 factor = self.weights / self.base
-                factor += (
-                    self.config.learning_rate * float(self.prediction_error) * self.eligibility
-                )
+                eligibility = self.factor_eligibility()
+                factor += self.config.learning_rate * float(self.prediction_error) * eligibility
                 np.clip(factor, self.config.minimum_factor, self.config.maximum_factor, out=factor)
                 if self.config.normalize_inputs or self.config.input_budget_fraction:
                     # Local synaptic-resource competition for every anatomical
@@ -249,13 +285,34 @@ class SensorimotorPlasticity(EligibilityPlasticity):
         self.feedback_elapsed[...] = 0
         return self.metrics()
 
+    def factor_eligibility(self):
+        return (
+            0.5 * (self.eligibility + self.slow_eligibility)
+            if self.slow_eligibility is not None
+            else self.eligibility
+        )
+
     def metrics(self):
         return {
             **super().metrics(),
-            "rule": "sensorimotor-reward-covariance-v1",
+            "rule": (
+                "sensorimotor-pre-post-covariance-v2"
+                if self.config.rule == "sensorimotor-rstdp-v2"
+                else "sensorimotor-reward-covariance-v1"
+            ),
             "modulation": "experimental internal motor plasticity; no decoder feedback",
             "reward_mean": float(self.reward_mean),
             "internal_reward_error": float(self.prediction_error),
+            **(
+                {
+                    "slow_eligibility_l1": float(
+                        np.abs(self.slow_eligibility).sum(dtype=np.float64)
+                    ),
+                    "eligibility_mix": "equal fast/slow local traces",
+                }
+                if self.slow_eligibility is not None
+                else {}
+            ),
         }
 
     def arrays(self):
@@ -264,10 +321,20 @@ class SensorimotorPlasticity(EligibilityPlasticity):
             "reward_mean": self.reward_mean,
             "prediction_error": self.prediction_error,
             "feedback_elapsed": self.feedback_elapsed,
+            **(
+                {"slow_eligibility": self.slow_eligibility}
+                if self.slow_eligibility is not None
+                else {}
+            ),
         }
 
     def restore(self, arrays, metadata):
         checked = {}
+        if self.slow_eligibility is not None:
+            slow = np.asarray(arrays["slow_eligibility"], np.float32)
+            if slow.shape != self.eligibility.shape or not np.isfinite(slow).all():
+                raise ValueError("Invalid slow eligibility checkpoint")
+            checked["slow_eligibility"] = slow.copy()
         for key in ("reward_mean", "prediction_error", "feedback_elapsed"):
             value = np.asarray(arrays[key], np.float64)
             if value.shape != () or not np.isfinite(value):
@@ -297,24 +364,36 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
 
         if perturbation is None or probability is None or not 0 <= probability <= 1:
             raise ValueError("Actual neural perturbations and their probability are required")
-        noise = np.asarray(perturbation, np.float32)
-        if noise.shape != (self.n,) or not np.isin(noise, [0, 1]).all():
+        noise = np.asarray(perturbation)
+        if noise.shape != (self.n,) or (
+            noise.dtype != np.bool_ and not np.isin(noise, [0, 1]).all()
+        ):
             raise ValueError("Invalid neural perturbation mask")
+        noise = noise.astype(np.float32, copy=False)
         spike = np.zeros(self.n, np.float32)
         spike[fired] = 1
         c = self.config
         # Presynaptic history before this step's perturbation: no future spikes.
         decay = np.exp(-dt / c.pre_trace_seconds)
         self.pre_trace *= decay
+        centered = c.rule == "sensorimotor-perturb-v3"
+        incoming = (
+            self.pre_trace - np.float32(decay) * self.post_baseline if centered else self.pre_trace
+        )
         sensorimotor_eligibility(
             self.pre,
             self.post,
-            self.pre_trace,
+            incoming,
             np.full(self.n, probability, np.float32),
             noise,
             self.eligibility,
             dt * c.activity_reference_hz,
             np.exp(-dt / c.eligibility_seconds),
+            # Clipping rare positive innovations biases the zero-mean trace.
+            # Keep v1 reproducible; v2 uses a linear eligibility filter.
+            clip_eligibility=c.rule == "sensorimotor-perturb-v1",
+            incoming_floor=-5.0 if centered else 0.0,
+            **self._slow_trace_options(dt),
         )
         self.pre_trace += (1 - decay) * spike
         decay = np.exp(-dt / c.post_baseline_seconds)
@@ -325,7 +404,13 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
     def metrics(self):
         return {
             **super().metrics(),
-            "rule": "sensorimotor-neural-perturbation-v1",
+            "rule": (
+                "sensorimotor-centered-input-perturbation-v3"
+                if self.config.rule == "sensorimotor-perturb-v3"
+                else "sensorimotor-linear-perturbation-v2"
+                if self.config.rule == "sensorimotor-perturb-v2"
+                else "sensorimotor-neural-perturbation-v1"
+            ),
             "modulation": "local existing neural-noise credit; no decoder or external critic",
         }
 

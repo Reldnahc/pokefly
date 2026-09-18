@@ -149,7 +149,10 @@ def main():
                 from pokefly.actions import pressed_buttons
 
                 assert delivered["buttons"] == list(pressed_buttons(delivered["action"]))
-                assert metadata["motor_arbitration"] in ("parallel-v2", "exclusive-v1")
+                from pokefly.experiment import load_config
+
+                expected_motor = load_config(args.config).brain.motor.arbitration
+                assert metadata["motor_arbitration"] == expected_motor
                 assert delivered["learning"]["plastic_edges"] == metadata["plastic_edges"]
                 assert "a" in delivered["motor_rates_hz"]
                 if metadata.get("visual_timing", "snapshot-v1") == "snapshot-v1":
