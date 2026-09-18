@@ -5,7 +5,35 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 16:50 UTC
+## Latest evidence, 2026-09-18 16:59 UTC
+
+**The stronger visual circuit passes the preselected retained two-cue learning
+test for both independently trained brains.** Final8,192 synapses are tested
+with learning/rewards off after neutral warmup and on fresh noise seeds:
+
+| Training seed | Original | Paired reward | Shuffled reward | Paired left / right cue |
+|---|---:|---:|---:|---:|
+| 501 | 44.72% | 69.10% | 36.37% | 56.43% / 81.77% |
+| 601 | 44.72% | 68.80% | 36.82% | 59.34% / 78.26% |
+
+All preselected conditions pass: balanced accuracy>=60%, BOTH cues>=55%, and
+at least5 percentage points above EACH control in BOTH training seeds.
+These are descriptive engineering thresholds, not a statistical significance
+test. Each panel has1,024 scored decisions over noise seeds2801..2804; repeated
+original controls are a reproducibility check, not extra independent samples.
+The raw-choice/provenance audit is `visual-retention-gate-20260918T165919Z-e1b7c7`.
+It validates the final synaptic hashes and includes every scored time window.
+
+This is evidence of a retained association between the two tested pixel cues
+and fixed neural motor choices. It does NOT establish general visual reasoning,
+learned Pokemon navigation or biological fidelity. No assay-trained weight is
+loaded into Pokemon. Registered same-acquired-start reversal is now running
+for both sources, with independent3101..3104 tests afterward. Actual-game
+practice/evaluation continues separately; no experimental model is promoted yet.
+Full verification after the gate-audit addition:328 Python/26 JS plus lint
+(`verify-294136a72b69487a87c68540cf2cafea`).
+
+### Actual-game and numerical results recorded at16:50 UTC
 
 Both longer v1 pairs finished24,000 decisions per arm:
 

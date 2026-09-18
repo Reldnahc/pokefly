@@ -22,9 +22,12 @@ entered Route 1. Saved weights obtained starters in 3/3 held-out trials versus
 panel. Separately, a dual-trace candidate trained on eight explicitly reset
 rival encounters won 6/8 on each of two frozen test panels, versus 4/8 and 3/8
 with original weights. This is limited battle retention, not whole-game
-autonomy or statistical proof. The newer visual models show modest retained
-cue-specific changes and reversal, but have not yet passed the predefined
-both-cue screen. Useful screen-specific gameplay learning remains unestablished;
+autonomy or statistical proof. A stronger internally calibrated visual model
+now passes a retained two-cue association test in two training seeds: about69%
+balanced accuracy versus45% original and36..37% shuffled feedback, with both
+cues above the preset threshold. Reversal and gameplay transfer are still under
+test; no synthetic assay-trained weights are used in Pokemon.
+Useful screen-specific gameplay learning remains unestablished;
 experiments continue. These early results do not
 prove eventual game completion. Failed earlier
 experiments remain in [RESULTS.md](RESULTS.md), with the continuing protocol in

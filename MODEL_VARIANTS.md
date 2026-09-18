@@ -733,8 +733,8 @@ Preparation (data require network; subsequent calibration is ROM-free):
 
 Calibration exports are immutable. The optional `--parameters flyvis` assay
 keeps zero-strength reference edges at their original magnitudes to preserve
-connectivity; it is therefore NOT an exact flyvis reproduction. Neither model
-has yet established reward-specific visual learning or reliable progression.
+connectivity; it is therefore NOT an exact flyvis reproduction. The later wide-v3
+profile passes a limited retained two-cue learning screen, not reliable progression.
 Synthetic assay/oracle weights are never gameplay initialization.
 
 After generating the optional reference and neutral calibration above, launch:

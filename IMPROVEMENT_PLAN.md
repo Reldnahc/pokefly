@@ -28,6 +28,30 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 16:59 UTC: wide-v3 PASSES the preselected independent acquisition gate for
+  BOTH training seeds. Paired balanced69.10%/68.80%, original44.72% shared
+  control, shuffled36.37%/36.82%. Each paired cue exceeds55%:
+ 501 left56.43/right81.77;601 left59.34/right78.26. Same final8,192 synapses,
+  neutral128 warmup, held-out2801..2804,128 decisions/cue/seed, no rewards or
+  test learning. Each paired panel beats BOTH controls by at least5 points.
+  This establishes limited retained two-cue association, NOT a Pokemon policy,
+  physiological validation, or statistical significance. Original repeated
+  controls are counted once, not as independent replications.
+  New read-only gate audit recomputes scores from ALL raw choices, verifies
+  final weight hashes, protocol and distinct source seeds, and rejects missing/
+  duplicated controls. Artifact `visual-retention-gate-20260918T165919Z-e1b7c7`.
+  It refuses legacy reports lacking explicit completed status rather than
+  silently treating them as complete. Five protocol unit tests pass.
+  The registered same-start reversal now starts for501/601 (absolute checkpoints
+ 8704/10240/16384;8,192 additional training), then fresh3101..3104 retention.
+  Assay-trained weights remain forbidden in gameplay; no default model promotion.
+  Reversal artifacts `visual-learning-curve-20260918T170017Z-620429` (501)
+  and `...-485f3d` (601). Stronger-signal/projected-credit acquisition curves
+  are `...T165047Z-6f9d9b` (501) and `...T165301Z-41ca7d` (601); their original
+ 3001..3004 final retention remains queued. Actual-game practice source401:
+  `retained-game-series-20260918T164934Z-3b2ae4`. Full suite328 Python/26 JS
+  plus lint passes (`verify-294136a72b69487a87c68540cf2cafea`).
+
 - 16:50 UTC: both v1 long-game pairs complete. Frozen/learn tiles are352/351
   (401) and348/297 (402). Both learned brains get starters sooner, but401
   learning never reaches Route1 or wins; its frozen control wins ONE rival
