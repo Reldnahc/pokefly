@@ -1,9 +1,10 @@
 from dataclasses import asdict
+from pathlib import Path
 
 import pytest
 
 from pokefly.cli import _parser
-from pokefly.experiment import ExperimentConfig
+from pokefly.experiment import ExperimentConfig, load_config
 
 
 def test_configuration_is_explicit_roundtrippable_and_strict():
@@ -46,6 +47,17 @@ def test_button_timing_is_versioned_not_silently_migrated():
         ExperimentConfig(button_timing="unknown")
     with pytest.raises(ValueError):
         ExperimentConfig(button_timing="serial-v2", frames=3)
+
+
+def test_fresh_launcher_fix_changes_only_button_delivery_and_keeps_old_profile():
+    old = asdict(load_config(Path("configs/sensorimotor-bounded-v1.json")))
+    new = asdict(load_config(Path("configs/sensorimotor-bounded-serial-v2.json")))
+    assert old["button_timing"] == "simultaneous-v1"
+    assert new["button_timing"] == "serial-v2"
+    new["button_timing"] = old["button_timing"]
+    assert new == old  # Same brain, retinal timing, reward settings and frame budget.
+    launcher = Path("scripts/start.ps1").read_text()
+    assert "$Profile = 'sensorimotor-bounded-serial-v2'" in launcher
 
 
 def test_missing_reward_timing_retains_legacy_checkpoint_behavior():

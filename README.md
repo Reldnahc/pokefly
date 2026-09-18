@@ -57,12 +57,13 @@ Launch the autonomous experimental controller with its live display:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pokefly train --device cuda --intro `
-  --config configs/sensorimotor-bounded-v1.json
+  --config configs/sensorimotor-bounded-serial-v2.json
 ```
 
 Shortcut: `.\scripts\start.ps1 -Intro`. Normal training now runs until Ctrl+C
 by default; use `-Steps 1000` (CLI: `--steps 1000`) for a bounded trial.
-The launcher defaults to `sensorimotor-bounded-v1`. Use `-Profile intrinsic-v1`
+The launcher defaults to `sensorimotor-bounded-serial-v2`: the same bounded
+brain as before, with the verified serial button-delivery fix. Use `-Profile intrinsic-v1`
 for calibrated dynamics with the earlier KC rule, `-Profile sensory-isolated-v1`
 for the earlier uncalibrated model, or `-Profile baseline` for original dynamics.
 Bare `python -m pokefly train` without a config still selects the baseline.
@@ -70,14 +71,19 @@ Fresh runs use the corrected `parallel-v2` decoder: one direction plus one of
 A/B/Start, with the same fixed thresholds and explicit release. Old checkpoints
 retain `exclusive-v1` on resume; start a fresh run to use the corrected adapter.
 
-Optional ongoing transport experiment: `-Profile sensorimotor-serial-v1`.
-This delivers paired direction/function commands sequentially within the same
-time budget, preventing D-pad priority from masking Start/A/B in naming screens.
-It is not yet the default and does not silently alter saved checkpoints.
+Fresh default launches deliver paired direction/function commands sequentially
+within the same frame budget, preventing D-pad priority from masking Start/A/B
+in naming screens. The fly chooses the same buttons; no game-state routing is
+added. `-Profile sensorimotor-bounded-v1` retains the old simultaneous control.
+Saved checkpoints retain their own timing on resume or weights-only loading.
+The older `sensorimotor-serial-v1` research profile also changes movement bouts
+and Start cooldown; it is not the default brain.
 
 Open [the local dashboard](http://127.0.0.1:8777). It shows the exact frame fed
 to the brain, retinal input, real firing activity, delivered neural button
-pulses, outcome rewards, and measured internal weight changes. Hybrid mode
+pulses, cumulative measured reward, and internal weight changes. Hover over
+reward to see current/delivered feedback. Old running servers explicitly show
+STEP REWARD until restarted; no client-side reward summation is used. Hybrid mode
 separately shows blue graded visual activity and amber spikes. Human controls
 are disabled during autonomous experiments. `--intro` explicitly scripts setup
 to the bedroom; omit it to let the fly attempt the opening screens.

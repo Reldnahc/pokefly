@@ -11,10 +11,13 @@ and the original house-exit milestone are measurements, not a route to teach.
 .\scripts\start.ps1 -Intro
 ```
 
-The launcher defaults to `sensorimotor-bounded-v1`, also selectable with
-`train --config configs/sensorimotor-bounded-v1.json`. This includes the
+The launcher defaults to `sensorimotor-bounded-serial-v2`, also selectable with
+`train --config configs/sensorimotor-bounded-serial-v2.json`. This includes the
 incoming sensory isolation, fixed neutral-image calibration and bounded internal
-sensorimotor learning described below. Use `-Profile sensory-isolated-v1` for
+sensorimotor learning described below, plus verified serial button delivery.
+Its brain/rewards are identical to the previous `sensorimotor-bounded-v1`;
+that original simultaneous profile is preserved unchanged as a control.
+Use `-Profile sensory-isolated-v1` for
 the previous model, or `-Profile hybrid-v1` for the unisolated control.
 Bare `train` without a config
 retains baseline neural dynamics. Fresh runs use the approved
@@ -38,7 +41,8 @@ in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 | `intrinsic-v1` | Fixed neutral-image excitability calibration; earlier KC learning rule. |
 | `sensorimotor-v1` | Calibrated dynamics plus broad motor-input covariance plasticity; locks in. |
 | `sensorimotor-normalized-v1` | Exact local incoming-strength normalization; weak motor acquisition. |
-| `sensorimotor-bounded-v1` | Current launcher: every eligible edge bounded to 0.75--1.25x original. |
+| `sensorimotor-bounded-v1` | Previous default/control: every eligible edge bounded to 0.75--1.25x original. |
+| `sensorimotor-bounded-serial-v2` | Current launcher: same bounded brain, verified serial delivery of its chosen buttons. |
 | `sensorimotor-budget-v1` | Wider individual edge range, total incoming strength bounded +/-25%. |
 | `sensorimotor-perturb-v1` | Same bounded input budget, credit from actual neural-noise perturbations. |
 | `sensorimotor-perturb-v2` | Linear, unclipped noise eligibility to remove the v1 clipping bias. |
@@ -803,6 +807,13 @@ current drift despite cue-specific learning; this is an experimental plasticity
 constraint, not measured physiology or a guaranteed exact reward gradient.
 No new persistent state is introduced: the existing release EMA is checkpointed.
 The version is opt-in, with paired/shuffled/held-out tests registered before use.
+
+`visual-wide-projected-v4.json` tests that SAME credit rule on the stronger
+release-wide-v3 circuit. It changes only the rule relative to wide-v3; its
+frozen calibration, physical dynamics, reward settings and buttons are identical.
+This is a separately registered experiment, not a promoted combination or
+a conversion of earlier checkpoints. Diagnostic conditioning weights never
+initialize gameplay.
 
 `train_game_series.py --initial-game-run <run>` can pin final ACTUAL-game-trained
 weights for further full new-game attempts, followed by frozen evaluation.

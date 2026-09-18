@@ -8,6 +8,7 @@ param(
     [ValidateSet('baseline', 'hybrid-v1', 'sensory-isolated-v1', 'stream-v1',
         'endpoint-v1', 'quiescent-v1', 'compartment-ema-v1', 'intrinsic-v1',
         'sensorimotor-v1', 'sensorimotor-normalized-v1', 'sensorimotor-bounded-v1',
+        'sensorimotor-bounded-serial-v2',
         'sensorimotor-budget-v1', 'sensorimotor-perturb-v1', 'sensorimotor-perturb-v2',
         'sensorimotor-perturb-v3', 'sensorimotor-reset-v2', 'compartment-reset-v2',
         'sensorimotor-low-noise-v1', 'sensorimotor-delayed-v1', 'sensorimotor-dual-v1',
@@ -20,7 +21,7 @@ param(
         'sensorimotor-serial-outcome-v3', 'sensorimotor-score-centered-v4',
         'sensorimotor-adaptive-v1', 'sensorimotor-premotor-v1',
         'sensorimotor-score-projected-v5', 'sensorimotor-gain12-v1',
-        'visual-rate-v1')][string]$Profile = 'sensorimotor-bounded-v1',
+        'visual-rate-v1')][string]$Profile = 'sensorimotor-bounded-serial-v2',
     [string]$LoadState,
     [string]$Resume,
     [string]$Weights

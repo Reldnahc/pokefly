@@ -28,6 +28,63 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 16:21 UTC: promote ONLY the already verified command-transport fix to fresh
+  launches, NOT any experimental visual/learning candidate. New versioned
+  `sensorimotor-bounded-serial-v2` keeps the default's neural model, rewards,
+  decoder and24-frame budget exactly; paired commands use11 direction,1release,
+ 11 function,1release. Evidence: input-priority source audit, four forced
+  nickname-screen transport controls and actual serial-play comparisons already
+  documented above. Original `sensorimotor-bounded-v1` file stays unchanged;
+  every saved run restores its original settings. Unit comparison enforces
+  the one-factor change. Fresh default real-ROM/launcher/resume checks follow.
+  This fixes delivery of fly-chosen buttons; it is not learned game behavior.
+
+- 16:17 UTC: wide-v3 paired8,192 interim scores66.09%/72.39%, but seed501's
+  left cue is only49.09% (right83.10%);601 left57.45%,right87.32%. The stronger
+  signal improves capacity, yet generic button drift remains a possible limit.
+  Independent2801..2804 retention remains mandatory; no gate pass yet.
+  Preselect `visual-wide-projected-v4`: ONLY swap the internal credit rule in
+  the wide-v3 model to the already implemented local mean-input projection.
+  Same frozen calibration, anatomical synapses, noise, rewards and adapter.
+  This isolates credit on the stronger-signal circuit; it is not fitting a
+  decoder or combining two untracked parameter changes. Queue501/601 curves
+  at512/2048/8192 after existing registered jobs free capacity, then independent
+ 3001..3004 final retention with the unchanged gate. No new trial launched yet.
+  Neither projected profile is promoted based on this hypothesis.
+
+- 16:12 UTC: independent reversal paired panels return56.30%/56.48%, versus
+  the acquired baselines41.35%/41.91% under the reversed contingency. This is
+  retained change in the appropriate direction, but left-cue accuracies45.68%
+  and38.41% mean BOTH still fail the same60%/each-cue55% criterion. Shuffled
+  independent panels are still finishing; keep the result provisional until
+  that comparison is complete. Do not reinterpret a favorable time bin as a pass.
+  The unchanged v1 acquisition501 final32,768 interim score is59.18%, not an
+  improvement over its8,192 small probe. Finish registered controls; do not
+  promote simple extra runtime as the fix. Wide-v3 literal first1,500 sample
+  Up fraction25.33%, house exit464, versus original v1 same-seed Up27.47% and
+  no house exit by1,500 (later1566). Early trajectory effect, not learning proof.
+
+- 16:00 UTC: stronger-release capacity control completed: original43.05%,
+  temporary oracle forward72.71%,reverse88.88% balanced on2,001..2,004 noise
+  seeds, with both cues above55%. Original files unchanged, fitted weights
+  discarded and never exported. This is improved controllability, NOT reward
+  learning. Artifact `oracle-synaptic-capacity-20260918T154733Z-45c072`.
+  Its completed GPU slot now starts the registered actual-game wide-v3 seed401
+  pair (learning first, then frozen),6,000 each,port8780. Seed402 will run the
+  opposite arm order as capacity becomes available. Only original neural weights
+  initialize these games; no capacity/conditioning checkpoint is accepted.
+
+- 15:58 UTC: both same-acquired-start reversal curves completed all arms.
+  Final small interim probes: paired60.20%/59.86% versus shuffled30.49%/49.00%
+  (501/601). Independent neutral-warmed retention on2701..2704 now running,
+  with the actual acquired8,192 checkpoint explicitly used as baseline in
+  BOTH panels. Do not call these interim curves an independent gate pass.
+  Sources `visual-learning-curve-20260918T150238Z-ab054c` / `...-718867`.
+  Projected-credit real-ROM smoke passes and its frozen70-decision trajectory
+  plus ALL arrays reproduce the original v1 control exactly. Full suite now
+ 311 Python/26 JS (`verify-c449852e570547aa89ec004e7a7f3245`). Source/docs pushed
+  as `52c3499`; subsequent changes remain recorded here until the next push.
+
 - 15:54 UTC: found a remaining HUMAN-display issue: the reward metric still
   showed only the current sample, usually zero. Add an authoritative cumulative
   reward field ONLY to dashboard publication (not neural input or archived

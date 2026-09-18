@@ -226,13 +226,20 @@ def test_learning_rate_candidate_cannot_change_rewards_or_firing(monkeypatch):
         module.validate_one_factor(original, candidate)
 
 
-def test_projected_visual_profile_changes_only_internal_credit_rule():
+@pytest.mark.parametrize(
+    "baseline,candidate_name",
+    [
+        ("visual-rate-v1", "visual-projected-learning-v4"),
+        ("visual-release-wide-v3", "visual-wide-projected-v4"),
+    ],
+)
+def test_projected_visual_profile_changes_only_internal_credit_rule(baseline, candidate_name):
     from dataclasses import asdict
 
     from pokefly.experiment import load_config
 
-    original = asdict(load_config(Path("configs/visual-rate-v1.json")))
-    candidate = asdict(load_config(Path("configs/visual-projected-learning-v4.json")))
+    original = asdict(load_config(Path(f"configs/{baseline}.json")))
+    candidate = asdict(load_config(Path(f"configs/{candidate_name}.json")))
     assert candidate["brain"]["plasticity"]["rule"] == "sensorimotor-perturb-projected-v4"
     candidate["brain"]["plasticity"]["rule"] = original["brain"]["plasticity"]["rule"]
     assert candidate == original

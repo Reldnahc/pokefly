@@ -5,7 +5,51 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 15:54 UTC
+## Latest evidence, 2026-09-18 16:24 UTC
+
+The verified serial command-delivery fix is now the fresh-launch default via
+`sensorimotor-bounded-serial-v2`. This changes ONLY transport, not the default
+brain, rewards, decoder or frame budget. The old profile and all saved-run
+settings remain unchanged. A real PowerShell default launch delivered all
+paired requests in the expected phases (`internal-learn-20260918T162141Z-dc6a70`);
+learn/exact-resume/frozen/no-reward smoke also passes
+(`internal-smoke-20260918T162148Z-7f47ac`). No experimental visual/learning model
+has been promoted. This is a delivery fix, not a learning-performance claim.
+
+Both independent v1 reversal panels are complete on noise seeds 2701..2704:
+paired 56.30% / 56.48%, acquired baseline 41.35% / 41.91%, shuffled 44.22% /
+47.81%. There is retained contingency-following change, but both still FAIL
+the unchanged balanced 60% / each-cue 55% gate. One cue is 45.68% / 38.41%.
+Artifacts `visual-retention-probe-20260918T155705Z-25c8d5` and `...T155735Z-203df4`.
+The v1 final 32,768 small paired probes are 59.18% / 59.20%; more unchanged
+training has not produced a clear improvement. Final shuffled/independent
+controls remain in progress; no positive longer-training claim is made.
+
+Wide-v3 capacity diagnostic: original 43.05%, temporary oracle forward 72.71%,
+reverse 88.88%, both cues above 55%. Those supervised weights were discarded,
+never exported or used in Pokemon (`oracle-synaptic-capacity-20260918T154733Z-45c072`).
+The actual reward-trained 8,192 small probes reach 66.09% / 72.39%, but one
+cue still fails in seed501. Independent 2801..2804 retention and shuffled
+controls are pending. Its literal seed401 game obtained a starter at 3,122
+and entered the rival battle, without synthetic training weights or scripted
+gameplay beyond the disclosed intro. That first learning arm finished with
+287 tiles, no battle win and no Route 1 visit. Full frozen/learning comparisons
+on BOTH 401/402 are still running; no treatment-effect claim yet. The first
+v1 retained-weight game pair (source402, held-out1501) gets a starter at5,416
+versus none in the original control, but fewer tiles159 versus199. Other
+registered seeds/sources remain pending; this is not a selected success report.
+
+Projected-credit v1 final 8,192 small probes are 59.11% / 59.40%; both cues
+exceed 55% but balanced scores remain below 60%. Shuffled and independent
+tests are still needed. The separately registered wide+projected combination
+changes only credit relative to wide-v3, with all physics/rewards fixed;
+it is queued, not yet run or promoted.
+
+Current full verification: 313 Python tests,26 JavaScript tests and lint pass
+(`verify-08437da4630c48888a804fbea731fd11`). The default launch uses the same
+protected ROM/data and does not migrate any existing checkpoint.
+
+### Display fix and earlier evidence
 
 Fixed a remaining display-only reward issue: the metric previously showed the
 instantaneous sample, usually zero. It now displays the server's cumulative

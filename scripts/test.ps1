@@ -42,7 +42,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Sensory-isolated exact-resume smoke test failed.' }
         foreach ($candidateProfile in @('stream-v1', 'endpoint-v1', 'quiescent-v1',
             'compartment-ema-v1', 'intrinsic-v1', 'sensorimotor-v1',
-            'sensorimotor-normalized-v1', 'sensorimotor-bounded-v1', 'sensorimotor-budget-v1',
+            'sensorimotor-normalized-v1', 'sensorimotor-bounded-v1',
+            'sensorimotor-bounded-serial-v2', 'sensorimotor-budget-v1',
             'sensorimotor-perturb-v1', 'sensorimotor-perturb-v2', 'sensorimotor-perturb-v3',
             'sensorimotor-reset-v2', 'compartment-reset-v2', 'sensorimotor-low-noise-v1',
             'sensorimotor-delayed-v1', 'sensorimotor-dual-v1', 'sensorimotor-centered-v1',
