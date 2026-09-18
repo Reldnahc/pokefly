@@ -189,6 +189,9 @@ class InternalBrain(PixelBrain):
                 "rule": "uniform-neutral-rate-homeostasis-v1",
                 "scope": "frozen internal excitability offsets; no game/reward/motor labels",
             }
+        if self.hybrid and self.hybrid.visual_circuit is not None:
+            if np.isin(self.plasticity.post, self.hybrid.graded_host).any():
+                raise ValueError("Game plasticity may not change frozen calibrated visual cells")
         self.sensory_isolation = {"enabled": False, "neurons": 0}
         if self.hybrid and len(self.hybrid.isolated_host):
             isolated = self.hybrid.isolated_host
@@ -238,11 +241,19 @@ class InternalBrain(PixelBrain):
                 temperature=self.config.dynamics.spike_temperature,
             )
         elif isinstance(self.plasticity, NeuralPerturbationPlasticity):
+            graded_release = None
+            if self.hybrid.visual_circuit is not None:
+                release = self.hybrid.release[self.hybrid.graded]
+                graded_release = (
+                    self.hybrid.graded_host,
+                    release if self.brain.xp is np else release.get(),
+                )
             self.plasticity.observe(
                 fired,
                 self.brain.dt,
                 perturbation=self.hybrid.last_noise,
                 probability=self.brain.noise_hz * self.brain.dt,
+                graded_release=graded_release,
             )
         else:
             self.plasticity.observe(fired, self.brain.dt)
@@ -278,6 +289,10 @@ class InternalBrain(PixelBrain):
             "motor_body_ids": {k: self.body_ids[v].tolist() for k, v in self.motors.items()},
             "device": self.brain.device,
             "n": self.brain.n,
+            **(
+                {"visual_calibration": self.hybrid.visual_circuit.info}
+                if self.hybrid and self.hybrid.visual_circuit is not None else {}
+            ),
             **(
                 {"intrinsic_calibration": self.intrinsic_calibration_info}
                 if self.intrinsic_calibration_info
@@ -342,6 +357,7 @@ class InternalBrain(PixelBrain):
         stored["config"]["dynamics"].setdefault("spike_temperature", 0.0)
         stored["config"]["dynamics"].setdefault("motor_adaptation_increment", 0.0)
         stored["config"]["dynamics"].setdefault("motor_adaptation_seconds", 3.0)
+        stored["config"]["dynamics"].setdefault("visual_model", "legacy-v1")
         stored["config"]["motor"] = dict(stored["config"]["motor"])
         stored["config"]["motor"].setdefault("arbitration", "exclusive-v1")
         stored["config"]["motor"].setdefault("direction_trace_seconds", 1.0)

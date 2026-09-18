@@ -36,6 +36,9 @@ def main():
     parser.add_argument("--spike-temperature", type=float, default=0.0)
     parser.add_argument("--motor-adaptation-increment", type=float, default=0.0)
     parser.add_argument("--motor-adaptation-seconds", type=float, default=3.0)
+    parser.add_argument(
+        "--visual-model", choices=("legacy-v1", "calibrated-rate-v1"), default="legacy-v1"
+    )
     parser.add_argument("--calibration-only", action="store_true")
     parser.add_argument(
         "--reset-every",
@@ -72,6 +75,7 @@ def main():
             spike_temperature=args.spike_temperature,
             motor_adaptation_increment=args.motor_adaptation_increment,
             motor_adaptation_seconds=args.motor_adaptation_seconds,
+            visual_model=args.visual_model,
         ),
     )
     c = InternalBrain(device=args.device, config=cfg)

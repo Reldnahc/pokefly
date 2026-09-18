@@ -409,7 +409,7 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
     NOT their conductance model or a validated fly molecular mechanism.
     """
 
-    def observe(self, fired, dt, *, perturbation=None, probability=None):
+    def observe(self, fired, dt, *, perturbation=None, probability=None, graded_release=None):
         from pokefly.fast_plasticity import sensorimotor_eligibility
 
         if perturbation is None or probability is None or not 0 <= probability <= 1:
@@ -422,6 +422,20 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         noise = noise.astype(np.float32, copy=False)
         spike = np.zeros(self.n, np.float32)
         spike[fired] = 1
+        if graded_release is not None:
+            indices, values = graded_release
+            indices, values = np.asarray(indices), np.asarray(values, np.float32)
+            if (
+                indices.dtype.kind not in "iu" or indices.ndim != 1
+                or values.shape != indices.shape or not np.isfinite(values).all()
+                or (indices < 0).any() or (indices >= self.n).any()
+                or (values < 0).any() or (values > 1).any()
+                or np.isin(indices, fired).any()
+            ):
+                raise ValueError("Invalid non-spiking presynaptic transmitter release")
+            # Same transmitter units as the neural forward pass. Only the
+            # NEXT step's presynaptic history sees this activity, below.
+            spike[indices] = values
         c = self.config
         # Presynaptic history before this step's perturbation: no future spikes.
         decay = np.exp(-dt / c.pre_trace_seconds)

@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import numpy as np
@@ -62,7 +62,10 @@ class TemporaryInputs:
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--probe", type=Path, required=True)
+    p.add_argument("--config", type=Path, default=Path("configs/sensorimotor-perturb-v3.json"))
     p.add_argument("--include-inhibition", action="store_true")
+    p.add_argument("--minimum-factor", type=float, default=0.25)
+    p.add_argument("--maximum-factor", type=float, default=4.0)
     p.add_argument(
         "--reference-report",
         type=Path,
@@ -70,9 +73,20 @@ def main():
     )
     args = p.parse_args()
     source = json.loads((args.probe / "report.json").read_text())
-    config = load_config(Path("configs/sensorimotor-perturb-v3.json")).brain
+    config = load_config(args.config).brain
+    config = replace(
+        config,
+        plasticity=replace(
+            config.plasticity,
+            minimum_factor=args.minimum_factor,
+            maximum_factor=args.maximum_factor,
+        ),
+    )
     source_config = load_config(Path(source["config"])).brain
-    for key in ("brain_steps", "noise_hz", "noise_amplitude", "dynamics", "intrinsic_calibration"):
+    for key in (
+        "brain_steps", "noise_hz", "noise_amplitude", "synaptic_gain", "dynamics",
+        "intrinsic_calibration",
+    ):
         assert asdict(config)[key] == asdict(source_config)[key], key
     data = configure_runtime()
     protected = {name: sha256(data / name) for name in ("brain.npz", "weights.npz")}
@@ -83,11 +97,13 @@ def main():
     report = {
         "scope": __doc__,
         "source_probe": str(args.probe),
+        "config": str(args.config),
+        "recorded_activity": source.get("recorded_activity", "spike counts"),
         "counts_sha256": sha256(args.probe / "counts.npz"),
         "fit_noise_seeds": source["seeds"],
         "test_noise_seeds": [2001, 2002, 2003, 2004],
         "decisions_per_cue": 128,
-        "factors": [0.25, 4.0],
+        "factors": [args.minimum_factor, args.maximum_factor],
         "input_budget_fraction": 0.25,
         "allowed_synapses": "both original signs, separate E/I budgets"
         if args.include_inhibition
@@ -134,8 +150,14 @@ def main():
                     base = original[selected].astype(float)
                     mean_current, cue_current = mean[positions] * base, contrast[positions] * base
                     desired_sign = (1 if direction == "left" else -1) * (-1 if reverse else 1)
-                    observed = (mean[positions] > 0) & ~np.isin(pre, c.hybrid.graded_host)
-                    bounds = [(0.25, 4.0) if active else (1.0, 1.0) for active in observed]
+                    recorded_graded = "summed transmitter release" in report["recorded_activity"]
+                    observed = (mean[positions] > 0) & (
+                        True if recorded_graded else ~np.isin(pre, c.hybrid.graded_host)
+                    )
+                    bounds = [
+                        (args.minimum_factor, args.maximum_factor) if active else (1.0, 1.0)
+                        for active in observed
+                    ]
                     budgets = [np.maximum(base, 0)]
                     if args.include_inhibition:
                         budgets.append(np.maximum(-base, 0))
@@ -178,7 +200,8 @@ def main():
                         }
                     )
                     factor = values / original
-                    assert factor.min() >= 0.25 - 1e-6 and factor.max() <= 4 + 1e-6
+                    assert factor.min() >= args.minimum_factor - 1e-6
+                    assert factor.max() <= args.maximum_factor + 1e-6
         frozen = c.brain.weights.copy()
         records = []
         for seed in report["test_noise_seeds"]:

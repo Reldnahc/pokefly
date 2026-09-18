@@ -5,7 +5,88 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 13:27 UTC
+## Latest evidence, 2026-09-18 14:17 UTC
+
+The user authorized offline calibration of INTERNAL visual neurons on generic
+stimuli/published responses, frozen before Pokemon learning. The fly still
+chooses every button through the same motor cells. No external visual policy,
+virtual photoreceptor, game-aware feature or route controller is introduced.
+
+### Visual calibration: implementation and early evidence, not a solved task
+
+The pinned reference graph maps exactly to 65,799 existing cells and 1,967,771
+existing edges. Its count scaling agrees with the original graph; 24,365
+reference edge signs differ, so Pokefly keeps ORIGINAL signs. Audit:
+`visual-reference-audit-20260918T134644Z-5ec14f`. Data/license provenance and
+full limitations are in `THIRD_PARTY_NOTICES.md` and `MODEL_VARIANTS.md`.
+
+The isolated visual prototype responds to moving gratings, but T4/T5 group
+direction selectivity is only 0.025..0.242 and differs between eyes. About
+3.1..4.1% of cells reach the chosen ceiling; this is not validated physiology.
+Artifact `calibrated-visual-probe-20260918T135707Z-d52749`. The unfitted flyvis
+parameter transfer is weaker (0..0.023), with zero-strength reference edges
+retained at original magnitude rather than deleted:
+`calibrated-visual-probe-20260918T140047Z-01e298`. Neither is an exact reproduction
+of the upstream graph/photoreceptor convention. Whole-fly integration adds
+one missing original L4, retains all cross-boundary connections, and freezes
+the visual model before gameplay. New neutral spiking calibration is stable
+across three reset seeds (mapped motor means 0.65..1.32 Hz):
+`intrinsic-probe-20260918T140237Z-11ac48`.
+
+In the full fly, an OFFLINE held-out diagnostic now distinguishes opposite
+motion at descending cells and motor inputs on all eight constant samples and
+all tested switching windows; the old motor-input measurement was 50%. These
+are small correlated diagnostic samples, not a significance test or deployed
+classifier. Actual untrained button choices remain weak: 49.4% balanced for
+motion and 43.7% for static cues. Artifacts:
+`visual-latency-probe-20260918T140540Z-de7dbb` (motion),
+`visual-latency-probe-20260918T140551Z-5ff069` (static).
+Static steering-current contrast/std is still only 0.0009 / 0.015; distributed
+input information is not automatically routed into motor choices. Audits:
+`motor-signal-audit-20260918T141620Z-869982` and `...T141621Z-7bfcc7`.
+
+Perturbation learning now accepts actual continuous presynaptic release for
+the new model; previously it would silently omit graded visual activity.
+Prior-history timing is maintained, with no fictitious spikes or labels.
+Both registered paired/shuffled visual curves and two matched actual-game
+learning/frozen comparisons are ongoing. There is no retained visual-learning
+or improved-progression claim yet.
+
+### Exact-resume defect found and repaired
+
+The first real-ROM visual-model smoke failed at decision 51. Neural-only
+snapshots were exact, but the first post-load sampled image differed in 3,470
+pixels. PyBoy 2.7 does not serialize its renderer's window-line counter.
+A temporary render followed by reloading the exact saved bytes restores it;
+serialized game state stays identical, and the temporary image/time/rewards
+never reach the fly. Diagnostic:
+`emulator-resume-probe-20260918T141055Z-39e8ce`. The failed runs are retained.
+
+After repair, real-ROM learning/resume/frozen/no-reward tests pass exactly:
+`internal-smoke-20260918T141157Z-f22c68`. The older stopped-run branch test also
+passes with unchanged sources: `checkpoint-window-verification-20260918T141218Z-f57c61`.
+Live HTTP pixel/graded-activity/button/speed tests pass on
+`internal-learn-20260918T141211Z-c9b96e`. Browser connection retried twice;
+rendered visual QA is still unavailable. Final integration checks: 294 Python
+tests, 23 JavaScript tests and lint pass (`verify-47f32e82a6564df69623a42009b77177`).
+All ten protected original files still match at 14:18 UTC, with unchanged
+retina hash (`visual-integration-protection-20260918T141840Z-6e415c`).
+
+### Completed negative/mixed learning controls
+
+Projected-score v5 final 8,192-decision balanced cue accuracy is 52.4% / 56.8%
+for training seeds 501/601; matched shuffled controls 47.7% / 49.4%. Neither
+passes the preselected >=60% screen. Not promoted. Artifacts:
+`visual-learning-curve-20260918T132756Z-69204e` and `...T132756Z-39c426`.
+
+The old-circuit supervised capacity control with wider 0.1..10 synaptic bounds
+(same +/-25% budgets and preserved predicted mean input) obtains 64.1% forward
+and 82.4% reversed balanced cue accuracy on independent noise streams. This
+is a temporary OFFLINE oracle, not reward learning; no fit was exported or used
+in the game. Original control reproduces the prior report exactly. Artifact:
+`oracle-synaptic-capacity-20260918T133928Z-9a8dfe`.
+
+## Evidence archived at 13:27 UTC
 
 Public source repository: https://github.com/Reldnahc/pokefly . ROM, model data,
 saves, checkpoints and raw runs remain local and Git-ignored.

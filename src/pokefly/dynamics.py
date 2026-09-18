@@ -29,17 +29,24 @@ class DynamicsConfig:
     spike_temperature: float = 0.0
     motor_adaptation_increment: float = 0.0
     motor_adaptation_seconds: float = 3.0
+    visual_model: str = "legacy-v1"
 
     def __post_init__(self):
         if self.profile not in ("baseline", "hybrid-v1"):
             raise ValueError("Unknown dynamics profile")
+        if self.visual_model not in ("legacy-v1", "calibrated-rate-v1"):
+            raise ValueError("Unknown internal visual-neuron model")
+        if self.visual_model != "legacy-v1" and (
+            self.profile != "hybrid-v1" or not self.graded_vision
+        ):
+            raise ValueError("Calibrated visual neurons require graded hybrid dynamics")
         if not isinstance(self.isolate_nonvisual_sensory, bool):
             raise ValueError("isolate_nonvisual_sensory must be boolean")
         if not isinstance(self.quiescent_nonvisual_sensory, bool):
             raise ValueError("quiescent_nonvisual_sensory must be boolean")
         if self.quiescent_nonvisual_sensory and not self.isolate_nonvisual_sensory:
             raise ValueError("Quiescent sensory boundary requires incoming isolation")
-        values = {k: v for k, v in asdict(self).items() if k != "profile"}
+        values = {k: v for k, v in asdict(self).items() if k not in ("profile", "visual_model")}
         if not all(np.isfinite(v) for v in values.values()):
             raise ValueError("Dynamics parameters must be finite")
         if not isinstance(self.graded_vision, bool):
@@ -88,6 +95,15 @@ class HybridDynamics:
         )
         self.graded = xp.concatenate((self.receptors, self.lamina))
         self.graded_host = self.graded if xp is np else self.graded.get()
+        self.visual_circuit = None
+        if config.visual_model == "calibrated-rate-v1":
+            from pokefly.calibrated_vision import CalibratedVisualCircuit
+
+            self.visual_circuit = CalibratedVisualCircuit(device=brain.device)
+            if np.setdiff1d(self.graded_host, self.visual_circuit.global_indices).size:
+                raise ValueError("Calibrated circuit must cover all original graded visual cells")
+            self.graded_host = self.visual_circuit.global_indices
+            self.graded = xp.asarray(self.graded_host)
         self.isolated_host = (
             nonvisual_sensory_cells(brain)
             if config.isolate_nonvisual_sensory
@@ -127,6 +143,11 @@ class HybridDynamics:
         self.motor_adaptation = (
             b.xp.zeros((b.n, 1), b.xp.float32) if self.config.motor_adaptation_increment else None
         )
+        if self.visual_circuit is not None:
+            self.visual_circuit.reset()
+            normalized = self.visual_circuit.rate / np.float32(self.visual_circuit.maximum_rate)
+            b.v[self.graded, 0] = normalized
+            self.release[self.graded] = normalized * np.float32(self.config.graded_release)
 
     def current(self, release):
         if self.brain.device == "cuda":
@@ -160,7 +181,19 @@ class HybridDynamics:
         b.v += noise * np.float32(b.noise_amp)
         if self.track_noise:
             self.last_noise = noise[:, 0] if xp is np else noise[:, 0].get()
-        if c.graded_vision:
+        if self.visual_circuit is not None:
+            vision = self.visual_circuit
+            if eye_drive is None:
+                eye_drive = np.zeros(len(b.visual), np.float32)
+            # Fixed dimensional conversion: reference [0,5] -> old graded
+            # [0,1] state; maximum release stays unchanged at 0.25 by default.
+            # Existing outside -> visual edges supply current without counting
+            # any original visual-internal connection a second time.
+            rate = vision.advance_drive(
+                eye_drive, b.dt, external_current=vision.incoming_current(self.release, b.gain)
+            )
+            b.v[self.graded, 0] = rate / np.float32(vision.maximum_rate)
+        elif c.graded_vision:
             target = xp.clip(c.lamina_rest + current[self.graded], 0, 1)
             if eye_drive is None:
                 eye_drive = np.zeros(len(b.visual), np.float32)
@@ -214,11 +247,19 @@ class HybridDynamics:
                 if self.motor_adaptation is not None
                 else {}
             ),
+            **(
+                {"visual_voltage": self.visual_circuit.voltage}
+                if self.visual_circuit is not None else {}
+            ),
         }
 
     def restore(self, arrays):
         for name, target in self.arrays().items():
             value = np.asarray(arrays["hybrid_" + name], np.float32)
+            if name == "visual_voltage":
+                self.visual_circuit.restore_voltage(value)
+                self.visual_circuit.steps = round(self.brain.steps * self.brain.dt / 0.004)
+                continue
             if value.shape != target.shape or not np.isfinite(value).all() or (value < 0).any():
                 raise ValueError(f"Invalid hybrid checkpoint {name}")
             if name == "release" and (value > 1).any():

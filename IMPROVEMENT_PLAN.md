@@ -28,6 +28,110 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 14:17 UTC: visual-rate current audit still finds tiny static-cue contrast
+  at the original steering rows (contrast / current std 0.0009 and 0.015).
+  Distributed cue information does not imply useful output wiring. While all
+  four registered visual/game comparisons complete, repeat the existing
+  supervised capacity diagnostic on the NEW frozen visual circuit: fit original
+  positive steering input synapses, 0.25..4 factors, +/-25% budgets and fixed
+  two-cue mean current, using the recorded 801..804 activity; test 2001..2004.
+  Count actual graded release now present in the measurements. Discard every
+  fitted synapse afterward. This is NOT online learning, never exported and
+  never used in Pokemon. Report both forward and reversed mappings, not just
+  the favorable one. This asks whether better sensing exposed learnable input
+  variation, not whether an external policy can solve the game.
+
+- 14:14 UTC: visual-rate real-game learn/resume/frozen/no-reward smoke passes
+  after diagnosing PyBoy 2.7's unsaved renderer window-line counter. A discarded
+  warm render then exact state reload removes 3,470 differing first-frame pixels;
+  serialized emulator state remains identical. No extra frames/rewards reach
+  the fly. Old-checkpoint branch test and actual HTTP pixel/graded/action/speed
+  checks also pass. Browser connection retried; still unavailable.
+  Start preselected actual-application comparisons from original synapses:
+  seeds 401 and 402, 6,000 decisions, new visual model frozen versus learning,
+  counterbalanced arm order. Only intro setup scripted, all game actions fly
+  controlled; frozen calibration and original broad rewards. These exploratory
+  runs continue alongside both ROM-free curves. Require held-out frozen-weight
+  transfer before treating any learning-arm advantage as retained improvement.
+
+- 14:09 UTC: full-circuit visual-rate diagnostics now distinguish opposite
+  motion at descending cells and motor inputs on all eight held-out constant
+  samples and all tested switching windows (old motor-input measurement 50%).
+  This is offline information measurement, NOT an action controller or learning.
+  Actual frozen Left/Right discrimination remains 49.4% balanced for motion,
+  43.7% for static half-field images. Preselect unchanged paired/shuffled static
+  learning curves, seeds 501/601, checkpoints 512/2048/8192; retain the same
+  >=60% / each-cue >=55% / >5-point control / reversal gates. Synthetic weights
+  stay outside Pokemon. Perturbation eligibility now accepts actual graded
+  presynaptic release for this profile only, preserving causal prior history.
+  Unit tests cover that formerly missing signal. No learning claim yet.
+  Real-ROM smoke found a distinct emulator resume issue: first sampled image
+  after reload differs, despite exact neural-only restore. Diagnose and fix
+  before counting full-application checkpoint tests as passed.
+
+- 14:00 UTC: transferred fitted visual rate model is stable on generic gratings,
+  but direction sensitivity is weak/uneven (T4/T5 group-vector selectivity
+  0.025..0.242; 3.1..4.1% of all visual cells at rate ceiling). This is NOT
+  validated physiology. Preserve all 3,018,819 original selected-cell edges,
+  original signs, 6,006 actual photoreceptors and unchanged retinal mapping.
+  Prototype selects 71,079 real visual cells, no virtual neuron or policy.
+  Next: opt-in full-circuit coupling, retain all external connections, 4 ms
+  internal visual substeps, fixed [0,5] -> [0,1] graded-state conversion and
+  unchanged maximum release. Freeze visual parameters before gameplay. Uniform
+  neutral-gray excitability calibration must be redone for remaining spiking
+  cells; no game/button target enters it. Check exact checkpoint continuation,
+  original-profile compatibility, raw visual sensitivity and live application.
+  Do not mistake successful integration for learned gameplay.
+  Integration also preserves one original L4 omitted by the reference subset:
+  its type constants are shared with other L4 cells; its connections retain
+  original magnitudes/signs. Full model therefore has 71,080 calibrated cells.
+
+- Completed projected-v5 curves: paired balanced accuracy 52.4% / 56.8%,
+  shuffled 47.7% / 49.4% at final 8,192 decisions (training seeds 501/601).
+  Neither meets the predefined >=60% cue-learning screen. Not promoted.
+  The wider-bound SUPERVISED temporary capacity diagnostic reaches 64.1%
+  forward / 82.4% reversed balanced accuracy; no fit is exported or used in
+  Pokemon. This diagnoses limited capacity, not reward learning.
+
+- User approved separately calibrating the fly's INTERNAL visual-neuron model
+  against generic visual stimuli/published responses, provided the fly remains
+  the game player. Scope: preserve raw screen input, anatomical circuit and
+  fixed button mapping; freeze visual calibration before game reward learning.
+  No game states, action targets, routes, external vision policy or learned
+  output adapter in calibration. First inspect the published flyvis model and
+  the MaleCNS parameter-transfer implementation; verify anatomy, licensing,
+  neural dynamics, calibration objective and visual responses before adopting
+  any parameters. Do not assume an attractive demo proves end-to-end control:
+  the separate closed-loop-fly project's own follow-up reports a readout
+  artefact. Existing projected curves and the bounds diagnostic continue and
+  will be fully reported, including negatives.
+
+- 13:39 UTC: original frozen motion-grating test is also weak at the controller:
+  47.0% same-direction choices conditional on Left/Right; motor-input offline
+  direction classification 50%, descending 62.5% (small correlated diagnostic
+  panel, not a statistical claim). No learned visual policy is introduced.
+  Asked the user whether separately calibrated internal visual-neuron dynamics
+  would fit the experiment; current learning comparisons continue meanwhile.
+  Independently test whether the arbitrary synaptic factor bounds constrain
+  capacity: rerun the existing temporary oracle positive control with positive
+  factors 0.1..10 instead of 0.25..4, SAME +/-25% input budgets and mean-current
+  equality, same fit seeds and independent test panel. Repeat the original arm
+  exactly against the old report; count it as verification, not a new trial.
+  Fit is deliberately supervised diagnostic ONLY, all temporary weights are
+  discarded, no learned adapter or exported gameplay model. A better oracle
+  response would justify a separate reward-learning test, not prove learning.
+
+- 13:35 UTC: while both fixed-budget projected curves complete, test a missing
+  sensory control: equal-luminance horizontal moving gratings, updated at EVERY
+  neural step through the unchanged retina. Static half-white cues are not
+  equivalent to visual motion. This is ROM-free, frozen original perturb-v3,
+  seeds 801..804, same constant/switching lengths as the existing latency probe.
+  Gratings have 32-pixel period, 50% duty cycle, two pixels/neural-step speed;
+  opposite directions share the same first frame and luminance. No fitted
+  encoder/readout, weight changes, labels to neurons, or changed game input.
+  Measure information at the existing pathways AND the actual fixed-decoder
+  choices. This is a sensitivity test, not new learning/progression evidence.
+
 - 13:30 UTC: projected-v5 has exact frozen forward counts/actions/rates for 64
   windows versus score-v2 (`projected-forward-verification-20260918T132730Z-875628`).
   Real-ROM learn/resume/frozen/no-reward smoke passes

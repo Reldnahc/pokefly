@@ -659,7 +659,8 @@ baseline state, learning traces, gates, weights, and random-stream state. Exact
 same-backend resume and fractional sparse propagation are regression tested.
 Browser layout verification remains unavailable when the in-app browser cannot
 connect; DOM tests and live HTTP/SSE checks are not a substitute for visual QA.
-# New opt-in mechanism tests (2026-09-18 13:23 UTC; not promoted)
+
+## New opt-in mechanism tests (2026-09-18 13:23 UTC; not promoted)
 
 `sensorimotor-score-projected-v5` keeps the score-v2 stochastic circuit and
 original likelihood eligibility. Before a reward update, it projects the
@@ -686,3 +687,54 @@ historical checkpoints missing the field retain that exact value. Neither
 candidate is the default launcher profile. Synthetic assay-trained weights
 must never be loaded into Pokemon. See the preselected comparisons and all
 negative evidence in `IMPROVEMENT_PLAN.md` / `FOLLOWTHROUGH_RESULTS.md`.
+
+## User-authorized internal visual calibration (opt-in, not promoted)
+
+`visual-rate-v1.json` transfers frozen, licensed visual-neuron parameters from
+the pinned MaleCNS/flyvis reference described in `THIRD_PARTY_NOTICES.md`. It
+does NOT import the reference's movement controller, virtual receptors, image
+features or learned output policy. The unchanged raw-pixel retina drives the
+same 6,006 original photoreceptors. 71,080 existing visual cells use rectified
+rate dynamics with 4 ms substeps. All original selected-cell edges and signs
+remain present; reference-covered magnitudes and type time constants/biases
+are calibrated. Remaining selected-cell edges retain their original gain-3
+magnitudes. Real R1-6 -> lamina conductances are normalized to the reference's
+aggregate strength; there is no direct image-to-lamina injection.
+
+Original connections across the visual/nonvisual boundary remain active in
+both directions. A fixed, uniform conversion maps reference rates [0,5] to
+normalized graded state [0,1], keeping the prior maximum release (0.25).
+Boundary inputs use the original signed current, held for one 20 ms outer
+step. This mixed-unit transfer is an explicit engineering hypothesis, not a
+validated biological model. Original data files are not rewritten. The
+standalone assay has zero outside input, explicitly unlike the complete fly.
+
+The remaining spiking neurons receive a newly frozen uniform neutral-gray
+calibration, never game/button/reward fitting. Only existing downstream
+synapses undergo gameplay learning. Perturbation eligibility uses measured
+continuous presynaptic release where appropriate, with prior-history timing;
+graded cells do not fabricate spikes. Visual voltage, source fingerprints and
+all downstream state are checkpointed. Old profiles default to `legacy-v1`
+visual dynamics and remain unchanged. The fixed anatomical button decoder is
+unchanged. Streaming pixels and serial delivery are explicit in this profile.
+
+Preparation (data require network; subsequent calibration is ROM-free):
+
+```powershell
+.venv\Scripts\python.exe scripts/fetch_visual_reference.py
+.venv\Scripts\python.exe scripts/audit_visual_reference.py
+.venv\Scripts\python.exe scripts/probe_calibrated_vision.py
+.venv\Scripts\python.exe scripts/probe_intrinsic.py --device cuda --visual-model calibrated-rate-v1 --calibration-only --calibration-steps 10000 --reset-probe-decisions 256 --export fly-data/intrinsic-neutral-visual-rate-v1.npz
+```
+
+Calibration exports are immutable. The optional `--parameters flyvis` assay
+keeps zero-strength reference edges at their original magnitudes to preserve
+connectivity; it is therefore NOT an exact flyvis reproduction. Neither model
+has yet established reward-specific visual learning or reliable progression.
+Synthetic assay/oracle weights are never gameplay initialization.
+
+Exact resume also repairs a PyBoy 2.7 rendering omission: its window-line
+counter is not serialized. Before attaching reward observers, a temporary
+render is discarded by reloading the identical game bytes. The serialized
+state is checked unchanged; no extra gameplay frame or reward reaches the
+fly. This fixes a one-image discrepancy when resuming an open menu.

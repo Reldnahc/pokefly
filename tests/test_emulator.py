@@ -20,6 +20,30 @@ class FakePyBoy:
         return True
 
 
+def test_exact_renderer_priming_discards_temporary_game_progress(tmp_path):
+    class Stateful(FakePyBoy):
+        def load_state(self, stream):
+            self.state = stream.read()
+            self.events.append(("load", self.state))
+
+        def save_state(self, stream):
+            stream.write(self.state)
+
+        def tick(self, frames, render):
+            self.state = b"temporary progress"
+            return super().tick(frames, render)
+
+    path = tmp_path / "example.state"
+    path.write_bytes(b"checkpoint")
+    game = RedEmulator.__new__(RedEmulator)
+    game.pyboy = Stateful()
+    game.load(path, advance=False, prime_renderer=True)
+    assert game.pyboy.state == b"checkpoint"
+    assert game.pyboy.events == [("load", b"checkpoint"), ("tick", 1), ("load", b"checkpoint")]
+    with pytest.raises(ValueError, match="non-advancing"):
+        game.load(path, prime_renderer=True)
+
+
 def test_repeated_buttons_have_a_release_frame() -> None:
     game = RedEmulator.__new__(RedEmulator)
     game.pyboy = FakePyBoy()

@@ -161,9 +161,27 @@ class RedEmulator:
         with path.open("wb") as stream:
             self.pyboy.save_state(stream)
 
-    def load(self, path: Path, *, advance: bool = True) -> None:
-        with path.open("rb") as stream:
-            self.pyboy.load_state(stream)
+    def load(self, path: Path, *, advance: bool = True, prime_renderer: bool = False) -> None:
+        if prime_renderer and advance:
+            raise ValueError("Renderer restoration is only for exact, non-advancing loads")
+        saved = path.read_bytes()
+        self.pyboy.load_state(io.BytesIO(saved))
+        if prime_renderer:
+            # PyBoy 2.7 omits Renderer.ly_window from save states. A fresh
+            # renderer starts at 0 rather than the frame-boundary value -1;
+            # an open menu can therefore render one shifted frame on resume.
+            # Complete ONE render, then discard ALL emulated progress by
+            # reloading the exact bytes. Call before attaching reward hooks.
+            # No warm-up pixels, actions, rewards or game time reach the fly.
+            try:
+                if not self.tick(1):
+                    raise RuntimeError("Emulator stopped during renderer restoration")
+            finally:
+                self.pyboy.load_state(io.BytesIO(saved))
+            restored = io.BytesIO()
+            self.pyboy.save_state(restored)
+            if restored.getvalue() != saved:
+                raise RuntimeError("Renderer restoration changed serialized emulator state")
         if advance:
             self.tick(1)
 

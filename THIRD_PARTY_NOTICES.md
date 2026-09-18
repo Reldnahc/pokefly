@@ -61,3 +61,46 @@ its disassembled source, or assembled game code. Short instruction signatures
 only verify observer hook locations in the supported user-supplied ROM.
 
 The ROM is supplied by the user and is not distributed with this project.
+
+## Optional visual-neuron calibration reference
+
+The optional research data downloaded by `scripts/fetch_visual_reference.py`
+comes from Abijah Kajabika's
+[fruit-fly-brain-research](https://github.com/AbijahKaj/fruit-fly-brain-research),
+pinned at `c28066a5b9eff03efdb002f6779980d29f70634c`. Its MaleCNS graph and
+fitted parameters are CC BY 4.0. Credit Berg, S. et al. (2026), *A connectome
+of the male Drosophila melanogaster central nervous system*, Cell; FlyEM,
+HHMI Janelia Research Campus and Google Research, https://male-cns.janelia.org/.
+Transferred flyvis parameters derive from Lappalainen, J. K. et al. (2024),
+*Connectome-constrained networks predict neural activity across the fly visual
+system*, Nature, https://doi.org/10.1038/s41586-024-07939-3 and
+https://github.com/TuragaLab/flyvis (MIT).
+
+The reference's movement controller and virtual-photoreceptor shortcut are
+not imported into gameplay. Public data are kept locally under ignored
+`fly-data/`, with their original license files, pinned Git-blob identities and
+local SHA-256 hashes. Downloading reference data does not establish a validated
+brain model or authorize claims of learned gameplay. Any adapted code carries
+the following upstream license:
+
+MIT License
+
+Copyright (c) 2026 Abijah Kajabika
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

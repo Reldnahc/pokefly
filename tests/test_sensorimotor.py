@@ -27,6 +27,33 @@ def learner(normalize=False):
     )
 
 
+def test_perturbation_trace_receives_real_graded_release_without_future_leak():
+    p = NeuralPerturbationPlasticity(
+        np.array([0, 1]), np.array([2, 2]), np.array([0.2, 0.3]), 3,
+        PlasticityConfig(rule="sensorimotor-perturb-v3", activity_reference_hz=1.0),
+    )
+    empty = np.empty(0, np.int64)
+    noise = np.array([False, False, True])
+    arguments = dict(
+        perturbation=noise, probability=0.1,
+        graded_release=(np.array([0]), np.array([0.2], np.float32)),
+    )
+    p.observe(empty, 0.02, **arguments)
+    assert not p.eligibility.any()  # Current graded input cannot predict prior noise.
+    assert p.pre_trace[0] > 0 and p.pre_trace[1] == 0
+    p.observe(empty, 0.02, **arguments)
+    assert p.eligibility[0] > 0 and p.eligibility[1] == 0
+    for invalid in (
+        (np.array([0]), np.array([2.])),
+        (np.array([3]), np.array([0.2])),
+        (np.array([0.]), np.array([0.2])),
+    ):
+        with pytest.raises(ValueError, match="release"):
+            p.observe(empty, 0.02, **dict(arguments, graded_release=invalid))
+    with pytest.raises(ValueError, match="release"):
+        p.observe(np.array([0]), 0.02, **arguments)
+
+
 def test_reward_uses_neural_coactivity_without_action_information():
     p = learner()
     for _ in range(100):

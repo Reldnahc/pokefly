@@ -161,7 +161,9 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
     with RedEmulator(options.rom, button_timing=config.button_timing) as game:
         bootstrap_actions = 0
         if options.resume:
-            game.load(Path(saved["directory"]) / "game.state", advance=False)
+            game.load(
+                Path(saved["directory"]) / "game.state", advance=False, prime_renderer=True
+            )
             frame = arrays["next_frame"].copy()
         else:
             if options.load_state:

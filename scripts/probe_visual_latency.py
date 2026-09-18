@@ -8,13 +8,15 @@ back to the fly, decoder, rewards or game. All neural weights stay frozen.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
+from assay_stimuli import observe_stimulus
+from evaluate_learning_choices import score
 
 from pokefly.experiment import load_config
 from pokefly.internal_brain import InternalBrain
-from pokefly.pixel_brain import test_patterns
 from pokefly.runner import run_directory, write_json
 
 
@@ -22,6 +24,9 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--config", type=Path, default=Path("configs/intrinsic-v1.json"))
     p.add_argument("--seeds", nargs="+", type=int, default=[801, 802, 803, 804])
+    p.add_argument(
+        "--stimulus", choices=("static-half-v1", "motion-grating-v1"), default="static-half-v1"
+    )
     args = p.parse_args()
     if len(set(args.seeds)) < 3:
         p.error("At least three distinct noise seeds required")
@@ -38,23 +43,54 @@ def main():
     cells = np.unique(np.concatenate(list(groups.values())))
     groups = {name: np.searchsorted(cells, idx) for name, idx in groups.items()}
     original_weights = b.weights.copy()
+    # Graded visual cells have no spikes. For this optional model, measure
+    # their ACTUAL integrated release instead of mistaking zero spike counts
+    # for zero activity. This accumulator only observes the neural simulation.
+    graded = None
+    if c.hybrid and c.hybrid.visual_circuit is not None:
+        graded = c.hybrid.graded_host
+        accumulated = b.xp.zeros(len(graded), b.xp.float32)
+        original_step = b.step
+
+        def measured_step(*args, **kwargs):
+            fired = original_step(*args, **kwargs)
+            accumulated[:] += c.hybrid.release[c.hybrid.graded]
+            return fired
+
+        b.step = measured_step
     records = {}
+    choices = []
     for seed in args.seeds:
         for condition in ("left", "right", "switching"):
             c.reset_dynamics(seed)
             rows = []
+            actions = []
             for index in range(256 if condition == "switching" else 128):
                 cue = (
                     ("left", "right")[(index // 64) % 2] if condition == "switching" else condition
                 )
-                observed = c.observe(test_patterns()[cue])
-                rows.append(observed.counts[cells].astype(np.uint16))
+                if graded is not None:
+                    accumulated.fill(0)
+                observed = observe_stimulus(c, cue, index, args.stimulus)
+                if graded is None:
+                    rows.append(observed.counts[cells].astype(np.uint16))
+                else:
+                    activity = observed.counts.astype(np.float32)
+                    activity[graded] = accumulated if b.xp is np else accumulated.get()
+                    rows.append(activity[cells])
+                actions.append(c.choose(observed)[0])
             records[f"{seed}_{condition}"] = np.stack(rows)
+            choices.append({"noise_seed": seed, "cue": condition, "actions": actions})
         print("frozen sensory probe seed", seed, flush=True)
     np.testing.assert_array_equal(b.weights, original_weights)
     np.savez_compressed(output / "counts.npz", **records, body_ids=c.body_ids[cells])
     report = {
         "config": str(args.config),
+        "stimulus": args.stimulus,
+        "recorded_activity": (
+            "spike counts; calibrated graded cells: actual summed transmitter release"
+            if graded is not None else "spike counts"
+        ),
         "seeds": args.seeds,
         "protocol": "Frozen brain; no game, rewards, weight fitting or action interventions. "
         "Offline leave-one-noise-seed-out nearest-centroid activity measurement only; "
@@ -63,7 +99,15 @@ def main():
         "constant_cue_fit_decisions": [64, 128],
         "switch_block_decisions": 64,
         "rows": [],
+        "fixed_decoder_records": choices,
     }
+    constants = [
+        {**row, "actions": dict(Counter(row["actions"][64:]))}
+        for row in choices if row["cue"] in ("left", "right")
+    ]
+    report["fixed_decoder_same_direction_score"] = score(constants, False)
+    report["fixed_decoder_opposite_direction_score"] = score(constants, True)
+    print("Frozen actual choices", report["fixed_decoder_same_direction_score"], flush=True)
     windows = ((0, 8), (8, 16), (16, 32), (32, 64))
     for name, indices in groups.items():
         correct = {str(window): [] for window in windows}
