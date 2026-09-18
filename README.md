@@ -22,15 +22,18 @@ entered Route 1. Saved weights obtained starters in 3/3 held-out trials versus
 panel. Separately, a dual-trace candidate trained on eight explicitly reset
 rival encounters won 6/8 on each of two frozen test panels, versus 4/8 and 3/8
 with original weights. This is limited battle retention, not whole-game
-autonomy or statistical proof. Screen-conditioned learning remains unproven;
+autonomy or statistical proof. The newer visual models show modest retained
+cue-specific changes and reversal, but have not yet passed the predefined
+both-cue screen. Useful screen-specific gameplay learning remains unestablished;
 experiments continue. These early results do not
 prove eventual game completion. Failed earlier
 experiments remain in [RESULTS.md](RESULTS.md), with the continuing protocol in
 [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
 The immediate-feedback motor result does not yet generalize to delayed rewards.
-An optional fixed serial-button timing candidate also fixes a confirmed naming-
-screen input-priority trap. Its completed run obtained a starter and won rival
+Fixed serial-button delivery fixes a confirmed naming-screen input-priority
+trap and is now the fresh-launch default, without changing the default brain.
+An earlier serial-delivery research run obtained a starter and won rival
 and wild battles, but still plateaued around Pallet/Route 1. Earlier delivery of
 the same confirmed outcome rewards is now under controlled evaluation. Neither
 finding should be mistaken for learned navigation. See the dated follow-through

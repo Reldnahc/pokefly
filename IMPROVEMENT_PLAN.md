@@ -28,6 +28,65 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 16:50 UTC: both v1 long-game pairs complete. Frozen/learn tiles are352/351
+  (401) and348/297 (402). Both learned brains get starters sooner, but401
+  learning never reaches Route1 or wins; its frozen control wins ONE rival
+  encounter.402 neither wins, and frozen explores farther north on Route1
+  (y25 versus28). No overall learned-progression claim or v1 promotion.
+  Corrected an earlier report's double-count: battle_win1 plus rival_win1 are
+  the SAME encounter, not a rival AND wild win. Source401 final24k retained-
+  weight panel now runs on the registered1501/1502 seeds, just like402.
+  Artifact `retained-gameplay-20260918T164449Z-192a55`.
+  Wide-v3 seed401 matched6k pair: learning287tiles/starter3122 versus frozen
+ 268tiles/no starter; neither wins or visits Route1. Both402 arms continue.
+  Registered actual-game practice source401 begins with1401 at8782; final
+  source402 will use the same protocol when ready. No best-source selection.
+  Its finished comparison slot starts the queued wide+projected501 curve.
+
+- 16:49 UTC: skip only discarded original current rows during calibrated
+  visual CUDA steps. No edges/weights removed: visual rows are replaced by
+  the frozen visual circuit and isolated sensory currents were already zero.
+  Full public current measurements and calibration/diagnostic overrides remain
+  unchanged; old visual models take the original path. Two ABBA benchmarks
+  match ALL neural arrays, metadata, actions and counts over64-decision
+  branches; time reduction about7.6..14% under shared GPU load, not100x.
+  Artifacts `internal-propagation-benchmark-20260918T164408Z-657c5e` and
+  `...T164726Z-ba9aae`. Both v1 and wide-v3 real-ROM checkpoint continuations
+  match the ORIGINAL recorded samples5001..5020 exactly, plus split resume
+  arrays/rewards. Artifacts `checkpoint-window-verification-20260918T164752Z-ef7a24`
+  and `...T164837Z-c489f3`.323 Python/26 JS plus lint pass
+  (`verify-2fbcdadd28be44ae9adfa5d42798323e`). New processes get the speedup;
+  existing fixed-budget experiments are not restarted or relabeled.
+
+- 16:40 UTC: preselect the follow-up to wide-v3 before its second independent
+  acquisition test or full gameplay pairs finish. Once BOTH acquisition
+  sources have passed original/shuffled/both-cue controls, test same-acquired-
+  state reversal (both arms start from the paired8,192 state), additional
+ 512/2,048/8,192 decisions, independent retention seeds3101..3104. Same gate,
+  no altered learning rate, calibration, rewards or decoder.
+  Separately queue repeated ACTUAL-game practice from BOTH final6,000 learning
+  runs (401 and402), never a selected best checkpoint or synthetic weights.
+  Each gets two explicitly reset fresh6,000-decision attempts carrying only
+  synapses: source401 training1401/1402; source402 training1403/1404. Evaluate
+  final synapses frozen versus original in fresh6,000-decision games on1601/
+ 1602, alternating arm order. Report starters, wins, new-area/Route1 progress,
+  tiles and button bias separately; mixed outcomes are not a blanket pass.
+  These resets are training interventions, NOT uninterrupted game completion.
+  Use free GPU slots after current registered tests, not extra user compute.
+  Browser-skill retry remains unavailable; no rendered-layout claim.
+
+- 16:36 UTC: wide-v3 acquisition seed501 passes the original/paired PART of
+  the independent retention screen: original44.72%, paired69.10%, with paired
+  left56.43% and right81.77%. These are saved final8,192 synapses, fresh neutral
+  warmup, noise seeds2801..2804, and no test reward or weight changes.
+  Artifact `visual-retention-probe-20260918T162138Z-e22d73`. Shuffled final
+  weights and the independent seed601 panel are still required; no full gate
+  pass or gameplay-learning claim yet. Seed601 original/paired panel starts
+  in the finished panel's GPU slot (`...T163645Z-0eab8b`). Both unchanged
+  paired/shuffled acquisition curves and registered actual-game pairs continue.
+  Current code/docs through the verified default transport are public at
+  commit `fe667e3`; no ROM, research weights or run artifacts were published.
+
 - 16:21 UTC: promote ONLY the already verified command-transport fix to fresh
   launches, NOT any experimental visual/learning candidate. New versioned
   `sensorimotor-bounded-serial-v2` keeps the default's neural model, rewards,

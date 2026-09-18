@@ -5,7 +5,48 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 16:24 UTC
+## Latest evidence, 2026-09-18 16:50 UTC
+
+Both longer v1 pairs finished24,000 decisions per arm:
+
+| Seed | Frozen / learned tiles | Starter, frozen / learned | Battle wins, frozen / learned | Northernmost Route1 y, frozen / learned |
+|---|---:|---:|---:|---:|
+| 401 | 352 / 351 | 11,593 / 8,789 | 1 / 0 | 29 / no visit |
+| 402 | 348 / 297 | 7,262 / 3,748 | 0 / 0 | 25 / 28 |
+
+Earlier starters did not translate into better overall progress. Do not promote
+v1 as a learned-navigation fix. Its final saved brains are both undergoing
+the registered frozen fresh-start comparisons, not selected best checkpoints.
+The single frozen victory is the rival encounter: `battle_win` includes
+`rival_win`; these counters must not be added as separate wins.
+
+Wide-v3's first6,000-decision pair completed: learning287tiles/starter3,122
+versus frozen268tiles/no starter. Neither won or visited Route1. Source402's
+pair is still running. The registered repeated-game practice from source401
+has begun; source402 will follow, each with two fresh attempts and a final
+frozen original/retained panel. Only actual-game synapses carry across resets.
+
+Numerical speedup: calibrated-visual CUDA steps now skip current sums that
+the existing equations discard. Original graph/weights and diagnostic current
+measurements remain unchanged. Two64-decision ABBA comparisons match ALL
+arrays, counts, actions and metadata, with7.6..14% less time under shared GPU
+load. Actual v1/wide-v3 resumes reproduce original recorded decisions5001..5020
+exactly and pass split-resume checks. Artifacts
+`internal-propagation-benchmark-20260918T164408Z-657c5e` / `...T164726Z-ba9aae`,
+`checkpoint-window-verification-20260918T164752Z-ef7a24` / `...T164837Z-c489f3`.
+Full suite:323 Python/26 JS and lint pass (`verify-2fbcdadd28be44ae9adfa5d42798323e`).
+
+### Evidence recorded at16:36 UTC
+
+The stronger visual circuit has a promising independent retention result:
+wide-v3 seed501's saved final synapses score **69.10% balanced**, versus
+44.72% original, after a fresh neutral warmup with rewards and learning off.
+Both cues exceed the preselected 55% threshold (56.43% left, 81.77% right).
+This completes only the original/paired portion of the test; the shuffled
+reward control and second training seed must also pass. It is not yet a full
+gate pass or proof of learned Pokemon progress. Artifact:
+`visual-retention-probe-20260918T162138Z-e22d73`, independent seeds2801..2804,
+1,024 scored decisions per arm. Second-source panel is now running.
 
 The verified serial command-delivery fix is now the fresh-launch default via
 `sensorimotor-bounded-serial-v2`. This changes ONLY transport, not the default
@@ -29,8 +70,9 @@ Wide-v3 capacity diagnostic: original 43.05%, temporary oracle forward 72.71%,
 reverse 88.88%, both cues above 55%. Those supervised weights were discarded,
 never exported or used in Pokemon (`oracle-synaptic-capacity-20260918T154733Z-45c072`).
 The actual reward-trained 8,192 small probes reach 66.09% / 72.39%, but one
-cue still fails in seed501. Independent 2801..2804 retention and shuffled
-controls are pending. Its literal seed401 game obtained a starter at 3,122
+cue fails in seed501's small probe. The larger independent retention panel
+above is the registered gate; shuffled and second-source checks are pending.
+Its literal seed401 game obtained a starter at 3,122
 and entered the rival battle, without synthetic training weights or scripted
 gameplay beyond the disclosed intro. That first learning arm finished with
 287 tiles, no battle win and no Route 1 visit. Full frozen/learning comparisons
@@ -104,7 +146,9 @@ dwell to 25.2%. Do not promote it. Artifacts:
 `visual-learning-rate-gameplay-20260918T145757Z-5084e4` / `...-ffee91`.
 
 The first 24,000-decision v1 continuation is complete: FROZEN seed401 gets
-352 tiles, a starter, one rival and one wild win, level6, Route1 minimum y29.
+352 tiles, a starter, ONE rival win, level6, Route1 minimum y29. Correction:
+the earlier wording incorrectly also counted a wild win; `battle_win=1` and
+`rival_win=1` describe the SAME encounter, not two victories.
 This is untrained control capacity, NOT learning evidence. Its matched learning
 arm and both seed402 controls are still running. Do not compare different
 seeds as a paired treatment effect. The independent menu replay of seed402

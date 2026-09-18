@@ -21,30 +21,49 @@ def main():
     from pathlib import Path
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--kernel", choices=("visual", "eligibility"), default="visual")
+    parser.add_argument(
+        "--kernel", choices=("visual", "eligibility", "propagation"), default="visual"
+    )
     args = parser.parse_args()
     c = InternalBrain(device="cuda", config=load_config(Path("configs/visual-rate-v1.json")).brain)
     v, xp = c.hybrid.visual_circuit, c.brain.xp
     if args.kernel == "visual":
         kernel = CUDAVisualUpdate(xp)
-    else:
+    elif args.kernel == "eligibility":
         from pokefly.cuda_plasticity import CUDAEligibility
 
         kernel = CUDAEligibility(c.plasticity.pre, c.plasticity.post, xp)
+    else:
+        from pokefly.deterministic import DeterministicCUDAInput
+
+        active = np.ones(c.brain.n, bool)
+        active[c.hybrid.graded_host] = False
+        active[c.hybrid.isolated_host] = False
+        kernel = DeterministicCUDAInput(c.brain, rows=np.flatnonzero(active))
 
     patterns = test_patterns()
     c.observe(patterns["checker"])
     initial, state = c.snapshot()
-    output = run_directory("visual-update-benchmark" if args.kernel == "visual"
-                           else "internal-eligibility-benchmark")
+    output = run_directory({
+        "visual": "visual-update-benchmark", "eligibility": "internal-eligibility-benchmark",
+        "propagation": "internal-propagation-benchmark",
+    }[args.kernel])
     report = {"scope": __doc__, "kernel": args.kernel, "decisions_per_branch": 64, "rows": []}
+    if args.kernel == "propagation":
+        row_sizes = np.diff(c.brain._W.indptr.get())
+        report["selected_neurons"] = int(active.sum())
+        report["discarded_current_edges"] = int(row_sizes[~active].sum())
+        report["original_edges"] = int(row_sizes.sum())
+        report["physical_model_unchanged"] = True
     reference, reference_state, reference_choices = None, None, None
     for implementation in ("original", "fused", "fused", "original"):
         c.restore(initial, state)
         if args.kernel == "visual":
             v.cuda_update = None if implementation == "original" else kernel
-        else:
+        elif args.kernel == "eligibility":
             c.plasticity.eligibility_kernel = None if implementation == "original" else kernel
+        else:
+            c.hybrid.step_input = None if implementation == "original" else kernel
         actions, counts = [], []
         xp.cuda.Stream.null.synchronize()
         started = time.perf_counter()

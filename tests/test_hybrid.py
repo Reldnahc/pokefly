@@ -57,6 +57,19 @@ def test_graded_vision_is_continuous_inhibitory_and_not_spikes():
     np.testing.assert_array_equal(bright.brain.weights, dark.brain.weights)
 
 
+def test_current_fast_path_does_not_bypass_calibration_or_diagnostic_overrides():
+    h = toy()
+    assert h.step_input is None  # Legacy lamina currents must NOT be discarded.
+    release = np.ones(4, np.float32)
+    full = h.current(release)
+    h.step_input = SimpleNamespace(dense=lambda _: np.full((4, 1), 7, np.float32))
+    np.testing.assert_array_equal(h._step_current(release), np.full((4, 1), 7))
+    np.testing.assert_array_equal(h.current(release), full)  # Public measurement stays full.
+    original_current = h.current
+    h.current = lambda values: original_current(values) + 0.125
+    np.testing.assert_array_equal(h._step_current(release), full + 0.125)
+
+
 def test_adaptation_and_release_resume_exactly():
     first, restored = toy(), toy()
     first.brain.v[2] = 2.0  # A controlled initial KC spike primes adaptation.

@@ -827,3 +827,14 @@ counter is not serialized. Before attaching reward observers, a temporary
 render is discarded by reloading the identical game bytes. The serialized
 state is checked unchanged; no extra gameplay frame or reward reaches the
 fly. This fixes a one-image discrepancy when resuming an open menu.
+
+Calibrated-visual CUDA steps omit only original current rows whose results
+are discarded by the existing equations: calibrated visual voltages come from
+their own circuit, and isolated sensory currents were already zero. Every
+remaining row retains the original summation order. All graph edges/weights,
+cross-boundary visual inputs, full diagnostic current measurements, and
+calibration/instrumentation overrides remain intact. Legacy visual models
+use the original path. This is numerical acceleration, not a new biological
+model or checkpoint identity. Two ABBA benchmarks and real-ROM continuations
+match neural arrays, choices, rewards and original input windows exactly;
+the observed time saving is about7.6..14% under shared GPU load, not100x.

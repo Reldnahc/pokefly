@@ -110,6 +110,19 @@ class HybridDynamics:
             else np.empty(0, np.int64)
         )
         self.isolated = xp.asarray(self.isolated_host)
+        self.step_input = None
+        if self.visual_circuit is not None and brain.device == "cuda":
+            from pokefly.deterministic import DeterministicCUDAInput
+
+            # Calibrated visual voltage is replaced by its own circuit below;
+            # isolated sensory current is already zero. Compute only the other
+            # rows, with the SAME ordered sum. The public current() diagnostic
+            # remains a full pass, and diagnostic/calibration overrides bypass
+            # this fast path. No graph edge or physical input is removed.
+            selected = np.ones(brain.n, bool)
+            selected[self.graded_host] = False
+            selected[self.isolated_host] = False
+            self.step_input = DeterministicCUDAInput(brain, rows=np.flatnonzero(selected))
         self.matrix = (
             sparse.csc_matrix(
                 (brain.weights, brain.indices, brain.indptr), shape=(brain.n, brain.n), copy=False
@@ -165,7 +178,7 @@ class HybridDynamics:
         xp = b.xp
         if self.track_score:
             self.previous_release = self.release.copy() if xp is np else self.release.get()
-        current = self.current(self.release) * b.gain
+        current = self._step_current(self.release) * b.gain
         if self.intrinsic_bias is not None:
             current += self.intrinsic_bias
         self.adaptation *= np.float32(np.exp(-b.dt / c.kc_adaptation_seconds))
@@ -237,6 +250,13 @@ class HybridDynamics:
         self.release[self.graded] = b.v[self.graded, 0] * np.float32(c.graded_release)
         b.fired, b.steps = fired, b.steps + 1
         return fired if xp is np else fired.get()
+
+    def _step_current(self, release):
+        # Preserve instrumentation and neutral-calibration wrappers exactly.
+        if (self.step_input is not None
+                and getattr(self.current, "__func__", None) is HybridDynamics.current):
+            return self.step_input.dense(release)
+        return self.current(release)
 
     def arrays(self):
         return {
