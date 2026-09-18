@@ -5,6 +5,106 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
+## Latest evidence, 2026-09-18 08:18 UTC
+
+Public source repository: https://github.com/Reldnahc/pokefly . ROM, model data,
+saves, checkpoints and raw runs remain local and Git-ignored.
+
+The dual-trace uninterrupted game now finishes at 40,000 decisions: 447
+cumulative sampled positions, a rival win and two wild-battle wins, level 7,
+but no new town, capture or badge. Route 1 eventually reached y=20 at decision
+32,917. Earlier y=24 reports were interim measurements. This is still a plateau,
+not evidence that enough passive runtime will complete the game. Source run
+`internal-learn-20260918T070458Z-6a8fc0`, continuation
+`internal-learn-20260918T071854Z-26737e`.
+
+Measurement-only execution hooks replayed the entire 30,000-decision
+continuation. All sampled states/rewards match, but **45.62% of frames were in
+Start or its nested menus**, with 2,198 openings. Initial unknown context is
+reported separately; timing is approximate to frame boundaries. Artifact:
+`recorded-menu-audit-20260918T081409Z-908468`. These measurements never enter the
+brain or decoder. Pokemon's [overworld handler](https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/home/overworld.asm)
+checks Start before directions. This motivates a fixed-cooldown control test,
+not a RAM-driven menu filter or removal of the Start mapping.
+
+Frozen original-weight movement comparison, recorded Route-1 reset and 6,000
+decisions per arm:
+
+| Seed | Short / sustained mean direction bout | Short / sustained northernmost Route-1 y | Short / sustained positions |
+| --- | --- | --- | --- |
+| 1201 | 1.18 / 2.71 decisions | 24 / 22 | 245 / 230 |
+| 1202 | 1.19 / 2.65 decisions | 32 / 20 | 222 / 225 |
+
+No arm reached a town. One sustained arm won a wild battle; others did not.
+This demonstrates coherent movement, not learned navigation. Artifact:
+`movement-bout-comparison-20260918T072342Z-66b261`. The sustained-1201 control
+spent 37.22% of frames in Start menus. A predeclared one-factor test changes
+only Start's fixed cooldown from 1 to 5 neural seconds; its controls are reused
+explicitly, never counted as extra trials. No default is changed by these tests.
+
+### Partial visual learning and reversal
+
+Perturbation-v3 uses existing neural-noise credit and centered presynaptic
+history. After 16,384 synthetic diagnostic training decisions on seed 501,
+the original retention probe gave 53.8% pooled conditional accuracy versus
+37.1% shuffled and 43.1% before training. This is NOT a passed full assay.
+
+Independent reward-free retention used 128 neutral warmup decisions, 128 test
+decisions per cue, and two fresh noise seeds (512 tested decisions per arm):
+
+| Test | Before training phase | Paired feedback | Shuffled feedback |
+| --- | ---: | ---: | ---: |
+| Acquisition, seeds 1311/1312 | 45.4% | 55.4% | 44.7% |
+| Reversal, seeds 1313/1314 | 44.2% | 59.2% | 50.2% |
+
+Values are pooled accuracy conditional on Left/Right choices, NOT accuracy
+across all seven buttons. Acquisition paired and shuffled target-action rates
+were both 26.95%; paired cue-specific accuracies were 62.2% and 48.4%. Thus two
+clear associations were not established. The old criterion-2 screen, which
+also requires target-rate gains, remains unchanged.
+
+Reversal adds 2,048 training decisions. Its shuffled control starts from the
+EXACT SAME acquired paired brain/dynamics, controlling for prior learning.
+That control was designed after the initial reversal result and transparently
+reuses the paired trial; it is not preregistered independent replication.
+In the new-noise test, paired reversed-cue accuracies were 63.6% and 54.1%,
+versus shuffled 67.3% and 32.4% (mostly one global button preference). Additional
+descriptive cue-preference contrast is now reported to expose that distinction;
+it does not retroactively change pass criteria. Independent training seed 601
+is still running. Samples within these time series are correlated; these small
+results are neither statistical significance nor Pokemon strategy proof.
+
+Artifacts: acquisition `visual-learning-curve-20260918T063831Z-ffb363`,
+reversal `...T073714Z-d4ad41`, matched control
+`matched-visual-reversal-20260918T074442Z-fe16ab`, and independent retention
+`visual-retention-probe-20260918T073238Z-46f5ed` / `...T075234Z-4d9e13`.
+No diagnostic-trained synapses enter Pokemon. A fresh perturb-v3 MODEL, with
+original weights and unchanged game rewards, is now being tested in the app.
+
+### Active whole-game training
+
+`scripts/train_game_series.py` carries GAME-trained internal weights through
+four explicitly reset new-game attempts (seeds 1401..1404, 12,000 decisions
+each), then freezes original and retained weights for matched seeds 1501/1502.
+Only the intro is scripted. Game state, novelty ledger and fast neural state
+reset; internal learned connections carry over. No waypoint curriculum or
+synthetic button reward is used. This tests repeated practice, not one
+uninterrupted playthrough. Results are pending, not presumed positive.
+
+Other completed failures are preserved: dual-trace black/white-to-A/B and
+bounded black/white-to-Up/Down do not pass the full counterbalanced assay.
+The score-v1/v2/v3 and low-temperature escape candidates have not established
+robust visual acquisition in their 2,048-decision screens. They remain optional
+research models, not promoted replacements.
+
+Latest completed verification: 201 Python tests, 22 JavaScript tests, lint;
+the menu timer adds a separately passing unit test. Escape-model actual-ROM
+resume/frozen/no-reward checks pass, and the user's old checkpoint still
+reproduces the next 20 recorded decisions exactly after the signed-resource
+refactor (`legacy-resume-signed-20260918`). All ten protected hashes match.
+Browser-rendered layout QA is still unavailable; emulator and HTTP/SSE checks
+are not described as browser QA.
+
 ## What is implemented and usable
 
 Fresh `scripts/start.ps1` launches now use `sensorimotor-bounded-v1`: fixed

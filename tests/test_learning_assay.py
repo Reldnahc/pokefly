@@ -36,3 +36,28 @@ def test_raw_brightness_to_up_down_scoring_and_counterbalancing():
     assert assay.score(rows, False, **options)["conditional_accuracy"] == 0.75
     assert assay.score(rows, True, **options)["conditional_accuracy"] == 0.25
     assert assay.score(rows, False, **options)["target_rate"] == 0.6
+
+
+def test_cue_contrast_removes_global_button_bias_and_reports_missing_choices():
+    assay = load_assay()
+    rows = [
+        {"cue": "left", "actions": {"left": 18, "right": 2}},
+        {"cue": "right", "actions": {"left": 9, "right": 1, "wait": 10}},
+    ]
+    result = assay.score(rows, False)
+    assert result["conditional_accuracy"] > 0.6
+    assert result["aligned_cue_preference_contrast"] == 0
+    assert result["balanced_conditional_accuracy"] == 0.5
+    rows[1]["actions"] = {"wait": 20}
+    assert assay.score(rows, False)["balanced_conditional_accuracy"] is None
+
+
+def test_cue_contrast_reverses_with_contingency():
+    assay = load_assay()
+    rows = [
+        {"cue": "left", "actions": {"left+a": 3, "right": 1}},
+        {"cue": "right", "actions": {"left": 1, "right+b": 3}},
+    ]
+    assert assay.score(rows, False)["aligned_cue_preference_contrast"] == 0.5
+    assert assay.score(rows, True)["aligned_cue_preference_contrast"] == -0.5
+    assert assay.score(rows, False)["balanced_conditional_accuracy"] == 0.75

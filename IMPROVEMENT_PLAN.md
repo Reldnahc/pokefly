@@ -28,6 +28,108 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 08:23 UTC: independently trained perturb-v3 seed 601 reached 56.0% at 8,192,
+  then fell to 50.0% at 16,384; shuffled control still running. Do NOT select
+  only the best checkpoint or call prolonged training a reliable solution.
+  One-factor mechanism probe: exact per-postsynaptic-neuron positive input
+  normalization instead of the +/-25% total-input budget, same v3 rule and
+  individual 0.25..4x limits. This constrains global excitability drift while
+  permitting competition among EXISTING inputs. Offline frozen-input capacity
+  audit still permits both cue-current signs (`visual-capacity-audit-20260918T082211Z-bb934f`);
+  optimized weights are never exported/deployed. Preselect seed 501, snapshots
+  2,048 and 8,192 with matched within-cue shuffled feedback; only an informative
+  result advances to independent seed/reversal. No game reward or input changes.
+- 202 Python, 22 JS and lint pass. Optional 5 s Start profile passes actual-ROM
+  exact resume/frozen/no-reward checks (`internal-smoke-20260918T082021Z-bc9f8b`).
+
+- 08:16 UTC: menu replay audit found 45.62% of frames in Start/nested menus,
+  2,198 openings across the 30,000-decision dual continuation. All states and
+  rewards exactly match; `recorded-menu-audit-20260918T081409Z-908468`.
+  Mechanism test preselected BEFORE outcomes: keep the sustained decoder and
+  original frozen neural weights, change only Start's existing fixed cooldown
+  from 1 to 5 neural seconds. Same Route-1 reset, seeds 1201/1202, 6,000 each.
+  Reuse the completed sustained-1s controls explicitly, not as new trials.
+  No menu detection, action quota, learned adapter or reward change in policy.
+  Five seconds is an engineering probe, NOT fitted/validated song physiology.
+  Require actual travel/menu measurements before a learning run or promotion.
+
+- 08:10 UTC: dual-trace uninterrupted continuation finished at 40,000: 447
+  cumulative positions, rival plus two wild wins across the source/continuation,
+  level 7, no new town/capture/badge. Read-only full-log audit corrects the earlier
+  interim Route-1 bound: it reached y=20 at 32,917, not just y=24. It was still
+  moving among Pallet/Route 1, with menu interruptions; final frame is the party
+  menu, not evidence of a permanent emulator freeze. This plateau remains open.
+- Frozen sustained-movement comparison completed both seeds. Minimum Route-1 y
+  short/sustained: seed 1201 24/22, seed 1202 32/20; no town in any arm.
+  More coherent movement is demonstrated, not useful learned navigation.
+- Independent reversal retention completed: before 44.2%, paired 59.2%, matched
+  shuffled 50.2% pooled conditional accuracy (512 decisions, new seeds 1313/1314).
+  Paired reverse-mapping per-cue accuracies 63.6/54.1%; shuffled 67.3/32.4%.
+  Add descriptive cue-preference contrast to distinguish global motor bias;
+  DO NOT change the existing criterion-2 success screen after seeing results.
+- Next actual-game test: run the visually more promising perturb-v3 MODEL with
+  ORIGINAL synapses, common recorded outdoor start, preselected seed 401 and
+  24,000 decisions. It receives only unchanged Pokemon rewards, no diagnostic
+  weights or actions. Compare the first 6,000 with the existing matched frozen
+  and bounded controls; compare later progress with their logged continuations.
+  This is an explicit starting-state reset, not a new-game or uninterrupted
+  continuation claim. Seed 402 confirmation is conditional on informative
+  progress/retained benefit, not a search for a lucky seed.
+- Literal sustained-model bedroom run and four-attempt retained-game series
+  remain active. Escape-model actual-ROM exact resume/frozen/no-reward checks
+  passed (`internal-smoke-20260918T080604Z-cea4f7`); its visual assay did not
+  establish a solution and the default remains unchanged.
+
+- 07:55 UTC: full new-game retained-training series running at dashboard port
+  8779: `retained-game-series-20260918T075051Z-705a0c`. Four preselected training
+  seeds 1401..1404, 12,000 decisions each, then frozen original/retained panels
+  1501/1502. Every attempt has an explicitly scripted intro only; neural weights
+  carry across attempts, game/novelty/fast state restart. These are labeled
+  training resets, not one autonomous playthrough and not waypoint curricula.
+  This addresses scarcity of fresh rewards after a single game saturates local
+  novelty. Default application remains indefinite and unchanged.
+- Same-acquired-state reversal control completed: before 46.2%, paired at
+  +2,048 decisions 64.2%, shuffled from identical weights/dynamics 47.1%.
+  Artifact `matched-visual-reversal-20260918T074442Z-fe16ab`; paired results are
+  reused, NOT additional trials. New independent-noise retention 1313/1314
+  is running, as is independently trained seed 601. This is partial visual
+  learning evidence, not established arbitrary two-cue skill or Pokemon strategy.
+- Actual dual-trace continuation replayed through 15,700, including both wild
+  victories; all 5,700 recorded states/rewards matched. Unmodified playback
+  frames show Bulbasaur using Tackle against Pidgey/Rattata. Artifact
+  `recorded-replay-proof-20260918T075422Z-23e0d7`; not extra autonomous wins.
+- Latest full verification: 199 Python, 22 JS, lint passed. Browser skill retried
+  at 07:47, still cannot connect to iab; live HTTP/SSE checks are not layout QA.
+
+- 07:45 UTC: source-only public snapshot `bebb493` pushed successfully. No
+  private data/ROM/save/model files in Git. Current tests: 198 Python, 22 JS;
+  sustained and signed-score actual-ROM resume/frozen/no-reward checks pass.
+- Dual-trace live continuation additionally won wild battles at decisions
+  11,967 and 15,697, reaching level 7. Route 1 reached y=24, then exploration
+  slowed again; still no new town. Continue observing, not a solved policy.
+- Frozen movement-bout seed 1201: short/sustained mean direction runs 1.18/2.71
+  decisions; Route-1 minimum y 24/22, positions 245/230, wild wins 0/1. No town
+  in either. Seed 1202 still running. Do NOT promote from this mixed result.
+- Independent visual retention of perturb-v3 after 16,384 training decisions:
+  neutral warmup 128, two new noise seeds, 512 total test decisions, no rewards.
+  Conditional accuracies original 45.4%, paired 55.4%, shuffled 44.7%; paired
+  and shuffled target rates both 26.95%. Paired per-cue accuracy Left 62.2%,
+  Right 48.4%, so two clear associations are NOT established.
+  Artifact `visual-retention-probe-20260918T073238Z-46f5ed`.
+- Explicit v3 reversal at 2,048 further decisions gives paired conditional
+  64.2% (before reversal 46.2%). Old shuffled-acquisition starting weights
+  already favor the reversed contingency, so a new post-discovery shuffled
+  reversal control starts from EXACTLY the same acquired paired brain;
+  `probe_matched_reversal.py` transparently reuses paired results, not new trials.
+  Independent acquisition seed 601 is now running to 16,384; no success claim.
+- Score-v2 black/white -> A/B also failed (paired 34.6%, shuffled 32.7% at
+  2,048). Signed score-v3 tests learning on existing inhibitory as well as
+  excitatory inputs, preserving signs and separate per-sign resource budgets.
+  Escape-v1 removes redundant background current noise and narrows stochastic
+  firing temperature from 0.05 to 0.02, with fresh neutral-only calibration
+  `intrinsic-probe-20260918T074218Z-01220f` and proportionally smaller update
+  step. These remain diagnostic hypotheses, not promoted models or biology.
+
 - 07:24 UTC: dual-trace independent battle confirmation completed 6/8 versus
   original 3/8 (`controlled-battle-learning-20260918T070446Z-946834`). Fresh
   autonomous dual-trace seed 401 obtained Bulbasaur at 4,243 and won the rival

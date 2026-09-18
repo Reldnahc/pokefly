@@ -1,0 +1,14 @@
+{
+  "brain": {
+    "intrinsic_calibration": "fly-data/intrinsic-neutral-v1.npz",
+    "dynamics": {"profile": "hybrid-v1", "isolate_nonvisual_sensory": true},
+    "motor": {"arbitration": "parallel-v2"},
+    "plasticity": {
+      "rule": "sensorimotor-perturb-v3",
+      "learning_rate": 0.02,
+      "activity_reference_hz": 1.0,
+      "eligibility_seconds": 0.6,
+      "normalize_inputs": true
+    }
+  }
+}

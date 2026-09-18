@@ -46,7 +46,8 @@ try {
             'sensorimotor-perturb-v1', 'sensorimotor-perturb-v2', 'sensorimotor-perturb-v3',
             'sensorimotor-reset-v2', 'compartment-reset-v2', 'sensorimotor-low-noise-v1',
             'sensorimotor-delayed-v1', 'sensorimotor-dual-v1', 'sensorimotor-centered-v1',
-            'sensorimotor-score-v1', 'sensorimotor-score-v2', 'sensorimotor-sustained-v1')) {
+            'sensorimotor-score-v1', 'sensorimotor-score-v2', 'sensorimotor-score-v3',
+            'sensorimotor-escape-v1', 'sensorimotor-sustained-v1', 'sensorimotor-sustained-menu-v1')) {
             $candidateConfig = "configs/$candidateProfile.json"
             $candidateCalibration = (Get-Content -Raw -LiteralPath $candidateConfig | ConvertFrom-Json).brain.intrinsic_calibration
             if ($candidateCalibration -and -not (Test-Path -LiteralPath $candidateCalibration)) {

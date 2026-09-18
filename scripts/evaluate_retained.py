@@ -24,6 +24,9 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--legacy-only", action="store_true")
     args = parser.parse_args()
+    args.output.mkdir(parents=True, exist_ok=True)
+    if (args.output / "retained-gameplay.json").exists():
+        parser.error("Choose a new output directory; completed reports are immutable")
     rom = resolve_rom(None, Path.cwd())
     pointer = args.source_run / "latest-checkpoint.json"
     _, saved = read_checkpoint(pointer)

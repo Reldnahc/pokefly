@@ -127,6 +127,14 @@ innovation instead of noise. Its presynaptic trace uses only past spikes, not
 the same step's new presynaptic spike. These are engineering hypotheses, not
 external encoders or learned button classifiers.
 
+`sensorimotor-perturb-normalized-v3` is a one-factor research control: same v3
+rule/individual bounds but exact positive-input normalization rather than a
++/-25% total budget. Existing synapses compete without changing total incoming
+strength. This tests global excitability drift versus cue-specific learning;
+it is not a fitted motor quota and is not promoted. The frozen-input capacity
+audit still permits both cue-current signs under this constraint, which is
+only a first-order capacity estimate, not a learned solution.
+
 The delayed-credit candidate changes eligibility from 0.6 to 30 neural seconds.
 It improves the tested battle outcomes but weakens immediate operant acquisition.
 The dual candidate maintains BOTH traces on the same existing synapses and
@@ -424,6 +432,28 @@ existing inputs a less disadvantaged learning scale. Bounds and local input
 budgets are unchanged. No task labels determine this scaling. It is another
 opt-in hypothesis, not evidence of a successful fly visual learner.
 
+`sensorimotor-score-v3` extends v2 to existing inhibitory as well as excitatory
+inputs to the same anatomically selected descending/motor cells. It never adds
+edges or changes signs. The membrane likelihood score includes the signed base
+weight; preconditioning divides by its absolute magnitude. Excitatory and
+inhibitory input-magnitude budgets are enforced separately per postsynaptic
+cell, so opposite signs cannot cancel to evade the bounds. It is an opt-in
+capacity test; no behavioral success has been established.
+
+`sensorimotor-escape-v1` retains the positive-input v2 rule but tests narrower
+stochastic firing (temperature 0.02) with background Bernoulli current noise
+disabled. Neuronal escape noise remains active; this is not deterministic or
+action-level exploration. Learning rate 0.0008 scales down with temperature.
+A separately frozen neutral calibration keeps the uniform rate-fitting protocol:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/probe_intrinsic.py --calibration-only --device cuda --spike-temperature 0.02 --noise-hz 0 --noise-amplitude 0 --reset-every 200 --reset-probe-decisions 128 --export fly-data/intrinsic-neutral-escape-v1.npz
+```
+
+This tests whether broad, redundant neural noise masks the small sensory
+contrasts. It does not alter the pixels, decoder, anatomy or game rewards.
+It is not a measured fly noise model and remains unpromoted.
+
 ## Optional fixed movement bouts: sensorimotor-sustained-v1
 
 Same calibrated dual-trace brain, but a separately versioned `sustained-v3`
@@ -442,6 +472,26 @@ matched recorded starts and two noise seeds. The starting-state reset is a
 diagnostic intervention. Any improvement here establishes control capacity,
 NOT learning. Sustained choices, including ones driven by residual traces,
 must not be described as new spikes in the dashboard or reports.
+
+## Optional Start cadence: sensorimotor-sustained-menu-v1
+
+Same sustained/dual model; only the existing fixed Start cooldown changes
+from 1 to 5 neural seconds. The pIP10 neurons must still generate every Start
+command, and A/B remain available during the cooldown. There is no game-state
+input, menu detector, learned button adapter, action quota, or reward change.
+Five seconds is a preselected engineering probe, not validated fly physiology.
+
+Reason: measurement-only replay of the 30,000-decision dual continuation found
+45.62% of emulator frames inside Start or nested menus, with 2,198 openings.
+Pokemon's [overworld input handler](https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/home/overworld.asm)
+checks Start before directions. `scripts/audit_menu_time.py` verifies all
+recorded states/rewards while measuring this; its hooks never reach the policy.
+
+`scripts/evaluate_start_cadence.py` checks original frozen weights, exact
+starting-state hashes and saved model settings before changing this one factor.
+It explicitly reuses the completed sustained controls for seeds 1201/1202,
+6,000 decisions each, not counting them as new trials. The candidate is opt-in
+and not yet promoted. See FOLLOWTHROUGH_RESULTS for outcomes and limitations.
 
 ## Display interpretation (kept out of the showcase layout)
 

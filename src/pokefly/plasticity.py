@@ -41,6 +41,7 @@ class PlasticityConfig:
             "sensorimotor-perturb-v3",
             "sensorimotor-score-v1",
             "sensorimotor-score-v2",
+            "sensorimotor-score-v3",
         ):
             raise ValueError("Unknown plasticity rule")
         if not isinstance(self.normalize_inputs, bool):
@@ -182,9 +183,17 @@ class SensorimotorPlasticity(EligibilityPlasticity):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if (self.base <= 0).any():
+        signed = self.config.rule == "sensorimotor-score-v3"
+        if not signed and (self.base <= 0).any():
             raise ValueError("Sensorimotor rule requires existing excitatory edges")
-        self.input_budget = np.bincount(self.post, weights=self.base, minlength=self.n)
+        # Signed-score variant has separate local excitatory/inhibitory resource
+        # budgets. It never cancels opposite signs to evade a total-input bound.
+        self.resource_group = self.post * 2 + (self.base < 0) if signed else self.post
+        self.resource_size = self.n * 2 if signed else self.n
+        self.resource_base = np.abs(self.base) if signed else self.base
+        self.input_budget = np.bincount(
+            self.resource_group, weights=self.resource_base, minlength=self.resource_size
+        )
         self.reset_modulation()
 
     def reset_modulation(self):
@@ -259,14 +268,18 @@ class SensorimotorPlasticity(EligibilityPlasticity):
                     # target neuron, not an action-frequency quota. Bounds hold
                     # even when the iterative budget projection is approximate.
                     for _ in range(12):
-                        total = np.bincount(self.post, weights=self.base * factor, minlength=self.n)
+                        total = np.bincount(
+                            self.resource_group,
+                            weights=self.resource_base * factor,
+                            minlength=self.resource_size,
+                        )
                         fraction = self.config.input_budget_fraction
                         target = np.clip(
-                            total[self.post],
-                            self.input_budget[self.post] * (1 - fraction),
-                            self.input_budget[self.post] * (1 + fraction),
+                            total[self.resource_group],
+                            self.input_budget[self.resource_group] * (1 - fraction),
+                            self.input_budget[self.resource_group] * (1 + fraction),
                         )
-                        ratio = total[self.post] / target
+                        ratio = total[self.resource_group] / target
                         if np.max(np.abs(ratio - 1)) < 1e-5:
                             break
                         factor /= ratio

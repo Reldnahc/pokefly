@@ -52,6 +52,7 @@ def test_choices(c, *, seed, decisions=48, first_only=False, cues=("left", "righ
 
 def score(rows, reverse, *, buttons=("left", "right"), cues=("left", "right")):
     hits, choices, total = 0, 0, 0
+    per_cue = {cue: {button: 0 for button in buttons} for cue in cues}
     for row in rows:
         target = buttons[cues.index(row["cue"]) ^ int(reverse)]
         for action, n in row["actions"].items():
@@ -59,12 +60,29 @@ def score(rows, reverse, *, buttons=("left", "right"), cues=("left", "right")):
             hits += n * (target in pressed)
             choices += n * bool(set(pressed) & set(buttons))
             total += n
+            for button in buttons:
+                per_cue[row["cue"]][button] += n * (button in pressed)
+    preferences = [
+        counts[buttons[0]] / sum(counts.values()) if sum(counts.values()) else None
+        for counts in per_cue.values()
+    ]
+    contrast = (
+        (preferences[0] - preferences[1]) * (-1 if reverse else 1)
+        if all(value is not None for value in preferences)
+        else None
+    )
     return {
         "target_rate": hits / total,
         "conditional_accuracy": hits / choices if choices else None,
         "competing_choices": choices,
         **({"left_right_choices": choices} if buttons == ("left", "right") else {}),
         "decisions": total,
+        # Descriptive additions only: the existing criterion-2 screen below
+        # remains unchanged. A global button bias has zero cue contrast even
+        # when cue-specific response rates make pooled accuracy misleading.
+        "per_cue_button_counts": per_cue,
+        "aligned_cue_preference_contrast": contrast,
+        "balanced_conditional_accuracy": 0.5 + 0.5 * contrast if contrast is not None else None,
     }
 
 

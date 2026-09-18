@@ -55,15 +55,18 @@ def main():
         fixed = float(weights[~positive] @ response[~positive])
         amount = weights[positive]
         for name, low, high, budget in (
-            ("bounded", 0.75, 1.25, False),
-            ("input_budget", 0.25, 4.0, True),
+            ("bounded", 0.75, 1.25, None),
+            ("input_budget", 0.25, 4.0, 0.25),
+            ("exact_input_budget", 0.25, 4.0, 0.0),
         ):
             bounds = []
             for direction in (1, -1):
                 fit = linprog(
                     direction * effect,
-                    A_ub=np.stack([amount, -amount]) if budget else None,
-                    b_ub=np.array([1.25, -0.75]) * amount.sum() if budget else None,
+                    A_ub=np.stack([amount, -amount]) if budget is not None else None,
+                    b_ub=np.array([1 + budget, -(1 - budget)]) * amount.sum()
+                    if budget is not None
+                    else None,
                     bounds=(low, high),
                     method="highs",
                 )

@@ -12,7 +12,10 @@ from pokefly.score_plasticity import LikelihoodPlasticity
 
 def learner():
     return LikelihoodPlasticity(
-        np.array([0]), np.array([1]), np.array([0.13], np.float32), 2,
+        np.array([0]),
+        np.array([1]),
+        np.array([0.13], np.float32),
+        2,
         PlasticityConfig(rule="sensorimotor-score-v1", learning_rate=0.1),
     )
 
@@ -38,9 +41,18 @@ def test_local_score_matches_finite_difference_of_complete_spike_history():
     membrane, eligibility = np.zeros(1), np.zeros(1)
     for incoming, spike, p in zip(release, fired, log_likelihood(1, True), strict=True):
         likelihood_eligibility(
-            np.array([0]), np.array([1]), np.array([base]), np.array([incoming, 0.0]),
-            np.array([0.0, spike]), np.array([0.0, p]), membrane, eligibility,
-            decay, 1.0, gain, temperature,
+            np.array([0]),
+            np.array([1]),
+            np.array([base]),
+            np.array([incoming, 0.0]),
+            np.array([0.0, spike]),
+            np.array([0.0, p]),
+            membrane,
+            eligibility,
+            decay,
+            1.0,
+            gain,
+            temperature,
         )
     eps = 1e-5
     expected = (log_likelihood(1 + eps) - log_likelihood(1 - eps)) / (2 * eps)
@@ -53,8 +65,18 @@ def test_expected_instantaneous_score_is_zero_and_has_no_cue_labels():
     for spike in [0, 1]:
         e = np.zeros(1)
         likelihood_eligibility(
-            np.array([0]), np.array([1]), np.array([0.2]), np.array([0.7, 0]),
-            np.array([0, spike]), np.array([0, p]), np.zeros(1), e, 0.8, 0.9, 3.0, 0.05,
+            np.array([0]),
+            np.array([1]),
+            np.array([0.2]),
+            np.array([0.7, 0]),
+            np.array([0, spike]),
+            np.array([0, p]),
+            np.zeros(1),
+            e,
+            0.8,
+            0.9,
+            3.0,
+            0.05,
         )
         scores.append(e[0])
     assert (1 - p) * scores[0] + p * scores[1] == pytest.approx(0, abs=1e-12)
@@ -73,10 +95,47 @@ def test_v2_preconditioning_uses_only_original_synapse_size():
     )
 
 
+def test_signed_score_preserves_signs_and_separate_inhibitory_resource_budget():
+    p = LikelihoodPlasticity(
+        np.array([0, 1, 0, 1]),
+        np.array([2, 2, 2, 2]),
+        np.array([0.2, 0.3, -0.1, -0.4], np.float32),
+        3,
+        PlasticityConfig(
+            rule="sensorimotor-score-v3", learning_rate=0.01, input_budget_fraction=0.25
+        ),
+    )
+    for _ in range(20):
+        p.observe(
+            np.array([2]),
+            0.02,
+            release=np.array([0.4, 0.2, 0.0]),
+            probability=np.array([0.0, 0.0, 0.1]),
+            membrane_decay=0.82,
+            gain=3.0,
+            temperature=0.05,
+        )
+        p.reinforce(1)
+    assert p.weights[0] > p.base[0]
+    assert abs(p.weights[2]) < abs(p.base[2])  # Positive outcome weakens active inhibition.
+    np.testing.assert_array_equal(np.sign(p.weights), np.sign(p.base))
+    for mask in (p.base > 0, p.base < 0):
+        ratio = abs(p.weights[mask]).sum() / abs(p.base[mask]).sum()
+        assert 0.75 - 1e-5 <= ratio <= 1.25 + 1e-5
+    q = LikelihoodPlasticity(p.pre, p.post, p.base, 3, p.config)
+    q.restore(p.arrays(), p.metrics())
+    np.testing.assert_array_equal(q.weights, p.weights)
+
+
 def observe(p):
     p.observe(
-        np.array([1]), 0.02, release=np.array([0.4, 0.0]), probability=np.array([0.0, 0.1]),
-        membrane_decay=0.82, gain=3.0, temperature=0.05,
+        np.array([1]),
+        0.02,
+        release=np.array([0.4, 0.0]),
+        probability=np.array([0.0, 0.1]),
+        membrane_decay=0.82,
+        gain=3.0,
+        temperature=0.05,
     )
 
 
@@ -122,9 +181,11 @@ def test_toy_two_cue_circuit_learns_with_positive_scalar_reward():
     # Algorithm unit test ONLY: this four-cell toy is never the fly controller.
     # A cue is supplied as two alternate presynaptic transmitter patterns.
     p = LikelihoodPlasticity(
-        np.array([0, 1, 0, 1]), np.array([2, 2, 3, 3]), np.full(4, 0.05, np.float32), 4,
-        PlasticityConfig(rule="sensorimotor-score-v1", learning_rate=0.5,
-                         eligibility_seconds=0.6),
+        np.array([0, 1, 0, 1]),
+        np.array([2, 2, 3, 3]),
+        np.full(4, 0.05, np.float32),
+        4,
+        PlasticityConfig(rule="sensorimotor-score-v1", learning_rate=0.5, eligibility_seconds=0.6),
     )
     rng = np.random.default_rng(123)
     voltage = np.zeros(4)
@@ -142,8 +203,15 @@ def test_toy_two_cue_circuit_learns_with_positive_scalar_reward():
             fired = np.flatnonzero(rng.random(4) < probability)
             counts[fired] += 1
             voltage[fired] = 0
-            p.observe(fired, 0.02, release=release, probability=probability,
-                      membrane_decay=0.82, gain=3.0, temperature=0.05)
+            p.observe(
+                fired,
+                0.02,
+                release=release,
+                probability=probability,
+                membrane_decay=0.82,
+                gain=3.0,
+                temperature=0.05,
+            )
         choice = np.argmax(counts[2:]) if counts[2] != counts[3] else None
         if decision < 1200:
             p.reinforce(float(choice == cue))

@@ -107,7 +107,12 @@ class InternalBrain(PixelBrain):
             eligible_post = np.isin(
                 b.superclass.astype(str), ["descending_neuron", "cb_motor", "vnc_motor"]
             )
-            self.csc_offsets = np.flatnonzero(eligible_post[b.indices] & (b.weights > 0))
+            eligible_sign = (
+                b.weights != 0
+                if config.plasticity.rule == "sensorimotor-score-v3"
+                else b.weights > 0
+            )
+            self.csc_offsets = np.flatnonzero(eligible_post[b.indices] & eligible_sign)
             pre = np.searchsorted(b.indptr, self.csc_offsets, side="right") - 1
         post = b.indices[self.csc_offsets]
         args = (np.asarray(pre), post, b.weights[self.csc_offsets], b.n, config.plasticity)
@@ -217,10 +222,12 @@ class InternalBrain(PixelBrain):
     def _observe_plasticity(self, fired):
         if isinstance(self.plasticity, LikelihoodPlasticity):
             self.plasticity.observe(
-                fired, self.brain.dt,
+                fired,
+                self.brain.dt,
                 release=self.hybrid.previous_release,
                 probability=self.hybrid.last_probability,
-                membrane_decay=float(self.brain.decay), gain=self.brain.gain,
+                membrane_decay=float(self.brain.decay),
+                gain=self.brain.gain,
                 temperature=self.config.dynamics.spike_temperature,
             )
         elif isinstance(self.plasticity, NeuralPerturbationPlasticity):
