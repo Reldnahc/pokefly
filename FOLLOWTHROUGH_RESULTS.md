@@ -5,7 +5,53 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 15:34 UTC
+## Latest evidence, 2026-09-18 15:54 UTC
+
+Fixed a remaining display-only reward issue: the metric previously showed the
+instantaneous sample, usually zero. It now displays the server's cumulative
+reward ledger (including resumed history), with current and delivered feedback
+in a tooltip. It never sums browser packets, so reconnects/skipped frames cannot
+lose reward. Old already-running servers are explicitly labeled STEP REWARD.
+The brain, reward definitions, and archived trajectory schema are unchanged.
+Live real-game pixel/brain/button/speed checks also verify displayed totals
+against logged reward prefixes (`internal-learn-20260918T155247Z-05a8eb`).
+26 JS tests pass. Browser-skill connection retry at15:53 still fails; rendered
+layout remains unverified, independently of passing stream/logic checks.
+
+Two separate hypotheses are now being tested, not combined or promoted:
+
+- Stronger frozen visual release (`visual-release-wide-v3`): both2,048-decision
+  interim paired checks show both-cue preference, balanced61.13%/66.36%.
+  Final8,192/shuffled controls and independent2801..2804 retention are pending.
+  Static/motion untrained choices remain45.0%/46.67%; offline neural stimulus
+  information alone is not visual control. Static direct-current contrast/std
+  is-0.50/+0.20 at the two steering cells, versus near-zero in v1. No manual
+  correction is made to those signs. Actual-game401/402 comparisons are
+  preregistered for6,000 decisions per frozen/learning arm, not yet started.
+- Mean-input-preserving credit (`visual-projected-learning-v4`): unchanged
+  visual-v1 neural dynamics/rewards/button adapter, with a local constraint
+  on internal synaptic updates. It tests generic motor-drive drift seen in the
+  retained-current audit. Both501/601 paired/shuffled curves are running;
+  independent final-weight retention is preselected on2901..2904. Full real-ROM
+  smoke passes (`internal-smoke-20260918T154218Z-5d82ee`). Its70-decision frozen
+  trajectory AND all checkpoint arrays exactly reproduce the original v1
+  frozen control; only the rule label differs. This is implementation control,
+  not positive learning evidence.
+
+The v1 seed402 FINAL24,000 synapses are now being tested in frozen fresh starts,
+original versus retained on1501/1502 for6,000 decisions each. The seed401 final
+brain will undergo the same panel when finished; this is not best-run selection.
+Artifact `retained-gameplay-20260918T153624Z-4e6ad6` is still running.
+
+Verification at15:48:310 Python/24 JavaScript tests and lint pass
+(`verify-0e8ccfb18008408e920df9295bd3f56e`), plus the subsequent profile-continuation
+guard test. All10 protected-file hashes and the original retina still match.
+Source/documentation through15:39 were pushed as public commit `e7068cb`.
+An additional bit-exact CUDA eligibility benchmark gives only~2% end-to-end
+benefit on the current shared GPU; small-graph production dispatch is unchanged
+(`internal-eligibility-benchmark-20260918T154527Z-89b51a`).
+
+### Completed negative tests and longer-game controls
 
 The 10x learning-rate candidate completed and FAILED both 6,000-decision
 comparisons: 175/111 tiles, no starter, versus v1 learning 213/233 tiles

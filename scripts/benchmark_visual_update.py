@@ -5,6 +5,7 @@ Timing is explicitly collected while other research jobs may share the GPU.
 The production model is not monkey-patched outside this diagnostic process.
 """
 
+import argparse
 import time
 
 import numpy as np
@@ -19,19 +20,31 @@ from pokefly.runner import run_directory, write_json
 def main():
     from pathlib import Path
 
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--kernel", choices=("visual", "eligibility"), default="visual")
+    args = parser.parse_args()
     c = InternalBrain(device="cuda", config=load_config(Path("configs/visual-rate-v1.json")).brain)
     v, xp = c.hybrid.visual_circuit, c.brain.xp
-    kernel = CUDAVisualUpdate(xp)
+    if args.kernel == "visual":
+        kernel = CUDAVisualUpdate(xp)
+    else:
+        from pokefly.cuda_plasticity import CUDAEligibility
+
+        kernel = CUDAEligibility(c.plasticity.pre, c.plasticity.post, xp)
 
     patterns = test_patterns()
     c.observe(patterns["checker"])
     initial, state = c.snapshot()
-    output = run_directory("visual-update-benchmark")
-    report = {"scope": __doc__, "decisions_per_branch": 64, "rows": []}
+    output = run_directory("visual-update-benchmark" if args.kernel == "visual"
+                           else "internal-eligibility-benchmark")
+    report = {"scope": __doc__, "kernel": args.kernel, "decisions_per_branch": 64, "rows": []}
     reference, reference_state, reference_choices = None, None, None
     for implementation in ("original", "fused", "fused", "original"):
         c.restore(initial, state)
-        v.cuda_update = None if implementation == "original" else kernel
+        if args.kernel == "visual":
+            v.cuda_update = None if implementation == "original" else kernel
+        else:
+            c.plasticity.eligibility_kernel = None if implementation == "original" else kernel
         actions, counts = [], []
         xp.cuda.Stream.null.synchronize()
         started = time.perf_counter()

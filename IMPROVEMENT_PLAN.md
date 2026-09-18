@@ -28,6 +28,46 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 15:54 UTC: found a remaining HUMAN-display issue: the reward metric still
+  showed only the current sample, usually zero. Add an authoritative cumulative
+  reward field ONLY to dashboard publication (not neural input or archived
+  trajectory schema). UI labels TOTAL REWARD, with per-sample/delivered values
+  in its tooltip; an older already-running server truthfully labels STEP REWARD.
+  No client-side accumulation that loses events on reconnect/coalesced frames.
+  Live pixel/brain/button/pacing smoke verifies totals against logged prefixes:
+  `internal-learn-20260918T155247Z-05a8eb`.26 JS checks pass; browser skill
+  connection retried at15:53 and remains unavailable, so no rendered QA claim.
+
+- 15:49 UTC: release-wide-v3 generic sensory panel is complete. Actual
+  untrained balanced choices remain45.0%static/46.67%motion, but both cues are
+  present at descending/motor inputs (small offline diagnostic, not a policy).
+  Static motor contrast/std:Left-0.50,Right+0.20 versus ~0.001/0.015 in v1.
+  Sign is opposite the assay's rewarded mapping, not a defect to hand-correct.
+  Current audit `motor-signal-audit-20260918T154625Z-435fa9`; latency panels
+  `visual-latency-probe-20260918T153147Z-722cae` / `...T153158Z-8c4c73`.
+  Apply the existing unchanged offline synaptic capacity assay to this model;
+  temporary supervised weights are NEVER exported or used in Pokemon.
+  Preselect literal-game wide-v3 comparisons:401/402,6,000 per frozen/learn arm,
+  fresh original neural weights, identical intro, alternating arm order,
+  unchanged rewards/pixels/buttons. Queue after current jobs free GPU capacity.
+  This is an exploratory model test while conditioning controls finish,
+  NOT a promotion based on the encouraging interim2,048 scores61.1%/66.4%.
+  Independent final-weight conditioning retention remains2801..2804.
+
+- 15:40 UTC: preselect a distinct credit-assignment test on the UNCHANGED
+  visual-rate-v1 circuit/calibration. The direct-current audit found correct
+  learned cue contrast but also a generic upward current shift; increasing
+  learning rate made game button bias worse. Test a local mean-input-preserving
+  projection of the existing centered perturbation eligibility, using only
+  original synaptic magnitudes and each presynaptic cell's existing running
+  release mean. No action/cue labels, desired firing targets, new synapses or
+  reward changes. All anatomical motor/descending targets get the same rule.
+  This is a versioned engineering approximation, not a biological mechanism
+  or guaranteed exact gradient. Bounds can make the projection approximate.
+  Same501/601 paired/shuffled budgets512/2048/8192; independent final retention
+  seeds2901..2904, unchanged gate. Existing registered curves finish unchanged.
+  Do not use any ROM-free trained weight in gameplay.
+
 - 15:37 UTC: preselect actual-game FINAL-24,000 retained-weight comparisons
   for BOTH401/402 trained brains, frozen original versus frozen retained,
   fresh intro resets, held-out seeds1501/1502,6,000 decisions per arm/seed.

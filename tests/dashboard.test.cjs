@@ -241,6 +241,35 @@ test("frozen control is labeled plasticity off", async () => {
   assert.equal(ui.elements.get("learning-mode").textContent, "PLASTICITY OFF");
 });
 
+test("reward total comes from the server ledger and survives skipped zero-reward samples", async () => {
+  const ui = await harness({manual: false, autonomous: true});
+  const learning = {dopamine_surrogate: 0, changed_edges: 2, changed_this_reward: 0,
+                    max_relative_change: 0.001};
+  await ui.send({...ui.packet(), reward: 0, reward_total: 12.75, delivered_reward: 0,
+                 reward_events: [], learning});
+  assert.equal(ui.elements.get("reward").textContent, "12.750");
+  assert.equal(ui.elements.get("reward-label").textContent, "TOTAL REWARD");
+  assert.match(ui.elements.get("reward").title, /This decision: 0.000/);
+  await ui.send({...ui.packet(500), reward: 0, reward_total: 14.25, delivered_reward: 0,
+                 reward_events: [], learning});
+  assert.equal(ui.elements.get("reward").textContent, "14.250");
+  // A newly connected viewer needs no past packets to show the same total.
+  const fresh = await harness({manual: false, autonomous: true, mode: "no-reward"});
+  await fresh.send({...fresh.packet(500), reward: .05, reward_total: 14.25, delivered_reward: 0,
+                    reward_events: [], learning});
+  assert.equal(fresh.elements.get("reward").textContent, "14.250");
+  assert.match(fresh.elements.get("reward").title, /delivered to the fly: 0.000/);
+});
+
+test("old running servers label their instantaneous reward instead of inventing a total", async () => {
+  const ui = await harness({manual: false, autonomous: true});
+  await ui.send({...ui.packet(), reward: .05, reward_events: [],
+                 learning: {dopamine_surrogate: .05, changed_edges: 0, changed_this_reward: 0,
+                            max_relative_change: 0}});
+  assert.equal(ui.elements.get("reward").textContent, "0.050");
+  assert.equal(ui.elements.get("reward-label").textContent, "STEP REWARD");
+});
+
 test("temporal input is labeled as a window, not a single causal frame", async () => {
   const ui = await harness({manual: false, autonomous: true, visualTiming: "stream-v1"});
   assert.match(ui.elements.get("screen-timing").textContent, /Input window/);

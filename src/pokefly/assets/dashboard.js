@@ -195,7 +195,14 @@ async function draw(packet) {
   }
   if (packet.learning) {
     const learning = packet.learning;
-    $("reward").textContent = Number(packet.reward).toFixed(3);
+    const hasTotal = typeof packet.reward_total === "number" && Number.isFinite(packet.reward_total);
+    $("reward-label").textContent = hasTotal ? "TOTAL REWARD" : "STEP REWARD";
+    setLabel("reward", Number(hasTotal ? packet.reward_total : packet.reward).toFixed(3),
+      (hasTotal ? "Cumulative measured reward for this game attempt, including its resumed history. "
+        : "This older running server supplies only the current decision's reward. ")
+      + `This decision: ${Number(packet.reward).toFixed(3)}; delivered to the fly: `
+      + `${Number(packet.delivered_reward ?? packet.reward).toFixed(3)}. `
+      + "Measured reward can increase with plasticity disabled; that does not establish learning.");
     $("dopamine").textContent = learning.dopamine_surrogate.toFixed(3);
     $("dopamine").title = learning.prediction_error
       ? "External reward transformed by tanh. Internal compartment prediction errors: "

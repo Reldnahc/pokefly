@@ -43,6 +43,7 @@ class PlasticityConfig:
             "sensorimotor-perturb-v1",
             "sensorimotor-perturb-v2",
             "sensorimotor-perturb-v3",
+            "sensorimotor-perturb-projected-v4",
             "sensorimotor-score-v1",
             "sensorimotor-score-v2",
             "sensorimotor-score-v3",
@@ -440,7 +441,7 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         # Presynaptic history before this step's perturbation: no future spikes.
         decay = np.exp(-dt / c.pre_trace_seconds)
         self.pre_trace *= decay
-        centered = c.rule == "sensorimotor-perturb-v3"
+        centered = c.rule in ("sensorimotor-perturb-v3", "sensorimotor-perturb-projected-v4")
         incoming = (
             self.pre_trace - np.float32(decay) * self.post_baseline if centered else self.pre_trace
         )
@@ -465,10 +466,26 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         self.post_baseline += (1 - decay) * spike
         self.feedback_elapsed += dt
 
+    def factor_eligibility(self):
+        value = super().factor_eligibility()
+        if self.config.rule == "sensorimotor-perturb-projected-v4":
+            from pokefly.fast_plasticity import mean_input_projection
+
+            # Existing local release history only. Remove the update's component
+            # along estimated tonic input for EACH anatomical target, not a
+            # named action. The physical neural dynamics remain unchanged.
+            return mean_input_projection(
+                value, self.base, self.post_baseline[self.pre], self.post, self.n
+            )
+        return value
+
     def metrics(self):
         return {
             **super().metrics(),
             "rule": (
+                "sensorimotor-mean-input-projected-perturbation-v4"
+                if self.config.rule == "sensorimotor-perturb-projected-v4"
+                else
                 "sensorimotor-centered-input-perturbation-v3"
                 if self.config.rule == "sensorimotor-perturb-v3"
                 else "sensorimotor-linear-perturbation-v2"

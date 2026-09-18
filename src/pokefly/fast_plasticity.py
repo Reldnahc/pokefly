@@ -8,6 +8,17 @@ import numpy as np
 from numba import njit, prange
 
 
+def mean_input_projection(value, base, release_mean, post, n):
+    """Positive-metric local projection; no stimulus, reward or action arguments."""
+    mean_input = base.astype(np.float64) * release_mean
+    numerator = np.bincount(post, weights=mean_input * value, minlength=n)
+    denominator = np.bincount(post, weights=mean_input * release_mean, minlength=n)
+    scale = np.divide(
+        numerator, denominator, out=np.zeros(n, np.float64), where=denominator > 0
+    )
+    return (value - release_mean * scale[post]).astype(np.float32)
+
+
 @njit(cache=True, nogil=True)
 def likelihood_eligibility(
     pre, post, base, release, spike, probability, membrane_trace, eligibility,

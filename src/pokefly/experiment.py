@@ -353,6 +353,10 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
                             dashboard.publish(
                                 {
                                     **record,
+                                    # Observer-only cumulative counters. Publish the
+                                    # authoritative ledger, never a client-side sum
+                                    # that loses rewards on reconnect/skipped frames.
+                                    "reward_total": rewards.total,
                                     **view.activity(observation),
                                     "screen": png_data(input_frame),
                                     "recent_actions": list(recent),

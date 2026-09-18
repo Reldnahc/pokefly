@@ -191,6 +191,25 @@ def test_same_start_reversal_requires_explicit_continuation(monkeypatch):
         module.main()
 
 
+def test_game_continuation_cannot_silently_change_its_visual_model(monkeypatch):
+    module = script(monkeypatch, "evaluate_visual_gameplay")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "evaluate_visual_gameplay.py",
+            "--seed",
+            "401",
+            "--config",
+            "configs/visual-release-wide-v3.json",
+            "--continue-from",
+            "previous",
+        ],
+    )
+    with pytest.raises(SystemExit):
+        module.main()
+
+
 def test_learning_rate_candidate_cannot_change_rewards_or_firing(monkeypatch):
     from dataclasses import asdict
 
@@ -205,6 +224,18 @@ def test_learning_rate_candidate_cannot_change_rewards_or_firing(monkeypatch):
     candidate["brain"]["noise_amplitude"] *= 2
     with pytest.raises(ValueError, match="ONLY"):
         module.validate_one_factor(original, candidate)
+
+
+def test_projected_visual_profile_changes_only_internal_credit_rule():
+    from dataclasses import asdict
+
+    from pokefly.experiment import load_config
+
+    original = asdict(load_config(Path("configs/visual-rate-v1.json")))
+    candidate = asdict(load_config(Path("configs/visual-projected-learning-v4.json")))
+    assert candidate["brain"]["plasticity"]["rule"] == "sensorimotor-perturb-projected-v4"
+    candidate["brain"]["plasticity"]["rule"] = original["brain"]["plasticity"]["rule"]
+    assert candidate == original
 
 
 def test_reversal_retention_cannot_silently_use_naive_or_different_start_controls(monkeypatch):

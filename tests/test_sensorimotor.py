@@ -29,13 +29,17 @@ def learner(normalize=False):
 
 def test_perturbation_trace_receives_real_graded_release_without_future_leak():
     p = NeuralPerturbationPlasticity(
-        np.array([0, 1]), np.array([2, 2]), np.array([0.2, 0.3]), 3,
+        np.array([0, 1]),
+        np.array([2, 2]),
+        np.array([0.2, 0.3]),
+        3,
         PlasticityConfig(rule="sensorimotor-perturb-v3", activity_reference_hz=1.0),
     )
     empty = np.empty(0, np.int64)
     noise = np.array([False, False, True])
     arguments = dict(
-        perturbation=noise, probability=0.1,
+        perturbation=noise,
+        probability=0.1,
         graded_release=(np.array([0]), np.array([0.2], np.float32)),
     )
     p.observe(empty, 0.02, **arguments)
@@ -44,9 +48,9 @@ def test_perturbation_trace_receives_real_graded_release_without_future_leak():
     p.observe(empty, 0.02, **arguments)
     assert p.eligibility[0] > 0 and p.eligibility[1] == 0
     for invalid in (
-        (np.array([0]), np.array([2.])),
+        (np.array([0]), np.array([2.0])),
         (np.array([3]), np.array([0.2])),
-        (np.array([0.]), np.array([0.2])),
+        (np.array([0.0]), np.array([0.2])),
     ):
         with pytest.raises(ValueError, match="release"):
             p.observe(empty, 0.02, **dict(arguments, graded_release=invalid))
@@ -231,6 +235,56 @@ def test_centered_input_perturbation_uses_past_local_activity_and_allows_negativ
     p.post_baseline[0] = 0.05
     p.observe(np.array([0]), 0.02, perturbation=np.array([False, True]), probability=0.024)
     assert p.eligibility[0] < 0  # This step's presynaptic spike is not read early.
+
+
+def test_projected_perturbation_preserves_local_mean_input_without_new_signals():
+    cfg = PlasticityConfig(
+        rule="sensorimotor-perturb-projected-v4",
+        learning_rate=0.001,
+        activity_reference_hz=1,
+        eligibility_seconds=0.6,
+    )
+    args = (np.array([0, 1, 0, 1]), np.array([2, 2, 3, 3]), np.array([0.1, 0.2, 0.3, 0.4]), 4)
+    p = NeuralPerturbationPlasticity(*args, cfg)
+    old = NeuralPerturbationPlasticity(*args, replace(cfg, rule="sensorimotor-perturb-v3"))
+    for model in (p, old):
+        model.post_baseline[:] = [0.02, 0.03, 0.02, 0.02]
+        model.pre_trace[:] = [0.04, 0.01, 0.02, 0.02]
+        model.observe(
+            np.array([1, 2]),
+            0.02,
+            perturbation=np.array([False, True, True, False]),
+            probability=0.024,
+        )
+    for key in p.arrays():
+        np.testing.assert_array_equal(p.arrays()[key], old.arrays()[key])
+    update = p.factor_eligibility()
+    mean = p.post_baseline[p.pre]
+    np.testing.assert_allclose(
+        np.bincount(p.post, weights=p.base * mean * update, minlength=4), 0, atol=1e-8
+    )
+    assert not np.array_equal(update, old.factor_eligibility())
+    before = p.weights.copy()
+    p.reinforce(0.05, enabled=False)
+    np.testing.assert_array_equal(before, p.weights)
+    p.reinforce(0.05)
+    assert np.any(before != p.weights)
+    np.testing.assert_allclose(
+        np.bincount(p.post, weights=(p.weights - before) * mean, minlength=4), 0, atol=1e-8
+    )
+    q = NeuralPerturbationPlasticity(*args, cfg)
+    q.restore({k: v.copy() for k, v in p.arrays().items()}, p.metrics())
+    for reward in (0, 0.05, 1):
+        for model in (p, q):
+            model.observe(
+                np.array([0, 3]),
+                0.02,
+                perturbation=np.array([False, False, False, True]),
+                probability=0.024,
+            )
+            model.reinforce(reward)
+        for key in p.arrays():
+            np.testing.assert_array_equal(p.arrays()[key], q.arrays()[key])
 
 
 def test_dual_eligibility_retains_delayed_activity_and_restores_exactly():

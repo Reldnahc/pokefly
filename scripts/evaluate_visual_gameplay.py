@@ -29,12 +29,17 @@ def main():
     parser.add_argument("--port", type=int, default=8778)
     parser.add_argument("--learn-first", action="store_true")
     parser.add_argument(
+        "--config", type=Path, help="New comparison profile; defaults to visual-rate-v1"
+    )
+    parser.add_argument(
         "--continue-from", type=Path,
         help="Completed matched report directory; --steps is ADDITIONAL per arm, no reset",
     )
     args = parser.parse_args()
     if args.steps < 1 or not 0 <= args.port <= 65535:
         parser.error("Positive steps and valid dashboard port required")
+    if args.config and args.continue_from:
+        parser.error("Exact continuations restore their saved profile; omit --config")
     output = run_directory("visual-model-gameplay")
     config = output / "fixed-config.json"
     previous = None
@@ -51,7 +56,7 @@ def main():
             raise ValueError("Source configuration changed")
         write_json(config, json.loads(source_config.read_text()))
     else:
-        write_json(config, asdict(load_config(Path("configs/visual-rate-v1.json"))))
+        write_json(config, asdict(load_config(args.config or Path("configs/visual-rate-v1.json"))))
     rom = resolve_rom(None, Path.cwd())
     report = {
         "scope": __doc__, "seed": args.seed, "steps": args.steps,

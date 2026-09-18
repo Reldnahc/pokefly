@@ -18,7 +18,7 @@ Bounds and resource projection can subsequently make the constraint inexact.
 
 import numpy as np
 
-from pokefly.fast_plasticity import likelihood_eligibility
+from pokefly.fast_plasticity import likelihood_eligibility, mean_input_projection
 from pokefly.plasticity import SensorimotorPlasticity
 
 
@@ -156,14 +156,3 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
         self.membrane_trace = trace.copy()
         if baseline is not None:
             self.release_baseline = baseline.copy()
-
-
-def mean_input_projection(value, base, release_mean, post, n):
-    """Positive-metric local projection; no stimulus, reward or action arguments."""
-    mean_input = base.astype(np.float64) * release_mean
-    numerator = np.bincount(post, weights=mean_input * value, minlength=n)
-    denominator = np.bincount(post, weights=mean_input * release_mean, minlength=n)
-    scale = np.divide(
-        numerator, denominator, out=np.zeros(n, np.float64), where=denominator > 0
-    )
-    return (value - release_mean * scale[post]).astype(np.float32)

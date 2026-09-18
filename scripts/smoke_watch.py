@@ -215,6 +215,11 @@ def main():
         )
         if args.autonomous:
             assert logged["buttons"] == delivered["buttons"]
+            for displayed in (first, delivered, current):
+                expected_total = sum(
+                    row["reward"] for row in records if row["sample"] <= displayed["sample"]
+                )
+                assert np.isclose(displayed["reward_total"], expected_total)
             assert all(row["buttons"] == list(pressed_buttons(row["action"])) for row in records)
             assert speed_changes == [2.5, 0]
             assert {2.5, 0} <= {row["pacing"]["target_hz"] for row in records}
@@ -230,6 +235,7 @@ def main():
             "pulse_logged_and_released": True,
             "multi_button_log_matches_commands": args.autonomous,
             "human_controls_disabled": args.autonomous,
+            "authoritative_reward_total_matches_logged_prefix": args.autonomous,
             "live_speed_changes_hz": speed_changes,
             "rom_unchanged": True,
             "samples": summary["samples"],

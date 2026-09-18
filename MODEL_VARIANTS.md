@@ -783,6 +783,27 @@ production weights. The initial scale0.05 comparison was negative/mixed; the
 production fallback scale remains1. Fitted/reference and photoreceptor-lamina
 conductances are excluded from this diagnostic scaling.
 
+`visual-projected-learning-v4.json` keeps the entire visual-rate-v1 neural
+model and changes ONLY the internal plasticity rule. Like perturb-v3, it
+uses actual presynaptic release history and independent postsynaptic neural
+noise. Before updating weights, it projects each target's factor update to
+preserve estimated mean incoming drive. For positive original weight `b`,
+presynaptic release mean `m`, raw factor eligibility `e`, and all existing
+selected synapses to one target:
+
+```text
+e_projected = e - m * sum(b * m * e) / sum(b * m * m)
+```
+
+Zero denominator leaves that target's update unchanged. This uses only local
+neural quantities; no action/cue identity, desired rate or external critic
+enters it. The existing weight bounds and input budgets still apply and can
+make mean preservation approximate. The motivation is observed generic
+current drift despite cue-specific learning; this is an experimental plasticity
+constraint, not measured physiology or a guaranteed exact reward gradient.
+No new persistent state is introduced: the existing release EMA is checkpointed.
+The version is opt-in, with paired/shuffled/held-out tests registered before use.
+
 `train_game_series.py --initial-game-run <run>` can pin final ACTUAL-game-trained
 weights for further full new-game attempts, followed by frozen evaluation.
 This is an explicit episode reset, not uninterrupted progression. It rejects

@@ -4,6 +4,7 @@ No game, weights, model parameters or production dispatch are changed. The
 benchmark runs alongside active research jobs, not on an isolated GPU.
 """
 
+import argparse
 import time
 
 import numpy as np
@@ -15,13 +16,18 @@ from pokefly.runtime import configure_runtime
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--edges", type=int, default=4300611)
+    args = parser.parse_args()
+    if not 1 <= args.edges <= 30_000_000:
+        parser.error("Edge count must be within the simulator's practical range")
     configure_runtime()
     import cupy as cp
 
     output = run_directory("cuda-eligibility-benchmark")
     report = {"scope": __doc__, "rows": []}
     rng = np.random.default_rng(9393)
-    n, edges = 166700, 4300611
+    n, edges = 166700, args.edges
     pre, post = [rng.integers(0, n, edges) for _ in range(2)]
     trace = rng.normal(0, 0.1, n).astype(np.float32)
     baseline = rng.uniform(0, 0.1, n).astype(np.float32)
