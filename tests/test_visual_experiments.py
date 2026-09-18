@@ -226,6 +226,26 @@ def test_learning_rate_candidate_cannot_change_rewards_or_firing(monkeypatch):
         module.validate_one_factor(original, candidate)
 
 
+def test_rule_candidate_cannot_also_change_rate_or_physics(monkeypatch):
+    from dataclasses import asdict
+
+    module = script(monkeypatch, "evaluate_visual_learning_rate")
+    original = asdict(module.load_config(Path("configs/visual-release-wide-v3.json")))
+    candidate = asdict(module.load_config(Path("configs/visual-wide-projected-v4.json")))
+    assert module.validate_one_factor(original, candidate, "rule") == (
+        "sensorimotor-perturb-v3", "sensorimotor-perturb-projected-v4"
+    )
+    candidate["brain"]["plasticity"]["learning_rate"] *= 10
+    with pytest.raises(ValueError, match="ONLY"):
+        module.validate_one_factor(original, candidate, "rule")
+    with pytest.raises(ValueError, match="Supported factors"):
+        module.validate_one_factor(original, original, "rewards")
+    candidate = asdict(module.load_config(Path("configs/visual-wide-projected-v4.json")))
+    candidate["brain"]["noise_amplitude"] *= 2
+    with pytest.raises(ValueError, match="ONLY"):
+        module.validate_one_factor(original, candidate, "rule")
+
+
 @pytest.mark.parametrize(
     "baseline,candidate_name",
     [

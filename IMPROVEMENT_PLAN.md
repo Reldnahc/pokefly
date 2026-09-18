@@ -1,5 +1,98 @@
 # Pokefly: neural-control and learning improvement plan
 
+21:00 UTC: causal-credit401 completed210 tiles/no starter versus the matched
+default-wide287/starter3122 and original frozen268/no starter. This is negative
+for that seed, not grounds to stop/omit its preselected402 comparison (running).
+Once the projected-wide shuffled controls and independent3001..3004 retention
+finish, resume BOTH interrupted default-wide practice series exactly from their
+step4500 checkpoints. Finish the already registered1401/1402 and1403/1404
+attempts and frozen1601/1602 evaluations, without adding episodes or selecting
+a successful training source. Shared original controls are NOT independent
+replications. This tests whether repeated real-game experience helps, not only
+whether a one-episode trace changes. Recovery must preserve the old files,
+pin/validate weights/config/game checkpoint provenance, verify overlapping
+recorded decisions, and count each resumed attempt only once. Keep at most two
+GPU jobs and do not promote an experimental candidate based on these partials.
+
+20:48 UTC: projected-wide DOES reduce retained general B bias in the registered
+neutral panel: B selections32.03%/29.17% versus default-wide52.34%/36.20%,
+original28.65%; mean B0.939/1.009Hz versus1.752/1.090Hz, original0.928Hz.
+All arms frozen, same3201..3203, all7 groups recorded; original repeated
+control is shared, not independent. Corrected an earlier transcription of
+original B to110/384=28.65% (not28.13%). Artifact
+`game-motor-drift-probe-20260918T204118Z-6cdcbb`. Useful game learning is NOT
+yet established: paired exploration is mixed and battle/Route1 outcomes absent.
+The causal-credit implementation passes345 Python/26 JS tests and lint,
+plus real-ROM learn/exact-resume/frozen/no-reward smoke
+`internal-smoke-20260918T204550Z-141776`. It stores neural eligibility before
+the held action, leaves all subsequent neural integration intact, and restores
+pending credit in explicit in-flight snapshots. Old profiles do not latch and
+old checkpoints keep feedback-boundary-v1. Candidate401 starts after that smoke
+job exits; projected shuffled-control501 occupies the only other GPU slot.
+
+20:44 UTC preregistration: projected-wide gameplay6000 completed with mixed
+coverage185/290 versus default-wide287/255; starter1/2 in both, no wins/Route1.
+Both resumed prefixes reproduce20 overlapping decisions exactly. CPU audit
+`credit-update-audit-20260918T204115Z-a0e2b4` finds projected mean-input residual
+at numerical-rounding scale, no active edge bounds at these final checkpoints;
+do not blame clipping for the observed game limitation. Neutral audit and
+shuffled visual-control completion are running, within the two-GPU limit.
+Next ONE-FACTOR candidate: `visual-causal-credit-v5`, identical to showcase
+wide-v3 except holding its internal factor-eligibility at the action boundary.
+In streamed mode the existing reward uses a trace after12 NEW neural steps,
+although those steps cannot change the already-delivered button. Holding the
+earlier trace removes that unrelated innovation; it does not change physical
+neural evolution, reward timing/value, visual input or decoder. This is a
+causal-alignment/variance hypothesis, NOT a proven learning fix. Preselect
+matched actual-game401/402 at6000 from original weights, exact frozen-prefix
+reuse, then fresh frozen1601/1602 retention if warranted. Check checkpoint
+compatibility, no-reward/frozen behavior and explicit in-flight trace restore.
+Do not change the default while testing or use synthetic weights in the game.
+
+2026-09-18 20:29 UTC: user explicitly resumes improvement experiments after
+reporting a better showcase. Process audit found no active Python/showcase job.
+Keep at most TWO GPU jobs, fixed budgets/checkpoints, and a named session ledger.
+First finish BOTH preregistered projected-wide actual-game candidates401/402
+from their exact step1000 checkpoints to total6000, preserving old partial runs
+and checking overlapping recorded decisions bit-for-bit. Do not treat resumed
+segments or reused frozen controls as independent trials. Compare all six game
+arms (original frozen, wide-v3 learning, projected learning) and repeat the
+registered neutral motor-drift panel3201..3203 on BOTH final candidate brains.
+In parallel with useful CPU/code work, complete the interrupted projected-wide
+ROM-free controls using exact saved full-state continuation, then independent
+retention3001..3004; keep the original gate unchanged. Synthetic assay weights
+never enter Pokemon. If the tonic-bias constraint fails, inspect its actual
+update residuals and causal credit timing before proposing a further version.
+Useful retained gameplay must still be tested frozen on fresh seeds; changing
+weights, increased tile counts, or one successful path is not the stopping rule.
+The showcase default remains unchanged while these candidates are evaluated.
+
+2026-09-18 17:59 UTC: the user clarified that process cleanup was not a
+stop-work instruction, then explicitly requested the newest best-supported
+model as the showcase default. Fresh `scripts/start.ps1` launches now select
+`visual-release-wide-v3`; the unfinished projected-credit variant remains
+opt-in. Old profiles/checkpoints and all model/reward parameters are unchanged.
+Only bounded implementation checks were launched, with at most two GPU jobs;
+all finished and no Pokefly Python worker remains. Future experiment work must
+retain that concurrency limit instead of relaunching the old queue en masse.
+Verification: 332 Python/26 JS tests and lint pass; actual default launch80,
+live stream50, and learn/resume/frozen/no-reward smoke pass. All10 protected
+hashes match. Browser connection remains unavailable, so rendered-layout QA
+is not claimed. See FOLLOWTHROUGH_RESULTS.md for exact verification artifacts.
+
+Runtime status, 2026-09-18 17:38 UTC: all experiment jobs are STOPPED following
+the user's process-cleanup request. This supersedes older "live"/"queued" notes
+below; do not automatically relaunch that queue. Eleven experiment sessions,
+their 22 Python processes, and associated launcher/runner processes were stopped
+and their absence verified. No dashboard listeners remain on ports 8777-8785.
+Unrelated user terminals, other projects, and Codex infrastructure were left alone.
+Saved artifacts were not deleted. Interrupted trials are incomplete, not failed
+or completed experimental results; there was no confirmed final graceful snapshot.
+The two practice runs retain their step-4500 checkpoints; the two projected-rule
+game runs retain step-1000 checkpoints. Frozen evaluation and visual-curve work
+retain only what was already written. Before any future experiment work, audit
+processes and set an explicit concurrency budget rather than accumulating jobs.
+
 Status: REOPENED. The user rejected stopping after the bounded comparison.
 Continue diagnosis, implementation, and actual-application experiments until
 there is credible evidence of repeatable progress and retained internal learning,
@@ -27,6 +120,64 @@ test proves eventual game completion.
 ### Follow-through evidence and live work
 
 Latest checkpoint of work (older entries below are a chronological lab log):
+
+- 17:30 UTC: neutral motor-drift panel completed; ALL saved weights remain
+  unchanged. Original/source401/source402 mean B rates0.928/1.752/1.090Hz;
+  B selected28.65/52.34/36.20% across384 scored decisions each. Full artifact
+  `game-motor-drift-probe-20260918T172152Z-e9332d` includes all7 populations
+  and all3 seeds. Both exploratory projected-wide actual-game comparisons
+  now launch from ORIGINAL synapses at8784/8785, not diagnostic weights.
+  Weak-v1 projected rule's full independent gate fails both seeds, confirmed
+  by raw/provenance audit `visual-retention-gate-20260918T172144Z-93513c`.
+  Old v1 final32k source501 independent paired65.43% still fails its right
+  cue50.67%; final shuffled and source601 tests remain required. No promotion.
+
+- 17:28 UTC: the first frozen neutral probe shows game-trained401 B firing
+ 1.497Hz versus original0.732Hz on the SAME fresh3201 noise and gray image.
+  Remaining seeds/sources are pending; this is a concrete tonic-drift lead,
+  not a complete panel. Preselect exploratory ACTUAL-game tests of the already
+  registered `visual-wide-projected-v4`, which changes ONLY the internal
+  mean-input-preserving rule relative to wide-v3. SAME401/402 seeds,6k each,
+  original synapses, same intro/rewards/pixels/buttons; no assay weights.
+  Explicitly reuse the completed wide-v3 frozen controls ONLY after exact
+ 64-decision pixel/neural/action/start-state verification. Both candidates
+  are required regardless of which source currently looks better. This does
+  NOT promote the model before its queued3001..3004 final retention controls.
+  Generalized the one-factor harness with explicit --factor rule; default
+  learning-rate-only behavior and original report fields remain compatible.
+  Queue in free slots after current diagnostic panels, not by stopping trials.
+
+- 17:20 UTC: read-only exact replay of all four wide-v3 game arms validates
+  every state/reward and measures Start/nested-menu occupancy. Frozen/learn
+  fractions36.09/25.55% (401),37.86/34.93% (402). This is not semantic menu
+  competence: increased B activity can also dismiss menus. Replay artifacts
+  `recorded-menu-audit-20260918T171511Z-583024`, `...-1ede9a`, `...-1dfef6`,
+  `...-1e3050`. All are replays, never new autonomous wins.
+  Preselect a frozen neutral-screen motor-drift diagnostic: ORIGINAL once,
+  then BOTH actual-game final6k synaptic states, shared RGB128,128 warmup+
+ 128 scored decisions, fresh noise3201/3202/3203. No reward, refitting,
+  ablation, action intervention or neural export. Measure all seven motor
+  rates/buttons, not a B-specific fitting target. This tests whether the
+  repeated-game B increase is tonic or depends on encountered screens.
+  Source401's first fresh6k practice ends271tiles/no starter; its second
+  registered attempt1402 is now running. No successful episode is selected.
+
+- 17:13 UTC: BOTH wide-v3 actual-game pairs complete6,000 decisions per arm.
+  Frozen/learn tiles268/287 (401),188/255 (402); starters0/1 and0/0;
+  wins0 throughout, no Route1 visit. Up fractions21.55/22.05% and17.17/23.87%.
+  This is consistent short-budget exploration improvement, not retained
+  gameplay competence. Both preselected saved-brain practice series now run:
+  source401 at8782, source402 at8783, separate fresh attempts then frozen1601/
+ 1602 comparisons. No synthetic weights or reward changes.
+  Completed v1 source402 retention is negative/mixed: original/retained tiles
+ 199/159 and266/185, starters1/2 in BOTH conditions (on different test seeds),
+  no wins. Do not promote that model from its favorable first test alone.
+  Source401's required panel continues; its repeated original1501 control
+  reproduces all6,000 trajectories exactly and counts as ONE shared control.
+  Partial final32k retention for old v1 source501 now runs on the registered
+ 2601..2604 seeds; original/paired only until its final shuffled state exists.
+  Projected-v4 on weak visual-v1 fails the paired independent gate already:
+ 56.61%/58.28%, one cue42.93%/50.25%. Finish the shuffled panels; do not promote.
 
 - 16:59 UTC: wide-v3 PASSES the preselected independent acquisition gate for
   BOTH training seeds. Paired balanced69.10%/68.80%, original44.72% shared

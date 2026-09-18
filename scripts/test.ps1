@@ -54,7 +54,8 @@ try {
             'sensorimotor-score-delayed-v2', 'sensorimotor-outcome-v3',
             'sensorimotor-serial-outcome-v3', 'sensorimotor-score-centered-v4',
             'sensorimotor-adaptive-v1', 'sensorimotor-premotor-v1',
-            'sensorimotor-score-projected-v5', 'sensorimotor-gain12-v1')) {
+            'sensorimotor-score-projected-v5', 'sensorimotor-gain12-v1',
+            'visual-release-wide-v3')) {
             $candidateConfig = "configs/$candidateProfile.json"
             $candidateCalibration = (Get-Content -Raw -LiteralPath $candidateConfig | ConvertFrom-Json).brain.intrinsic_calibration
             if ($candidateCalibration -and -not (Test-Path -LiteralPath $candidateCalibration)) {

@@ -49,15 +49,47 @@ def test_button_timing_is_versioned_not_silently_migrated():
         ExperimentConfig(button_timing="serial-v2", frames=3)
 
 
-def test_fresh_launcher_fix_changes_only_button_delivery_and_keeps_old_profile():
+def test_preserved_serial_profile_changes_only_button_delivery():
     old = asdict(load_config(Path("configs/sensorimotor-bounded-v1.json")))
     new = asdict(load_config(Path("configs/sensorimotor-bounded-serial-v2.json")))
     assert old["button_timing"] == "simultaneous-v1"
     assert new["button_timing"] == "serial-v2"
     new["button_timing"] = old["button_timing"]
     assert new == old  # Same brain, retinal timing, reward settings and frame budget.
+
+
+def test_showcase_default_uses_tested_visual_model_without_changing_rewards_or_decoder():
+    previous = load_config(Path("configs/sensorimotor-bounded-serial-v2.json"))
+    showcase = load_config(Path("configs/visual-release-wide-v3.json"))
     launcher = Path("scripts/start.ps1").read_text()
-    assert "$Profile = 'sensorimotor-bounded-serial-v2'" in launcher
+    assert "$Profile = 'visual-release-wide-v3'" in launcher
+    assert showcase.brain.dynamics.visual_model == "calibrated-rate-v1"
+    assert showcase.brain.dynamics.isolate_nonvisual_sensory
+    assert showcase.brain.dynamics.graded_release == 1.0
+    assert showcase.brain.intrinsic_calibration == (
+        "fly-data/intrinsic-neutral-visual-release-wide-v3.npz"
+    )
+    assert showcase.brain.plasticity.rule == "sensorimotor-perturb-v3"
+    assert showcase.visual_timing == "stream-v1"
+    assert showcase.button_timing == previous.button_timing == "serial-v2"
+    assert showcase.rewards == previous.rewards
+    assert showcase.brain.motor == previous.brain.motor
+    assert showcase.frames == previous.frames
+    # A new launcher default must not change the baseline or migrate old brains.
+    assert _parser().parse_args(["train"]).config is None
+    assert "if (-not $Resume -and -not $Weights -and $Profile -ne 'baseline')" in launcher
+    assert "Resume/Weights restore the saved model profile" in launcher
+
+
+def test_setup_prepares_showcase_dependencies_without_overwriting_existing_calibration():
+    setup = Path("scripts/setup.ps1").read_text()
+    assert "scripts/fetch_visual_reference.py" in setup
+    assert (
+        "if (-not (Test-Path -LiteralPath "
+        "'fly-data\\intrinsic-neutral-visual-release-wide-v3.npz'))"
+    ) in setup
+    assert "--visual-model calibrated-rate-v1 --graded-release 1 --wide-bias" in setup
+    assert "--export fly-data/intrinsic-neutral-visual-release-wide-v3.npz" in setup
 
 
 def test_missing_reward_timing_retains_legacy_checkpoint_behavior():

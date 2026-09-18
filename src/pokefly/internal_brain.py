@@ -266,6 +266,12 @@ class InternalBrain(PixelBrain):
         if self.csr_offsets is not None:
             self.brain._W.data[self.csr_offsets] = self.brain.xp.asarray(self.plasticity.weights)
 
+    def latch_credit(self) -> None:
+        """Store this neural window's eligibility, without a button/game input."""
+        if not isinstance(self.plasticity, NeuralPerturbationPlasticity):
+            raise ValueError("Decision-window credit requires neural-perturbation plasticity")
+        self.plasticity.latch_credit()
+
     def identity(self) -> dict:
         return {
             "numerics": "pcg64-fixed-cuda-row-reduction-v1",

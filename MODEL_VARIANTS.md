@@ -11,12 +11,16 @@ and the original house-exit milestone are measurements, not a route to teach.
 .\scripts\start.ps1 -Intro
 ```
 
-The launcher defaults to `sensorimotor-bounded-serial-v2`, also selectable with
-`train --config configs/sensorimotor-bounded-serial-v2.json`. This includes the
-incoming sensory isolation, fixed neutral-image calibration and bounded internal
-sensorimotor learning described below, plus verified serial button delivery.
-Its brain/rewards are identical to the previous `sensorimotor-bounded-v1`;
-that original simultaneous profile is preserved unchanged as a control.
+The launcher defaults to `visual-release-wide-v3`, also selectable with
+`train --config configs/visual-release-wide-v3.json`. At the user's request this
+showcase selection includes the stronger frozen visual calibration, streaming
+raw frames, perturbation-based internal synaptic learning, sensory isolation,
+and verified serial button delivery. It passed the retained two-cue association
+screen; useful learned Pokemon progression is still unestablished. It starts
+from original synapses, never synthetic assay weights. The unfinished
+`visual-wide-projected-v4` remains opt-in, not the default.
+Use `-Profile sensorimotor-bounded-serial-v2` for the preserved prior default;
+its brain/rewards are identical to the earlier `sensorimotor-bounded-v1`.
 Use `-Profile sensory-isolated-v1` for
 the previous model, or `-Profile hybrid-v1` for the unisolated control.
 Bare `train` without a config
@@ -42,7 +46,8 @@ in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 | `sensorimotor-v1` | Calibrated dynamics plus broad motor-input covariance plasticity; locks in. |
 | `sensorimotor-normalized-v1` | Exact local incoming-strength normalization; weak motor acquisition. |
 | `sensorimotor-bounded-v1` | Previous default/control: every eligible edge bounded to 0.75--1.25x original. |
-| `sensorimotor-bounded-serial-v2` | Current launcher: same bounded brain, verified serial delivery of its chosen buttons. |
+| `sensorimotor-bounded-serial-v2` | Previous launcher: same bounded brain, verified serial delivery of its chosen buttons. |
+| `visual-release-wide-v3` | Current showcase launcher: stronger frozen visual circuit, streamed frames, perturbation-based internal learning and serial buttons. |
 | `sensorimotor-budget-v1` | Wider individual edge range, total incoming strength bounded +/-25%. |
 | `sensorimotor-perturb-v1` | Same bounded input budget, credit from actual neural-noise perturbations. |
 | `sensorimotor-perturb-v2` | Linear, unclipped noise eligibility to remove the v1 clipping bias. |
@@ -692,7 +697,7 @@ candidate is the default launcher profile. Synthetic assay-trained weights
 must never be loaded into Pokemon. See the preselected comparisons and all
 negative evidence in `IMPROVEMENT_PLAN.md` / `FOLLOWTHROUGH_RESULTS.md`.
 
-## User-authorized internal visual calibration (opt-in, not promoted)
+## User-authorized internal visual calibration (wide-v3 showcase default)
 
 `visual-rate-v1.json` transfers frozen, licensed visual-neuron parameters from
 the pinned MaleCNS/flyvis reference described in `THIRD_PARTY_NOTICES.md`. It
@@ -743,7 +748,8 @@ After generating the optional reference and neutral calibration above, launch:
 .\scripts\start.ps1 -Intro -Profile visual-rate-v1
 ```
 
-The default remains unchanged pending controlled retained-learning evidence.
+The older `visual-rate-v1` remains opt-in; the showcase now defaults to the
+later `visual-release-wide-v3` following the user's explicit request.
 `configs/visual-release-v2.json` is a preserved FAILED neutral-only sensitivity
 test: maximum graded release 1.0 instead of 0.25 for every calibrated visual
 cell, with the same 1 Hz neutral-only spiking calibration. Escape/B remains
@@ -779,7 +785,9 @@ version; old artifacts/checkpoint identities remain unchanged. Reproduce with:
 Independent neutral-reset motor means0.75..1.20Hz are a calibration check, not
 gameplay/learning success. Visual parameters and these offsets stay frozen
 during subsequent tests. No named motor target participates in fitting; the
-same raw retina and fixed buttons remain. This is not a launcher default.
+same raw retina and fixed buttons remain. This is now the showcase launcher
+default by user request, based on its retained visual-association result,
+not a claim of solved Pokemon learning. Old profiles/checkpoints remain intact.
 
 `probe_calibrated_vision.py --fallback-release-scale 0.05` is a separate private,
 standalone visual-unit diagnostic. It does not export a game model or change
@@ -807,6 +815,15 @@ current drift despite cue-specific learning; this is an experimental plasticity
 constraint, not measured physiology or a guaranteed exact reward gradient.
 No new persistent state is introduced: the existing release EMA is checkpointed.
 The version is opt-in, with paired/shuffled/held-out tests registered before use.
+
+`evaluate_visual_learning_rate.py --factor rule` also supports a STRICT
+one-factor rule comparison against a completed fresh-game pair. It rejects
+changes in learning rate, physical dynamics, rewards, timing or decoder, and
+verifies an exact frozen64-decision prefix before explicitly reusing the
+original control. Omitting --factor retains the older learning-rate-only mode.
+Reused controls are not new trials. `probe_game_motor_drift.py --source-runs`
+measures final actual-game weights versus one shared original on neutral gray
+with no reinforcement, refitting or neural exports; it is a diagnostic only.
 
 `visual-wide-projected-v4.json` tests that SAME credit rule on the stronger
 release-wide-v3 circuit. It changes only the rule relative to wide-v3; its
@@ -838,3 +855,25 @@ use the original path. This is numerical acceleration, not a new biological
 model or checkpoint identity. Two ABBA benchmarks and real-ROM continuations
 match neural arrays, choices, rewards and original input windows exactly;
 the observed time saving is about7.6..14% under shared GPU load, not100x.
+
+## Experimental actuator-credit alignment (not the showcase default)
+
+`visual-causal-credit-v5.json` differs from wide-v3 ONLY in the experiment's
+versioned `credit_timing`: `decision-window-v1` instead of the historical
+`feedback-boundary-v1`. Streaming chooses from the preceding neural window,
+then integrates12 new neural steps while holding that chosen button. The
+historical rule rewards the trace at the end of those additional steps.
+The candidate latches the brain's own factor-eligibility when choosing, lets
+all subsequent neural/visual dynamics run unchanged, then uses the stored
+trace with the same scalar reward and reward baseline at the normal boundary.
+It receives no action label or RAM feature; no external learner is introduced.
+Pending credit is included in in-flight neural snapshots and consumed once.
+Normal decision-boundary checkpoints have no pending credit. Missing old
+configuration fields explicitly retain feedback-boundary-v1; legacy models
+do not latch, and saved profiles are never silently converted.
+
+This is a causal-alignment/variance hypothesis, not biological validation or
+established Pokemon learning. Frozen/no-reward dynamics remain unchanged.
+The strict one-factor harness accepts `--factor credit_timing` and first
+verifies the original frozen-control prefix before reusing completed controls.
+Use its explicit config for a new experiment; it is not the launcher default.

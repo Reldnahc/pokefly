@@ -1,4 +1,4 @@
-"""One-factor actual-game internal learning-rate test; unchanged broad rewards.
+"""One-factor actual-game internal-plasticity test; unchanged broad rewards.
 
 Reuse an explicitly identified completed original-weight frozen/learning pair.
 First verify a frozen 64-decision prefix exactly, then train from original
@@ -21,19 +21,26 @@ from pokefly.rom import resolve_rom
 from pokefly.runner import run_directory, write_json
 
 
-def validate_one_factor(original, candidate):
+def validate_one_factor(original, candidate, factor="learning_rate"):
+    if factor not in ("learning_rate", "rule", "credit_timing"):
+        raise ValueError("Supported factors are internal learning_rate, rule or credit_timing")
     old, new = copy.deepcopy(original), copy.deepcopy(candidate)
-    old_rate = old["brain"]["plasticity"].pop("learning_rate")
-    new_rate = new["brain"]["plasticity"].pop("learning_rate")
-    if old != new or new_rate == old_rate:
-        raise ValueError("Candidate must differ ONLY in internal learning rate")
-    return old_rate, new_rate
+    if factor == "credit_timing":
+        old_value, new_value = old.pop(factor), new.pop(factor)
+    else:
+        old_value = old["brain"]["plasticity"].pop(factor)
+        new_value = new["brain"]["plasticity"].pop(factor)
+    if old != new or new_value == old_value:
+        raise ValueError(f"Candidate must differ ONLY in internal {factor}")
+    return old_value, new_value
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--baseline-report", type=Path, required=True)
     p.add_argument("--config", type=Path, default=Path("configs/visual-fast-learning-v2.json"))
+    p.add_argument("--factor", choices=("learning_rate", "rule", "credit_timing"),
+                   default="learning_rate")
     p.add_argument("--port", type=int, required=True)
     args = p.parse_args()
     if not 0 <= args.port <= 65535:
@@ -46,7 +53,9 @@ def main():
     candidate = asdict(load_config(args.config))
     if sha256(Path(source["config"])) != source["config_sha256"]:
         raise ValueError("Source configuration changed")
-    old_rate, new_rate = validate_one_factor(asdict(load_config(Path(source["config"]))), candidate)
+    old_value, new_value = validate_one_factor(
+        asdict(load_config(Path(source["config"]))), candidate, args.factor
+    )
     control = next(r for r in source["rows"] if r["mode"] == "frozen")
     baseline = Path(control["run"])
     stored = json.loads((baseline / "config.json").read_text())
@@ -58,7 +67,9 @@ def main():
     assert json.loads((baseline / "summary.json").read_text())["reason"] == "step_limit"
     arrays, _ = read_checkpoint(baseline / "latest-checkpoint.json")
     np.testing.assert_array_equal(arrays["weights"], arrays["base"])
-    output = run_directory("visual-learning-rate-gameplay")
+    output = run_directory({"learning_rate": "visual-learning-rate-gameplay",
+                            "rule": "visual-plasticity-rule-gameplay",
+                            "credit_timing": "visual-credit-timing-gameplay"}[args.factor])
     config = output / "fixed-config.json"
     write_json(config, candidate)
     report = {
@@ -67,8 +78,9 @@ def main():
         "steps": source["steps"],
         "config": str(config),
         "config_sha256": sha256(config),
-        "old_learning_rate": old_rate,
-        "new_learning_rate": new_rate,
+        "factor": args.factor,
+        f"old_{args.factor}": old_value,
+        f"new_{args.factor}": new_value,
         "baseline_report": str(args.baseline_report),
         "baseline_report_sha256": sha256(args.baseline_report),
         "reused_controls_not_new_trials": source["rows"],

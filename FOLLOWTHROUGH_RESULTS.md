@@ -1,11 +1,174 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Learning follow-through, 2026-09-18 21:08 UTC
+
+The first causal-credit run completed 6,000 decisions: **210 sampled positions,
+no starter**, first house exit359. This is worse than wide-v3 learning287/starter
+at3122 and frozen268/no starter on that seed. Its registered402 comparison is
+still running; no promotion or overall effect is claimed.
+Artifact `visual-credit-timing-gameplay-20260918T204817Z-b4a1c9`.
+
+The original repeated-practice studies can now resume without discarding their
+training. `resume_game_series.py` validates the complete weight chain, model,
+ROM and original seed/budget schedule; copies previous evidence as explicitly
+shared, pins the interrupted checkpoint, checks overlapping recorded decisions,
+and then finishes the original fresh-start/frozen-weight test schedule. Both
+actual step4500 sources pass read-only preflight. They are queued behind the
+current candidate/control panels, not additional concurrent GPU workers.
+
+An exploratory read-only dose check illustrates a possible transfer gap, NOT
+a causal finding. Wide-v3's two successful 8,192-decision synthetic paired
+assays received sums of `tanh(reward)` of2800.38/2567.33; its two6,000-decision
+actual-game training runs received17.16/15.57. These are about163/165 times
+different in total, or119/121 times per decision. Cue structure, contingency,
+reward frequency and magnitude all differ, so this does not isolate a gain
+effect or establish that stronger feedback will help. No reward has changed.
+
+Verification:348 Python tests,26 JS tests and lint pass, artifact
+`verify-2687f6ae44854423a3de171c1b589016`; all10 protected file hashes match.
+The ROM, brain data and run artifacts are still Git-ignored and untracked.
+
 Work is ongoing. This supersedes the earlier "no improvement" conclusion for
 movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 16:59 UTC
+## Learning follow-through, 2026-09-18 20:52 UTC
+
+Both interrupted projected-wide actual-game candidates were completed from
+their exact step1000 checkpoints to total6000. All20 overlapping decisions
+match each original log exactly; old prefix plus new suffix count as ONE trial.
+Artifacts `resumed-rule-gameplay-20260918T203139Z-ce3fff` (401) and `...-c0dd8a`
+(402). Previously completed controls are reused explicitly, not new trials.
+
+| Seed | Original frozen tiles | Default wide-v3 learning | Projected-v4 learning |
+|---|---:|---:|---:|
+| 401 | 268 | 287; starter3,122 | 185; starter5,767 |
+| 402 | 188 | 255; no starter | 290; no starter |
+
+No condition wins a battle or visits Route1 in these6000-decision comparisons.
+Projection is not a demonstrated gameplay improvement: coverage changes in
+opposite directions, and there is one starter in each learning condition.
+
+The same candidate DOES reduce retained neutral-screen B bias. Frozen saved
+game synapses, uniform RGB128, all three preselected3201..3203 noise streams,
+128 warmup+128 scored decisions per stream, all seven motor groups measured:
+
+| Source | Default-wide B selections / Hz | Projected-wide B selections / Hz |
+|---|---:|---:|
+| Original shared control | 28.65% / 0.928 | identical observations, counted once |
+| Game401 final6000 | 52.34% / 1.752 | 32.03% / 0.939 |
+| Game402 final6000 | 36.20% / 1.090 | 29.17% / 1.009 |
+
+Artifact `game-motor-drift-probe-20260918T204118Z-6cdcbb`; original observations
+match the earlier control across ALL recorded fields. The original count is
+110/384=28.65%; the earlier28.13% transcription has been corrected. This is a
+mechanism diagnostic, not a claim of useful visual strategy. The CPU-only
+`credit-update-audit-20260918T204115Z-a0e2b4` finds projected mean-input update
+residuals at rounding scale and no active weight bounds in these final game
+snapshots. Hypothetical updates do not modify or export the source weights.
+
+A SEPARATE timing candidate is now being tested. `visual-causal-credit-v5`
+changes only which internal eligibility trace receives the unchanged reward:
+the trace present when the button was chosen, before the next streamed neural
+window. That next window still runs normally and drives the next choice. It
+cannot change the button already being held, so excluding its new innovations
+is a causal-alignment/variance hypothesis, not a proven learning improvement.
+No action identity, RAM state or fitted decoder enters this neural trace.
+The two actual-game seeds401/402 and6000 budget were preselected;401 is running.
+Projected visual-acquisition controls are also being recovered from saved full
+states; final independent3001..3004 retention is still required.
+
+Implementation verification:345 Python/26 JS tests and lint pass
+(`verify-0f8757f21894491899bc7ebb301f1ec5`), with real-ROM learn, exact-resume,
+frozen and no-reward checks (`internal-smoke-20260918T204550Z-141776`). The
+causal candidate's frozen70-decision run exactly matches the older default's
+pixels, neurons, actions, game/rewards and ALL final neural arrays; only the
+intended learning-timing label differs. These are implementation checks, not
+additional learning trials. The showcase default remains wide-v3. At most
+two GPU jobs are allowed; the prior eleven-job queue is not relaunched.
+
+## Showcase default update, 2026-09-18 17:59 UTC
+
+At the user's explicit request, fresh `scripts/start.ps1 -Intro` now selects
+`visual-release-wide-v3`: the stronger frozen visual circuit, streaming raw
+frames, perturbation-based internal learning and serial button delivery. This
+is the model that passed the independent retained two-cue test below, not a
+claim of established Pokemon progression. The unfinished projected-credit
+candidate remains opt-in. Rewards, fixed anatomical button mapping, original
+weights/data and existing saved profiles are unchanged. No assay-trained or
+selected successful gameplay weights are silently loaded into fresh runs.
+
+Bounded implementation verification (not new gameplay-performance evidence):
+
+- Full suite:332 Python tests,26 JavaScript tests and lint pass;
+  `verify-52d08aeba83c45ffaa4f7cf7c9afa7e1`.
+- Literal default PowerShell launcher:80 decisions, correct recorded model,
+  streamed/serial timing and consistent final checkpoint;
+  `internal-learn-20260918T175722Z-1562c7`.
+- Real-game dashboard stream:50 decisions; pixels/retina/actions agree,
+  graded activity remains separate from spikes, reward totals match logs,
+  live speed changes work and human buttons remain disabled;
+  `internal-learn-20260918T175752Z-e3bf38/smoke.json`.
+- Learning, exact20-decision resume, frozen and no-reward controls all pass;
+  `internal-smoke-20260918T175833Z-78448d`.
+- All10 protected ROM/model/checkpoint hashes match. All verification workers
+  exited; no Pokefly Python job was left running. The browser connection is
+  still unavailable, so rendered desktop-layout QA remains unverified.
+
+## Research evidence recorded at 2026-09-18 17:30 UTC
+
+The following "running" references describe the historical state before the
+17:38 process cleanup; interrupted experiment panels are not completed results.
+
+The completed neutral-screen diagnostic finds a retained GENERAL B bias after
+Pokemon training, especially in source401. These are frozen saved game weights,
+RGB128 only, three fresh noise streams,128 warmup+128 scored decisions each:
+
+| Synapses | Mean B-neuron rate | B selections over384 decisions |
+|---|---:|---:|
+| Original shared control | 0.928Hz | 28.65% |
+| Final6k game401 | 1.752Hz | 52.34% |
+| Final6k game402 | 1.090Hz | 36.20% |
+
+All seven motor groups were measured. No cell was retuned and no weights
+changed in this diagnostic (`game-motor-drift-probe-20260918T172152Z-e9332d`).
+This separates tonic drift from a purely menu-evoked response; it does not
+prove drift is the sole gameplay bottleneck. The existing mean-input-preserving
+rule is now being tested in matched6k actual games on the stronger circuit,
+both401/402, using only original synapses and unchanged rewards. The unchanged
+frozen controls are explicitly reused after exact64-decision prefix checks.
+It is an exploratory rule test, not model promotion or new independent controls.
+
+Exact replay of the four wide-v3 game arms also measures Start/nested-menu
+fractions: frozen/learning36.09/25.55% (401),37.86/34.93% (402). All24,000
+recorded states/rewards match. Less menu time is not automatically screen-aware
+menu competence; increased B can also cause it. These replays are not new play.
+
+The mean-preserving rule on the WEAKER visual-v1 circuit failed its completed
+retention gate: paired56.61/58.28%, original48.84%, shuffled52.35/51.11%;
+right-cue42.93/50.25%. Artifact `visual-retention-gate-20260918T172144Z-93513c`.
+This negative result is retained; the separately registered stronger-signal
+combination has not yet completed its independent controls.
+
+### Actual-game pairs recorded at17:13 UTC
+
+The stronger visual model's two6,000-decision actual-game pairs are complete:
+
+| Seed | Frozen / learning tiles | Frozen / learning Up | Starter, frozen / learning | Wins |
+|---|---:|---:|---:|---:|
+| 401 | 268 / 287 | 21.55% / 22.05% | no / yes, at3,122 | none |
+| 402 | 188 / 255 | 17.17% / 23.87% | no / no | none |
+
+Both learning runs explore more than their matched frozen controls, but none
+visits Route1 or wins a battle. This is encouraging short-budget exploration,
+not yet learned navigation or game progression. Both final actual-game brains
+are undergoing the registered repeated-practice/frozen-transfer protocol.
+The weaker v1 source402's completed fresh-start test does NOT show improvement:
+original/retained tiles199/159 and266/185, one starter in each condition over
+two seeds, no wins. Its favorable first starter result was not a general gain.
+
+### Confirmed visual-association result at16:59 UTC
 
 **The stronger visual circuit passes the preselected retained two-cue learning
 test for both independently trained brains.** Final8,192 synapses are tested

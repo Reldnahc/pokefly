@@ -35,6 +35,15 @@ try {
         & $projectPython scripts/probe_intrinsic.py --calibration-only --device $projectDevice --export fly-data/intrinsic-neutral-v1.npz
         if ($LASTEXITCODE -ne 0) { throw 'Neutral intrinsic calibration failed.' }
     }
+    # The showcase default requires pinned visual data and its own immutable
+    # neutral-only calibration. Never replace an existing calibration/checkpoint.
+    & $projectPython scripts/fetch_visual_reference.py
+    if ($LASTEXITCODE -ne 0) { throw 'Pinned visual reference preparation failed.' }
+    if (-not (Test-Path -LiteralPath 'fly-data\intrinsic-neutral-visual-release-wide-v3.npz')) {
+        Write-Host 'Preparing the showcase visual model on neutral gray (no ROM or gameplay rewards).'
+        & $projectPython scripts/probe_intrinsic.py --device $projectDevice --visual-model calibrated-rate-v1 --graded-release 1 --wide-bias --calibration-only --calibration-steps 10000 --reset-probe-decisions 256 --export fly-data/intrinsic-neutral-visual-release-wide-v3.npz
+        if ($LASTEXITCODE -ne 0) { throw 'Showcase visual calibration failed.' }
+    }
     Write-Host 'Ready. Internal experiment: .\scripts\start.ps1 -Intro'
     Write-Host 'Open http://127.0.0.1:8777. Experimental plasticity, not proven gameplay learning.'
     Write-Host 'Frozen/manual diagnostic: .\.venv\Scripts\python.exe -m pokefly watch --manual'

@@ -4,8 +4,9 @@ This page specifies the preserved baseline. The implemented graded-vision,
 adaptive-KC, and DAN-targeted visual-memory variants are documented separately
 in [MODEL_VARIANTS.md](MODEL_VARIANTS.md). Select them explicitly using
 `--config configs/hybrid-v1.json`. The main launcher now uses
-`configs/sensorimotor-bounded-v1.json`: persistent sensory isolation, fixed
-neutral excitability calibration, and bounded internal motor-input learning.
+`configs/visual-release-wide-v3.json` for the user-requested showcase: persistent
+sensory isolation, frozen visual/neutral calibration, streamed raw frames,
+perturbation-based internal motor-input learning, and serial button delivery.
 Equations and caveats are in MODEL_VARIANTS; evidence is in
 [FOLLOWTHROUGH_RESULTS.md](FOLLOWTHROUGH_RESULTS.md). No variant silently replaces old checkpoints.
 New opt-in temporal-input, quiescent-sensory and partial compartment-learning

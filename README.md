@@ -35,7 +35,9 @@ experiments remain in [RESULTS.md](RESULTS.md), with the continuing protocol in
 
 The immediate-feedback motor result does not yet generalize to delayed rewards.
 Fixed serial-button delivery fixes a confirmed naming-screen input-priority
-trap and is now the fresh-launch default, without changing the default brain.
+trap and is included in the fresh-launch default. At the user's request, the
+showcase now also defaults to the strongest tested visual-association model,
+`visual-release-wide-v3`; this selection does not establish learned navigation.
 An earlier serial-delivery research run obtained a starter and won rival
 and wild battles, but still plateaued around Pallet/Route 1. Earlier delivery of
 the same confirmed outcome rewards is now under controlled evaluation. Neither
@@ -63,13 +65,19 @@ Launch the autonomous experimental controller with its live display:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pokefly train --device cuda --intro `
-  --config configs/sensorimotor-bounded-serial-v2.json
+  --config configs/visual-release-wide-v3.json
 ```
 
 Shortcut: `.\scripts\start.ps1 -Intro`. Normal training now runs until Ctrl+C
 by default; use `-Steps 1000` (CLI: `--steps 1000`) for a bounded trial.
-The launcher defaults to `sensorimotor-bounded-serial-v2`: the same bounded
-brain as before, with the verified serial button-delivery fix. Use `-Profile intrinsic-v1`
+The launcher defaults to `visual-release-wide-v3`: frozen calibrated visual
+neurons, fresh raw frames during actions, internal perturbation-based synaptic
+learning, and verified serial button delivery. This is the tested two-cue
+association model, not a proven general Pokemon player. The unfinished
+projected-update candidate is NOT the default. Fresh runs still start from
+original synapses, never synthetic-test-trained or selected successful weights.
+Use `-Profile sensorimotor-bounded-serial-v2` for the previous default,
+`-Profile intrinsic-v1`
 for calibrated dynamics with the earlier KC rule, `-Profile sensory-isolated-v1`
 for the earlier uncalibrated model, or `-Profile baseline` for original dynamics.
 Bare `python -m pokefly train` without a config still selects the baseline.
@@ -85,8 +93,13 @@ Saved checkpoints retain their own timing on resume or weights-only loading.
 The older `sensorimotor-serial-v1` research profile also changes movement bouts
 and Start cooldown; it is not the default brain.
 
+The required pinned visual-reference data and immutable neutral calibration
+are already installed on this machine. `scripts/setup.ps1` prepares them on
+a fresh installation; it does not overwrite an existing calibration.
+
 Open [the local dashboard](http://127.0.0.1:8777). It shows the exact frame fed
-to the brain, retinal input, real firing activity, delivered neural button
+to the brain (the last frame of the default's multi-frame input window),
+retinal input, real firing activity, delivered neural button
 pulses, cumulative measured reward, and internal weight changes. Hover over
 reward to see current/delivered feedback. Old running servers explicitly show
 STEP REWARD until restarted; no client-side reward summation is used. Hybrid mode

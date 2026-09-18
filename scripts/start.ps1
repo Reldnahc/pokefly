@@ -21,7 +21,8 @@ param(
         'sensorimotor-serial-outcome-v3', 'sensorimotor-score-centered-v4',
         'sensorimotor-adaptive-v1', 'sensorimotor-premotor-v1',
         'sensorimotor-score-projected-v5', 'sensorimotor-gain12-v1',
-        'visual-rate-v1')][string]$Profile = 'sensorimotor-bounded-serial-v2',
+        'visual-rate-v1', 'visual-release-wide-v3',
+        'visual-wide-projected-v4')][string]$Profile = 'visual-release-wide-v3',
     [string]$LoadState,
     [string]$Resume,
     [string]$Weights
@@ -51,6 +52,11 @@ if (($Resume -or $Weights) -and $PSBoundParameters.ContainsKey('Profile')) {
 Push-Location $projectRoot
 try {
     Write-Host 'Experimental fly controller. Open the Dashboard URL printed below.'
+    if ($Resume -or $Weights) {
+        Write-Host 'Model: saved checkpoint settings (not upgraded to the fresh-run default).'
+    } else {
+        Write-Host "Model: $Profile"
+    }
     Write-Host 'Ctrl+C completes the current decision and saves a checkpoint.'
     & $projectPython @launchArgs
     if ($LASTEXITCODE -ne 0) { throw "Pokefly stopped with exit code $LASTEXITCODE." }

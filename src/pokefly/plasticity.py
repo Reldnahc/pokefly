@@ -410,6 +410,43 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
     NOT their conductance model or a validated fly molecular mechanism.
     """
 
+    def reset_modulation(self):
+        super().reset_modulation()
+        self.pending_credit = None
+
+    def latch_credit(self):
+        """Hold local credit before actuator latency; no action identity enters."""
+        if self.pending_credit is not None:
+            raise ValueError("Previous neural credit has not received its feedback")
+        self.pending_credit = self.factor_eligibility().copy()
+
+    def reinforce(self, reward, *, enabled=True):
+        latched = self.pending_credit is not None
+        try:
+            result = super().reinforce(reward, enabled=enabled)
+            if latched:
+                result["credit_timing"] = "decision-window-v1"
+            return result
+        finally:
+            self.pending_credit = None
+
+    def arrays(self):
+        return {
+            **super().arrays(),
+            **({"pending_neural_credit": self.pending_credit.copy()}
+               if self.pending_credit is not None else {}),
+        }
+
+    def restore(self, arrays, metadata):
+        pending = arrays.get("pending_neural_credit")
+        if pending is not None:
+            pending = np.asarray(pending, np.float32)
+            if pending.shape != self.eligibility.shape or not np.isfinite(pending).all():
+                raise ValueError("Invalid pending neural credit")
+            pending = pending.copy()
+        super().restore(arrays, metadata)
+        self.pending_credit = pending
+
     def observe(self, fired, dt, *, perturbation=None, probability=None, graded_release=None):
         from pokefly.fast_plasticity import sensorimotor_eligibility
 
@@ -467,6 +504,8 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         self.feedback_elapsed += dt
 
     def factor_eligibility(self):
+        if self.pending_credit is not None:
+            return self.pending_credit
         value = super().factor_eligibility()
         if self.config.rule == "sensorimotor-perturb-projected-v4":
             from pokefly.fast_plasticity import mean_input_projection

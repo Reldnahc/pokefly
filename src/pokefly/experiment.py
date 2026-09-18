@@ -32,6 +32,7 @@ class ExperimentConfig:
     frames: int = 24
     visual_timing: str = "snapshot-v1"
     button_timing: str = "simultaneous-v1"
+    credit_timing: str = "feedback-boundary-v1"
 
     def __post_init__(self):
         if not 2 <= self.frames <= 120:
@@ -44,6 +45,15 @@ class ExperimentConfig:
             raise ValueError("Serial button timing requires at least four frames")
         if self.visual_timing == "stream-v1" and self.brain.brain_steps > self.frames:
             raise ValueError("Stream mode needs at least one game frame per neural step")
+        if self.credit_timing not in ("feedback-boundary-v1", "decision-window-v1"):
+            raise ValueError("Unknown credit timing")
+        if self.credit_timing == "decision-window-v1" and (
+            self.visual_timing != "stream-v1"
+            or not self.brain.plasticity.rule.startswith("sensorimotor-perturb")
+        ):
+            raise ValueError(
+                "Decision-window credit requires streamed neural-perturbation learning"
+            )
 
     @classmethod
     def from_dict(cls, data: dict, *, checkpoint: bool = False):
@@ -280,6 +290,8 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
                         input_window = temporal.window
                         action, rates = controller.choose(observation)  # NEURONS ONLY
                         buttons = list(pressed_buttons(action))
+                        if config.credit_timing == "decision-window-v1":
+                            controller.latch_credit()  # LOCAL neural trace; no button/RAM input.
                         if not temporal.advance(game, action, config.frames):
                             reason = "emulator_stopped"
                             break
