@@ -47,6 +47,7 @@ class PlasticityConfig:
             "sensorimotor-score-v2",
             "sensorimotor-score-v3",
             "sensorimotor-score-centered-v4",
+            "sensorimotor-score-projected-v5",
         ):
             raise ValueError("Unknown plasticity rule")
         if not isinstance(self.normalize_inputs, bool):
@@ -208,6 +209,7 @@ class SensorimotorPlasticity(EligibilityPlasticity):
         self.resource_group = self.post * 2 + (self.base < 0) if signed else self.post
         self.resource_size = self.n * 2 if signed else self.n
         self.resource_base = np.abs(self.base) if signed else self.base
+        self.eligibility_kernel = None  # Optional bit-exact acceleration, no persistent state.
         self.input_budget = np.bincount(
             self.resource_group, weights=self.resource_base, minlength=self.resource_size
         )
@@ -248,7 +250,7 @@ class SensorimotorPlasticity(EligibilityPlasticity):
         )
         scale = dt * c.activity_reference_hz
         decay = np.exp(-dt / c.eligibility_seconds)
-        sensorimotor_eligibility(
+        (self.eligibility_kernel or sensorimotor_eligibility)(
             self.pre,
             self.post,
             incoming,
@@ -428,7 +430,7 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         incoming = (
             self.pre_trace - np.float32(decay) * self.post_baseline if centered else self.pre_trace
         )
-        sensorimotor_eligibility(
+        (self.eligibility_kernel or sensorimotor_eligibility)(
             self.pre,
             self.post,
             incoming,

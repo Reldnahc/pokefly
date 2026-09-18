@@ -5,10 +5,100 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 11:03 UTC
+## Latest evidence, 2026-09-18 13:27 UTC
 
 Public source repository: https://github.com/Reldnahc/pokefly . ROM, model data,
 saves, checkpoints and raw runs remain local and Git-ignored.
+
+### Completed before the interrupted turn was resumed
+
+The three outstanding processes exited normally, with their complete reports
+saved. Broader anatomical plasticity is NOT promoted. At 8,192 visual-training
+decisions, its paired balanced cue accuracy is 51.6%, shuffled 46.0%. Pooled
+accuracy (54.7% versus 45.2%) overstates the cue distinction: paired Left/Right
+counts are 54/10 on the left image and 43/10 on the right image. The result is
+mostly a generic Left preference, not reliable context learning. Artifact:
+`visual-learning-curve-20260918T105829Z-52ad54`.
+
+Actual Route-1 runs, 6,000 decisions each, original weights at the start:
+
+| Seed | Reused frozen positions / wins | Motor-only learning | One-hop premotor learning |
+| --- | --- | --- | --- |
+| 1201 | 337 / 0 | 208 / 3 | 249 / 1 |
+| 1202 | 414 / 1 | 327 / 1 | 430 / 1 |
+
+Motor-only uses the same perturb-v3 rule as the one-hop candidate, not the
+older bounded covariance rule. Both validate exact original-weight frozen
+64-decision prefixes against their explicitly reused controls. Northernmost
+Route-1 y is 24 in every arm except broader seed 1202 (25). No new town,
+capture or badge. More changed connections is not evidence of better learning.
+Artifacts: `anatomical-scope-gameplay-20260918T113017Z-f591b6` and
+`anatomical-scope-gameplay-20260918T113028Z-d26821`.
+
+Frozen transfer of the FINAL brains from the two 24,000-decision whole-game
+training runs also completed. Same Route-1 reset and two 6,000-decision seeds:
+
+| Seed | Original positions / wins | Legacy-outcome trained | Earlier-outcome trained |
+| --- | --- | --- | --- |
+| 1201 | 337 / 0 | 338 / 5 | 387 / 0 |
+| 1202 | 414 / 1 | 312 / 0 | 442 / 3 |
+
+The earlier-outcome brain increases coverage on this small panel, but wins are
+mixed and there is still no new town/capture/badge. Northernmost y remains 24
+except legacy seed 1202 (23). Learning is off throughout evaluation; original
+controls are reused, not additional trials. Final training checkpoints were
+preselected, not chosen from peaks. Artifact:
+`final-game-weight-transfer-20260918T110148Z-e7bea9`. An earlier driver failed
+before gameplay because it compared pre-load and post-prime emulator hashes;
+that failed report is preserved and the successful protocol checks both states
+at their appropriate boundaries.
+
+### Local credit and signal-to-noise diagnostics
+
+Two frozen score-v2 credit collections (4,096 decisions each) have inter-seed
+update cosine 0.027. A bounded temporary step along the averaged direction
+raises target frequency 18.5% -> 20.8%, but conditional cue accuracy only
+44.9% -> 45.5%; the negative direction gives 16.5% / 44.7%. These are diagnostic
+temporary synapses, not online learning or deployed game weights. All originals
+were restored. Artifact: `local-credit-direction-audit-20260918T111051Z-6af0e0`.
+
+Projection of already recorded stochastic presynaptic counts through original
+signed weights estimates the steering left-minus-right mean-current contrast
+at 0.10 / 0.16 of within-cue standard deviation. There are no missing graded
+inputs to these motor cells. This is a decision-averaged current measurement,
+not the full membrane dynamics or proof of a causal bottleneck. Artifact:
+`motor-signal-audit-20260918T111942Z-4607d0`.
+
+The broader learning kernel now has optional bit-exact CUDA acceleration for
+at least one million eligible edges (the default smaller scope is unchanged).
+At 4.3 million edges, including host/device transfers, single-trace updates
+take about 3.2 ms versus 13 ms on CPU; dual traces about 5.6 versus 19 ms.
+This is a kernel comparison under concurrent load, NOT a fourfold whole-app
+speedup. CPU-threaded variants were not faster and are not activated.
+64 complete learning windows match CPU exactly in counts, actions, weights
+and all final neural state. Actual-ROM learning/resume/frozen/no-reward smoke
+also passes: `internal-smoke-20260918T112726Z-a7a496`.
+
+Two new opt-in hypotheses were preselected at 13:23 UTC. Projected-v5 preserves
+the score-v2 forward circuit and constrains the local update against estimated
+mean input. Exact frozen forward and real-ROM checkpoint smoke pass; the two
+paired/shuffled learning curves are running, with no success claim yet.
+Whole-circuit gain 12 with the existing bounded neutral calibration fails its
+stability check: reset A rates 5.5..9.3 Hz, B 15.2..15.8 Hz, and MBON mean
+21.5..21.8 Hz, versus target 1 Hz. Frozen held-out cue measurement falls to
+50% at motor inputs / 37.5% descending, versus 100% in the original measured
+model. Steering current contrasts remain only 0.14 / 0.13 of within-cue
+variation. This candidate is NOT promoted and will not receive gameplay
+training. Artifacts: `intrinsic-probe-20260918T132602Z-f862ec`,
+`visual-latency-probe-20260918T132756Z-42f162`,
+`motor-signal-audit-20260918T133209Z-661196`.
+
+Current checks: 286 Python tests / 23 JS tests / lint pass. The new mean-input
+rule has exact 64-window original forward equivalence and actual-ROM
+learn/resume/frozen/no-reward smoke. All 20 original recorded samples
+68,501..68,520 still reproduce exactly after the inactive gain-field addition;
+all ten protected ROM/model/stopped-run hashes are unchanged (13:30 UTC).
+This is software verification, not evidence of learned game progress.
 
 ### Confirmed input-priority trap; serial-delivery results
 

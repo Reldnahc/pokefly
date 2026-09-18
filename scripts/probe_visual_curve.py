@@ -98,6 +98,7 @@ def main():
         "pretest": pretest,
         "pre_score": score(pretest, args.reverse, buttons=buttons, cues=cues),
         "rows": [],
+        "status": "running",
     }
     if previous_report:
         report["previous_report"] = str(args.continue_from / "report.json")
@@ -110,6 +111,7 @@ def main():
                 for row in previous_report["rows"]
                 if row["training_decisions"] == starting_step
             }
+    write_json(output / "report.json", report)
     paired_rewards, paired_cues = [], []
     if args.continue_from:
         old_training = json.loads((args.continue_from / "paired-training.json").read_text())
@@ -181,9 +183,15 @@ def main():
                 write_json(output / "report.json", report)
                 np.savez_compressed(output / f"{arm}-{count}.npz", **learned)
                 write_json(output / f"{arm}-{count}.json", learned_state)
+                # Preserve action/reward history alongside every neural snapshot,
+                # not only at the end of a potentially long arm. An interrupted
+                # run is still labeled running; never call its final gate passed.
+                write_json(output / f"{arm}-training.json", training)
                 print(arm, count, row["score"], flush=True)
                 c.restore(learned, learned_state)
         write_json(output / f"{arm}-training.json", training)
+    report["status"] = "completed"
+    write_json(output / "report.json", report)
     print("Report:", output, flush=True)
 
 

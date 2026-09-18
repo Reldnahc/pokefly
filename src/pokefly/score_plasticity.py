@@ -9,6 +9,11 @@ identity, cue label, or RAM input.
 The optional centered-v4 variant uses deviations from the neuron's prior
 release average. This is a local covariance/innovation approximation, NOT the
 exact likelihood gradient of the original uncentered physical neuron model.
+
+Projected-v5 retains the original score, but removes the update component
+that changes estimated mean input to each postsynaptic cell. Its constraint
+uses only local release averages, not cue/action labels or desired rates.
+Bounds and resource projection can subsequently make the constraint inexact.
 """
 
 import numpy as np
@@ -23,7 +28,9 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
         self.membrane_trace = np.zeros_like(self.eligibility)
         self.release_baseline = (
             np.zeros(self.n, np.float32)
-            if self.config.rule == "sensorimotor-score-centered-v4"
+            if self.config.rule in (
+                "sensorimotor-score-centered-v4", "sensorimotor-score-projected-v5"
+            )
             else None
         )
         if self.config.slow_eligibility_seconds:
@@ -59,7 +66,7 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
             temperature,
             **(
                 {"release_baseline": self.release_baseline}
-                if self.release_baseline is not None
+                if self.config.rule == "sensorimotor-score-centered-v4"
                 else {}
             ),
         )
@@ -73,6 +80,9 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
         return {
             **super().metrics(),
             "rule": (
+                "sensorimotor-mean-input-projected-score-v5"
+                if self.config.rule == "sensorimotor-score-projected-v5"
+                else
                 "sensorimotor-centered-spike-innovation-v4"
                 if self.config.rule == "sensorimotor-score-centered-v4"
                 else "sensorimotor-signed-likelihood-score-v3"
@@ -82,8 +92,11 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
                 else "sensorimotor-logistic-likelihood-score-v1"
             ),
             "modulation": (
+                "local score projected against running mean input; no action/cue labels"
+                if self.config.rule == "sensorimotor-score-projected-v5"
+                else
                 "local pre-centered spike innovation (approximate, not exact score gradient)"
-                if self.release_baseline is not None
+                if self.config.rule == "sensorimotor-score-centered-v4"
                 else "local stochastic-spike score; no decoder feedback or external critic"
             ),
         }
@@ -93,6 +106,15 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
         # v1's factor gradient makes absolute updates proportional to base^2;
         # v2 removes one base factor so weak existing inputs can participate.
         value = super().factor_eligibility()
+        if self.config.rule == "sensorimotor-score-projected-v5":
+            # D = diag(1/base) is the same positive preconditioner as v2.
+            # With a = base * E[release], the constrained ascent direction is
+            # Dg - Da * (a.T Dg)/(a.T Da), separately for each target cell.
+            # Thus a.T direction = 0 before bounds/resource competition.
+            # This suppresses generic input drift, not a button or spike quota.
+            return mean_input_projection(
+                value / self.base, self.base, self.release_baseline[self.pre], self.post, self.n
+            )
         return (
             value / np.abs(self.base)
             if self.config.rule
@@ -116,7 +138,9 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
         if (
             trace.shape != self.membrane_trace.shape
             or not np.isfinite(trace).all()
-            or (self.release_baseline is None and (trace < 0).any())
+            or (
+                self.config.rule != "sensorimotor-score-centered-v4" and (trace < 0).any()
+            )
         ):
             raise ValueError("Invalid membrane eligibility checkpoint")
         baseline = None
@@ -132,3 +156,14 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
         self.membrane_trace = trace.copy()
         if baseline is not None:
             self.release_baseline = baseline.copy()
+
+
+def mean_input_projection(value, base, release_mean, post, n):
+    """Positive-metric local projection; no stimulus, reward or action arguments."""
+    mean_input = base.astype(np.float64) * release_mean
+    numerator = np.bincount(post, weights=mean_input * value, minlength=n)
+    denominator = np.bincount(post, weights=mean_input * release_mean, minlength=n)
+    scale = np.divide(
+        numerator, denominator, out=np.zeros(n, np.float64), where=denominator > 0
+    )
+    return (value - release_mean * scale[post]).astype(np.float32)

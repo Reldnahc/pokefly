@@ -31,6 +31,7 @@ class BrainConfig:
     brain_steps: int = 12
     noise_hz: float = 1.2
     noise_amplitude: float = 0.22
+    synaptic_gain: float = 3.0
     plasticity: PlasticityConfig = field(default_factory=PlasticityConfig)
     motor: MotorConfig = field(default_factory=MotorConfig)
     dynamics: DynamicsConfig = field(default_factory=DynamicsConfig)
@@ -43,6 +44,8 @@ class BrainConfig:
             raise ValueError("Noise settings must be finite")
         if not 0 <= self.noise_hz <= 50 or not 0 <= self.noise_amplitude <= 2:
             raise ValueError("Noise rate must be 0..50 Hz and amplitude 0..2")
+        if not np.isfinite(self.synaptic_gain) or not 0 < self.synaptic_gain <= 30:
+            raise ValueError("Whole-circuit synaptic gain must be finite and in (0,30]")
         if self.intrinsic_calibration is not None:
             if not isinstance(self.intrinsic_calibration, str) or not self.intrinsic_calibration:
                 raise ValueError("Intrinsic calibration must name an explicit file")
@@ -80,6 +83,7 @@ class InternalBrain(PixelBrain):
         self.config = config
         self.seed = seed
         self.brain.noise_hz, self.brain.noise_amp = config.noise_hz, config.noise_amplitude
+        self.brain.gain = config.synaptic_gain
         self.brain.rng = CheckpointNoise(self.brain.xp, seed)
         with np.load(configure_runtime() / "brain.npz", allow_pickle=False) as meta:
             self.body_ids = meta["ids"].copy()
@@ -146,6 +150,16 @@ class InternalBrain(PixelBrain):
             self.csr_offsets = b.xp.asarray(csr_offsets)
             if not np.array_equal(b._W.data[self.csr_offsets].get(), self.plasticity.base):
                 raise RuntimeError("CPU/CUDA initial plastic weights disagree")
+            if (
+                len(pre) >= 1_000_000
+                and isinstance(self.plasticity, SensorimotorPlasticity)
+                and not isinstance(self.plasticity, LikelihoodPlasticity)
+            ):
+                from pokefly.cuda_plasticity import CUDAEligibility
+
+                self.plasticity.eligibility_kernel = CUDAEligibility(
+                    self.plasticity.pre, self.plasticity.post, b.xp
+                )
         self.hybrid = None
         if config.dynamics.profile == "hybrid-v1":
             self.hybrid = HybridDynamics(b, self.groups, config.dynamics)
@@ -319,6 +333,7 @@ class InternalBrain(PixelBrain):
         stored = dict(state["identity"])
         # Old baseline checkpoints predate the explicit, inactive dynamics settings.
         stored["config"] = dict(stored["config"])
+        stored["config"].setdefault("synaptic_gain", 3.0)
         stored["config"].setdefault("intrinsic_calibration", None)
         stored["config"].setdefault("dynamics", asdict(DynamicsConfig()))
         stored["config"]["dynamics"] = dict(stored["config"]["dynamics"])

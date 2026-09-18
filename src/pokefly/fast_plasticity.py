@@ -5,7 +5,7 @@ No fast-math, parallel reduction, random draws, or changed summation order.
 """
 
 import numpy as np
-from numba import njit
+from numba import njit, prange
 
 
 @njit(cache=True, nogil=True)
@@ -49,7 +49,7 @@ def sensorimotor_eligibility(
 ):
     divisor = np.float32(scale)
     gain = 1.0 - decay
-    for edge in range(len(pre)):
+    for edge in prange(len(pre)):
         incoming = np.float32(pre_trace[pre[edge]] / divisor)
         incoming = min(np.float32(5.0), max(np.float32(incoming_floor), incoming))
         outgoing = np.float32(np.float32(spike[post[edge]] - baseline[post[edge]]) / divisor)
@@ -68,3 +68,11 @@ def sensorimotor_eligibility(
                 slow_eligibility[edge] = min(np.float32(5.0), max(np.float32(-5.0), value_slow))
             else:
                 slow_eligibility[edge] = value_slow
+
+
+# Experimental acceleration entry point. No reductions or shared edge writes:
+# the same scalar operations are compiled for disjoint edges. Production still
+# uses the serial dispatcher until bit-exactness and throughput are measured.
+parallel_sensorimotor_eligibility = njit(cache=True, nogil=True, parallel=True)(
+    sensorimotor_eligibility.py_func
+)

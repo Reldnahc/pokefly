@@ -32,6 +32,7 @@ def main():
     parser.add_argument("--target-hz", type=float, default=1.0)
     parser.add_argument("--noise-amplitude", type=float, default=0.22)
     parser.add_argument("--noise-hz", type=float, default=1.2)
+    parser.add_argument("--synaptic-gain", type=float, default=3.0)
     parser.add_argument("--spike-temperature", type=float, default=0.0)
     parser.add_argument("--motor-adaptation-increment", type=float, default=0.0)
     parser.add_argument("--motor-adaptation-seconds", type=float, default=3.0)
@@ -60,7 +61,10 @@ def main():
         parser.error("Export target already exists; calibration files are immutable")
     output = run_directory("intrinsic-probe")
     cfg = load_config(Path("configs/sensory-isolated-v1.json")).brain
-    cfg = replace(cfg, noise_amplitude=args.noise_amplitude, noise_hz=args.noise_hz)
+    cfg = replace(
+        cfg, noise_amplitude=args.noise_amplitude, noise_hz=args.noise_hz,
+        synaptic_gain=args.synaptic_gain,
+    )
     cfg = replace(
         cfg,
         dynamics=replace(

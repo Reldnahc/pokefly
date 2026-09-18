@@ -7,7 +7,7 @@ from pokefly.dynamics import DynamicsConfig
 from pokefly.fast_plasticity import likelihood_eligibility
 from pokefly.internal_brain import BrainConfig
 from pokefly.plasticity import PlasticityConfig
-from pokefly.score_plasticity import LikelihoodPlasticity
+from pokefly.score_plasticity import LikelihoodPlasticity, mean_input_projection
 
 
 def learner():
@@ -93,6 +93,53 @@ def test_v2_preconditioning_uses_only_original_synapse_size():
     np.testing.assert_allclose(
         p.weights - before, p.config.learning_rate * np.tanh(1) * raw_score, rtol=1e-6
     )
+
+
+def test_mean_input_projection_is_local_and_preserves_ascent_and_input():
+    base = np.array([0.2, 0.1, 0.4, 0.3, 0.2], np.float32)
+    means = np.array([0.1, 0.4, 0.2, 0.7, 0.0], np.float32)
+    post = np.array([2, 2, 3, 3, 4])
+    gradient = np.array([0.3, -0.2, 0.4, 0.2, 0.6], np.float32)
+    value = gradient / base
+    result = mean_input_projection(value, base, means, post, 5)
+    np.testing.assert_allclose(
+        np.bincount(post, weights=base * means * result, minlength=5), 0, atol=2e-8
+    )
+    assert float(gradient @ result) >= 0
+    assert result[-1] == value[-1]  # No observed input: no fabricated constraint.
+    changed = value.copy()
+    changed[:2] *= 2
+    local = mean_input_projection(changed, base, means, post, 5)
+    np.testing.assert_array_equal(local[2:], result[2:])
+    np.testing.assert_allclose(
+        mean_input_projection(result, base, means, post, 5), result, atol=1e-7
+    )
+
+
+def test_projected_score_keeps_original_likelihood_and_resumes_exactly():
+    p = learner()
+    p.config = replace(p.config, rule="sensorimotor-score-projected-v5")
+    p.reset_modulation()
+    original = learner()
+    for _ in range(4):
+        observe(p)
+        observe(original)
+    np.testing.assert_array_equal(p.eligibility, original.eligibility)
+    np.testing.assert_array_equal(p.membrane_trace, original.membrane_trace)
+    assert p.release_baseline[0] > 0
+    # A one-input cell has no mean-preserving direction available.
+    np.testing.assert_allclose(p.factor_eligibility(), 0, atol=1e-6)
+    q = LikelihoodPlasticity(p.pre, p.post, p.base, p.n, p.config)
+    q.restore({k: v.copy() for k, v in p.arrays().items()}, p.metrics())
+    for _ in range(4):
+        observe(p)
+        observe(q)
+        p.reinforce(0.4)
+        q.reinforce(0.4)
+    for key in p.arrays():
+        np.testing.assert_array_equal(p.arrays()[key], q.arrays()[key])
+    p.reset_modulation()
+    assert not p.release_baseline.any()
 
 
 def centered_learner():
@@ -245,6 +292,17 @@ def test_score_rule_requires_matching_stochastic_model():
             plasticity=replace(config, slow_eligibility_seconds=30),
             dynamics=DynamicsConfig(profile="hybrid-v1", spike_temperature=0.05),
         )
+
+
+@pytest.mark.parametrize("gain", [0, -1, 31, np.nan, np.inf])
+def test_invalid_whole_circuit_gain_is_rejected(gain):
+    with pytest.raises(ValueError, match="synaptic gain"):
+        BrainConfig(synaptic_gain=gain)
+
+
+def test_legacy_gain_default_matches_upstream_and_candidate_is_explicit():
+    assert BrainConfig().synaptic_gain == 3.0
+    assert BrainConfig(synaptic_gain=12).synaptic_gain == 12
 
 
 def test_toy_two_cue_circuit_learns_with_positive_scalar_reward():

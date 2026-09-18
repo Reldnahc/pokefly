@@ -659,3 +659,30 @@ baseline state, learning traces, gates, weights, and random-stream state. Exact
 same-backend resume and fractional sparse propagation are regression tested.
 Browser layout verification remains unavailable when the in-app browser cannot
 connect; DOM tests and live HTTP/SSE checks are not a substitute for visual QA.
+# New opt-in mechanism tests (2026-09-18 13:23 UTC; not promoted)
+
+`sensorimotor-score-projected-v5` keeps the score-v2 stochastic circuit and
+original likelihood eligibility. Before a reward update, it projects the
+preconditioned update against estimated mean incoming current, independently
+for every anatomically selected target. The estimate is a 10-second running
+presynaptic release mean. It has no cue labels, button identity, desired firing
+rate, external critic or learned adapter. This is a local engineering
+constraint, not a measured fly learning rule. Later clipping/resource
+competition can make exact mean preservation inexact. Existing factors,
+signs, sparse connections and 25% input budgets remain unchanged.
+
+`sensorimotor-gain12-v1` changes whole-circuit synaptic gain from 3 to 12 and
+requires its own frozen neutral-gray calibration. It is a signal-to-noise
+sensitivity test, not proof that stronger coupling is biologically correct.
+All cells share the gain. Calibration uses the existing uniform 1 Hz equation
+on eligible non-sensory spiking cells, with no game, reward or motor labels:
+
+```powershell
+.venv\Scripts\python.exe scripts/probe_intrinsic.py --device cuda --calibration-only --synaptic-gain 12 --calibration-steps 10000 --reset-probe-decisions 256 --export fly-data/intrinsic-neutral-gain12-v1.npz
+```
+
+These two hypotheses are evaluated separately. Default gain remains 3;
+historical checkpoints missing the field retain that exact value. Neither
+candidate is the default launcher profile. Synthetic assay-trained weights
+must never be loaded into Pokemon. See the preselected comparisons and all
+negative evidence in `IMPROVEMENT_PLAN.md` / `FOLLOWTHROUGH_RESULTS.md`.

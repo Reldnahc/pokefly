@@ -28,6 +28,75 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 13:30 UTC: projected-v5 has exact frozen forward counts/actions/rates for 64
+  windows versus score-v2 (`projected-forward-verification-20260918T132730Z-875628`).
+  Real-ROM learn/resume/frozen/no-reward smoke passes
+  (`internal-smoke-20260918T132601Z-f78aed`); 286 Python / 23 JS tests and lint pass.
+  Original stopped-run checkpoint suffix is still exact after the inactive gain
+  field addition (`checkpoint-window-verification-20260918T132851Z-df5f99`).
+  Both preselected projected visual curves are now running (seeds 501/601).
+  Before first results, define the promotion gate: FINAL 8,192 weights, not
+  the best interim peak; independent frozen seeds 2501..2504; balanced cue
+  accuracy >=60%, each cue >=55%, and >=5-point balanced improvement over both
+  original and shuffled controls on each training seed. Require reversal from
+  that acquired state against a same-start shuffled reversal, not just a new
+  global preference. Passing is cue-learning evidence only, not game progress.
+  The fixed gain-12 neutral calibration is already poor: A 5.5..9.3 Hz, B
+  15.2..15.8 Hz and memory-output mean 21.5..21.8 Hz on frozen reset probes,
+  versus the 1 Hz target. No gain-12 gameplay promotion; finish the read-only
+  sensory measurement to preserve the failed hypothesis.
+
+- 13:23 UTC: resumed after the user reported an error state. All three pending
+  jobs completed normally. Broader-scope visual training at 8,192 decisions
+  gives 51.6% balanced cue accuracy versus 46.0% shuffled; it mostly increases
+  Left regardless of cue. Actual Route-1 scope tests: motor-only 208/327
+  positions, broader 249/430, reused frozen 337/414; neither reaches a new town.
+  These are not promoted or treated as retained navigation learning.
+  Next, test TWO separable mechanism hypotheses, not a combined tuned model:
+  (1) a local mean-input-preserving projection of score-v2 updates, using only
+  each presynaptic cell's running release mean and original synapse sizes.
+  This tests whether generic motor bias consumes learning capacity. Keep the
+  exact stochastic forward model, calibration, decoder and all other learning
+  settings. Preselect paired/shuffled visual curves, seeds 501 and 601,
+  checkpoints 512/2,048/8,192; report cue-balanced discrimination as well as
+  total rewarded activity. (2) a fixed whole-circuit synaptic-gain sensitivity
+  test at 12 versus the original 3, with a separately frozen neutral-gray
+  calibration using the existing uniform 1 Hz homeostasis protocol. No motor
+  labels, rewards, game images or button fit enter calibration. Test frozen
+  cue contrast/noise before committing to any long training. Both hypotheses
+  are engineering models, not established fly physiology. Synthetic weights
+  NEVER enter Pokemon; retained learning, independent noise and reversal are
+  required before any success claim. Preserve all negative results.
+
+- 11:30 UTC: the credit-direction audit raises target frequency but not cue
+  discrimination; inter-seed update cosine is only 0.027. Existing input-count
+  data shows left/right steering cue contrast only 0.10/0.16 of the within-cue
+  current standard deviation (score-v2). No gain/noise/critic change is assumed
+  to solve this. While the full broader-scope visual assay finishes, preselect
+  EXPLORATORY actual-game tests of motor-only versus one-hop perturb-v3 learning:
+  same original weights, calibrated serial controller, recorded Route-1 reset,
+  legacy outcome timing, seeds 1201/1202, 6,000 decisions each. A reset is an
+  intervention; neither assay/oracle weights nor a learned adapter enter the
+  game. Validate original frozen 64-decision prefixes against the existing
+  serial controls, then explicitly reuse those full frozen controls. This is
+  not promotion or a learning claim; report BOTH learning scopes/seeds even if
+  the visual assay fails. Any improvement needs frozen transfer on new seeds.
+
+- 11:10 UTC: test whether the score-v2 local reward-credit signal points toward
+  better choices at all, before inventing another critic. ROM-free DIAGNOSTIC:
+  freeze original weights while accumulating the unchanged rule's centered
+  reward-times-eligibility signal over 4,096 decisions on each noise seed
+  501/601, same alternating cues. Measure agreement between the two estimates.
+  Then temporarily move existing weights along the averaged direction and its
+  NEGATIVE control, max 25% factor change per postsynaptic population (same
+  positive diagonal scaling for both signs). Evaluate actual fixed-decoder
+  behavior on fresh seeds 2301..2304, 128 decisions/cue; compare original,
+  positive and negative directions. No fitted classifier/readout, game use,
+  exported weights or online policy change during collection. Report both
+  target frequency and cue-specific discrimination. This batch direction
+  audit is NOT a trained-game model or a biological learning claim. Restore
+  all originals and verify protected hashes afterward.
+
 - 11:01 UTC: compare the FINAL weights from both completed 24,000-decision
   serial games (legacy outcome timing and earlier confirmed outcomes), not a
   selected intermediate best checkpoint. Frozen Route-1 transfer, seeds
