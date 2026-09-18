@@ -27,6 +27,8 @@ class DynamicsConfig:
     isolate_nonvisual_sensory: bool = False
     quiescent_nonvisual_sensory: bool = False
     spike_temperature: float = 0.0
+    motor_adaptation_increment: float = 0.0
+    motor_adaptation_seconds: float = 3.0
 
     def __post_init__(self):
         if self.profile not in ("baseline", "hybrid-v1"):
@@ -54,6 +56,12 @@ class DynamicsConfig:
             raise ValueError("Invalid graded release/rest")
         if not 0 <= self.kc_tonic <= 0.14 or not 0 <= self.kc_adaptation_increment <= 2:
             raise ValueError("Invalid KC dynamics")
+        if (
+            not 0 <= self.motor_adaptation_increment <= 2
+            or self.motor_adaptation_seconds <= 0
+            or (self.motor_adaptation_increment and self.profile != "hybrid-v1")
+        ):
+            raise ValueError("Motor adaptation requires hybrid dynamics and valid constants")
 
 
 def nonvisual_sensory_cells(brain) -> np.ndarray:
@@ -96,6 +104,18 @@ class HybridDynamics:
         self.intrinsic_bias = None  # Optional fixed, neutral-calibration model data.
         self.track_noise = False
         self.track_score = False
+        # Anatomy only; not the button registry. Optional intrinsic current,
+        # independent of reward, image semantics, decoder state or game RAM.
+        self.adaptive_motor = xp.asarray(
+            np.flatnonzero(
+                np.isin(
+                    brain.superclass.astype(str), ["descending_neuron", "cb_motor", "vnc_motor"]
+                )
+            )
+            if config.motor_adaptation_increment
+            else [],
+            dtype=xp.int64,
+        )
         self.reset()
 
     def reset(self):
@@ -104,6 +124,9 @@ class HybridDynamics:
         self.release = b.xp.zeros(b.n, b.xp.float32)
         self.last_noise = None  # Consumed in the same neural step; not persistent state.
         self.last_probability = self.previous_release = None
+        self.motor_adaptation = (
+            b.xp.zeros((b.n, 1), b.xp.float32) if self.config.motor_adaptation_increment else None
+        )
 
     def current(self, release):
         if self.brain.device == "cuda":
@@ -120,9 +143,7 @@ class HybridDynamics:
         b, c = self.brain, self.config
         xp = b.xp
         if self.track_score:
-            self.previous_release = (
-                self.release.copy() if xp is np else self.release.get()
-            )
+            self.previous_release = self.release.copy() if xp is np else self.release.get()
         current = self.current(self.release) * b.gain
         if self.intrinsic_bias is not None:
             current += self.intrinsic_bias
@@ -131,6 +152,9 @@ class HybridDynamics:
         old_graded = b.v[self.graded].copy()
         b.v *= b.decay
         b.v += current + b.tonic - self.adaptation
+        if self.motor_adaptation is not None:
+            self.motor_adaptation *= np.float32(np.exp(-b.dt / c.motor_adaptation_seconds))
+            b.v -= self.motor_adaptation
         b.v[self.kc] += np.float32(c.kc_tonic - b.tonic)
         noise = b.rng.random((b.n, 1)) < b.noise_hz * b.dt
         b.v += noise * np.float32(b.noise_amp)
@@ -171,6 +195,10 @@ class HybridDynamics:
         fired = xp.flatnonzero(active)
         b.v[fired] = 0
         self.adaptation[self.kc, 0] += active[self.kc] * np.float32(c.kc_adaptation_increment)
+        if self.motor_adaptation is not None:
+            self.motor_adaptation[self.adaptive_motor, 0] += active[
+                self.adaptive_motor
+            ] * np.float32(c.motor_adaptation_increment)
         self.release.fill(0)
         self.release[fired] = 1
         self.release[self.graded] = b.v[self.graded, 0] * np.float32(c.graded_release)
@@ -178,7 +206,15 @@ class HybridDynamics:
         return fired if xp is np else fired.get()
 
     def arrays(self):
-        return {"adaptation": self.adaptation, "release": self.release}
+        return {
+            "adaptation": self.adaptation,
+            "release": self.release,
+            **(
+                {"motor_adaptation": self.motor_adaptation}
+                if self.motor_adaptation is not None
+                else {}
+            ),
+        }
 
     def restore(self, arrays):
         for name, target in self.arrays().items():
@@ -187,6 +223,13 @@ class HybridDynamics:
                 raise ValueError(f"Invalid hybrid checkpoint {name}")
             if name == "release" and (value > 1).any():
                 raise ValueError("Release must be in [0,1]")
+            if name == "motor_adaptation":
+                selected = self.adaptive_motor
+                selected = selected if self.brain.xp is np else selected.get()
+                outside = np.ones(self.brain.n, bool)
+                outside[selected] = False
+                if np.any(value[outside]):
+                    raise ValueError("Motor adaptation outside anatomical target population")
             setattr(self, name, self.brain.xp.asarray(value.copy()))
 
     def telemetry(self):

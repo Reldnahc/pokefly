@@ -11,7 +11,7 @@ from pokefly.internal_brain import CheckpointNoise
 from pokefly.plasticity import DANTargetedPlasticity, PlasticityConfig, dan_target_gates
 
 
-def toy(config=None):
+def toy(config=None, *, motor=False):
     matrix = sparse.csc_matrix(
         np.array([[0, 0, 0, 0], [-1, 0, 0, 0], [0, 0.2, 0.8, 0], [0, 0, 0.1, 0]], np.float32)
     )
@@ -21,7 +21,9 @@ def toy(config=None):
         device="cpu",
         visual=np.array([0]),
         _visual=np.array([0]),
-        superclass=np.array(["sensory", "ol_intrinsic", "cb_intrinsic", "cb_sensory"]),
+        superclass=np.array(
+            ["sensory", "ol_intrinsic", "cb_intrinsic", "cb_motor" if motor else "cb_sensory"]
+        ),
         weights=matrix.data,
         indices=matrix.indices,
         indptr=matrix.indptr,
@@ -72,6 +74,54 @@ def test_adaptation_and_release_resume_exactly():
     assert first.adaptation[2] > 0
     with pytest.raises(ValueError):
         restored.restore({"hybrid_adaptation": np.full((4, 1), np.nan)})
+
+
+def test_motor_adaptation_is_spike_triggered_and_anatomically_selective():
+    config = DynamicsConfig(profile="hybrid-v1", motor_adaptation_increment=0.02)
+    h = toy(config, motor=True)
+    before = h.brain.weights.copy()
+    h.brain.v[3] = 2
+    assert 3 in h.step(np.array([0.3]))
+    np.testing.assert_array_equal(h.adaptive_motor, [3])
+    assert h.motor_adaptation[3, 0] == pytest.approx(0.02)
+    assert not h.motor_adaptation[:3].any()
+    h.step(np.array([0.3]))
+    assert h.motor_adaptation[3, 0] == pytest.approx(0.02 * np.exp(-0.02 / 3))
+    assert h.brain.v[3, 0] == pytest.approx(h.brain.tonic - h.motor_adaptation[3, 0])
+    np.testing.assert_array_equal(before, h.brain.weights)
+    h.reset()
+    assert not h.motor_adaptation.any()
+    old = toy()
+    assert old.motor_adaptation is None and "motor_adaptation" not in old.arrays()
+
+
+def test_motor_adaptation_resume_and_legacy_default():
+    config = DynamicsConfig(profile="hybrid-v1", motor_adaptation_increment=0.02)
+    a, b = toy(config, motor=True), toy(config, motor=True)
+    a.brain.noise_hz = b.brain.noise_hz = 50
+    for _ in range(80):
+        a.step(np.array([0.3]))
+    assert a.motor_adaptation[3, 0] > 0
+    b.brain.v[:] = a.brain.v
+    b.brain.rng.generator.bit_generator.state = a.brain.rng.generator.bit_generator.state
+    b.restore({"hybrid_" + k: v.copy() for k, v in a.arrays().items()})
+    for _ in range(30):
+        np.testing.assert_array_equal(a.step(np.array([0.7])), b.step(np.array([0.7])))
+        for key in a.arrays():
+            np.testing.assert_array_equal(a.arrays()[key], b.arrays()[key])
+        np.testing.assert_array_equal(a.brain.v, b.brain.v)
+    bad = {"hybrid_" + k: v.copy() for k, v in a.arrays().items()}
+    bad["hybrid_motor_adaptation"][0] = 0.1
+    with pytest.raises(ValueError, match="outside"):
+        b.restore(bad)
+    assert (
+        ExperimentConfig.from_dict({}, checkpoint=True).brain.dynamics.motor_adaptation_increment
+        == 0
+    )
+    with pytest.raises(ValueError):
+        DynamicsConfig(motor_adaptation_increment=0.02)
+    with pytest.raises(ValueError):
+        DynamicsConfig(profile="hybrid-v1", motor_adaptation_seconds=0)
 
 
 def test_config_roundtrip_and_validation():

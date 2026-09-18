@@ -28,6 +28,96 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 11:01 UTC: compare the FINAL weights from both completed 24,000-decision
+  serial games (legacy outcome timing and earlier confirmed outcomes), not a
+  selected intermediate best checkpoint. Frozen Route-1 transfer, seeds
+  1201/1202, 6,000 decisions, same game start and forward configuration as the
+  validated serial controls. Reuse those original controls explicitly. This
+  asks whether the observed 2-versus-5 wins left useful retained behavior.
+  No practice resets in source training, synthetic weights, new shaping or
+  further learning in evaluation. The reset for transfer is an intervention.
+  Compare ALL arms/seeds and report unfinished-but-paid encounters separately.
+  A favorable small panel requires new-seed confirmation before promotion.
+
+- 10:55 UTC: the matched stochastic information audit also finds cue information
+  at motor inputs; missing pixels are not the explanation. Both-sign oracle
+  fitting gives only 56.9% forward (positive-only 55.1%) and 76.3% reverse;
+  fixed inhibition alone is not established as the bottleneck. Test ONE broader
+  anatomical learning scope: existing positive inputs to all motor/descending
+  cells PLUS central-brain intrinsic cells that directly project to ANY
+  descending cell. This selects 21,848 target cells / 4,300,611 positive edges,
+  versus 2,129 original targets; no button labels, added edges, encoder changes,
+  fitted readout, new reward or new neuron dynamics. Keep perturb-v3 unchanged
+  otherwise. This is an engineering capacity hypothesis, not validated fly
+  plasticity. Require exact frozen forward equivalence, sparse-index tests and
+  checkpoint continuation before paired/shuffled visual acquisition seed 501
+  at 512/2,048/8,192. Synthetic-trained weights NEVER enter Pokemon. Require
+  retained cue-specific improvement, independent seed and reversal before any
+  learning claim or model promotion. Preserve all old failures and both arms.
+
+- 10:43 UTC: the successful frozen sensory-information audit used deterministic
+  threshold dynamics, NOT the stochastic model required by score-v2/v3. Do not
+  assume its visual information/capacity carries over. Run the same frozen
+  latency/count audit for unchanged score-v2, seeds 801..804, before another
+  score-learning variant or upstream-plasticity expansion. This is a missing
+  matched-model diagnostic, not new training or an external visual policy.
+  Its offline classifier remains measurement-only, never used by the game.
+
+- 10:36 UTC: positive-edge oracle achieved 55.1% forward / 79.8% reversed
+  conditional accuracy (original forward 40.7%) in actual frozen circuit tests.
+  These are supervised temporary synapses, NOT learned behavior. Artifact
+  `oracle-synaptic-capacity-20260918T102612Z-f7f970`; all weights discarded and
+  original source hashes match. Next capacity control permits both ORIGINAL
+  signs with separate E/I budgets and the same mean-current constraint, fit
+  seeds and test seeds. Never export/deploy. Repeat original counts to check
+  the expanded in-memory intervention code has not changed the baseline; do
+  not count that duplicate as independent evidence. This asks whether fixed
+  inhibition limits the harder cue assignment before changing another rule.
+
+- 10:30 UTC: eight real-battle training episodes for outcome-v3 are complete;
+  the matched battle evaluation is still running. Independently preselect a
+  transfer test now, not only if its remaining battle scores are favorable:
+  weights from `controlled-battle-learning-20260918T095632Z-8e9695/training-908`,
+  fresh full-game intro starts, frozen seeds 1501/1502, 12,000 decisions each.
+  Reuse and validate the corresponding original-weight full-game controls from
+  the completed series, explicitly not new trials. Reward timing may differ
+  but has no effect on a frozen controller; every forward-model setting must
+  match. Preserve exact starting game-state hashes and flag any paid but
+  unfinished final encounter. Live dashboard enabled. Training reset to the
+  same recorded rival remains an explicit intervention; this is transfer of
+  REAL GAME training, not diagnostic button/cue-trained weights or a route.
+
+- 10:24 UTC: after multiple failed cue-learning rules, run a separate ROM-free
+  SYNAPTIC CAPACITY POSITIVE CONTROL before adding another rule. Use the existing
+  frozen presynaptic counts (seeds 801..804) and a supervised linear program to
+  maximize direct left/right cue contrast on existing positive DNa02 inputs,
+  within the same 0.25..4 factors and +/-25% input budget. Also preserve each
+  neuron's mean predicted input across the two cues; fix unobserved/graded
+  inputs at original weights. Then test those temporary weights in the ACTUAL
+  recurrent fly on new noise seeds 2001..2004, both cue assignments, 128 choices
+  per cue, original fixed decoder. No rewards, game, fitted readout or neural
+  weights exported. This is deliberately an oracle intervention, NOT learning
+  evidence and NEVER a deployable brain. It tests whether the earlier frozen-
+  current capacity bound translates into actual choices. Failure is not a
+  general impossibility proof. Preserve every arm and original data hashes.
+
+- Next mechanism test, after the 10:17 UTC inspection: actual replay at frozen
+  serial/3-second samples 3,406..3,413 shows repeated Up into an impassable
+  north-facing ledge. Artifact `recorded-replay-proof-20260918T101515Z-a1360c`.
+  This is not another missing-Up event. Test opt-in spike-triggered adaptation
+  on ALL anatomically descending/motor cells (not button-selected populations):
+  0.02 current increment per spike, 3-second exponential decay. Reuse the
+  existing neutral-gray 1 Hz homeostasis protocol to calibrate fixed biases
+  for this changed dynamics model, not game behavior. Compare original frozen
+  serial controls against the combined adaptation/calibration candidate on
+  the same Route-1 state, seeds 1201/1202 and 6,000 decisions. Keep reward and
+  decoder settings unchanged. No collision detector, action timer or quota,
+  artificial tactile channel, route, punishment or new synapse. This is an
+  engineering adaptation hypothesis, not measured fly motor physiology.
+  Validate selective current, reset/checkpoint state, legacy exactness and
+  neutral firing before gameplay. Positive exploration would still not prove
+  learned navigation; require retained learning separately.
+
 - 10:02 UTC: the extended score-v2 paired visual arm drops from 52.0% at
   8,192 to 46.2% at 16,384; shuffled control is still running. More training
   alone has not produced cue discrimination. Test a local presynaptic-centering

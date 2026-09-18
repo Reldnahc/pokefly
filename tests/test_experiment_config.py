@@ -52,3 +52,24 @@ def test_missing_reward_timing_retains_legacy_checkpoint_behavior():
     assert ExperimentConfig.from_dict({}, checkpoint=True).rewards.timing == "encounter-end-v1"
     config = ExperimentConfig.from_dict({"rewards": {"timing": "last-faint-v3"}})
     assert ExperimentConfig.from_dict(asdict(config), checkpoint=True) == config
+
+
+def test_missing_learning_scope_retains_legacy_checkpoint_behavior():
+    old = {
+        "brain": {
+            "plasticity": {"rule": "sensorimotor-perturb-v3"},
+            "dynamics": {"profile": "hybrid-v1"},
+        }
+    }
+    assert ExperimentConfig.from_dict(old, checkpoint=True).brain.plasticity.scope == (
+        "motor-inputs-v1"
+    )
+    candidate = ExperimentConfig.from_dict(
+        {
+            "brain": {
+                "plasticity": {"rule": "sensorimotor-perturb-v3", "scope": "premotor-one-hop-v2"},
+                "dynamics": {"profile": "hybrid-v1"},
+            }
+        }
+    )
+    assert ExperimentConfig.from_dict(asdict(candidate), checkpoint=True) == candidate

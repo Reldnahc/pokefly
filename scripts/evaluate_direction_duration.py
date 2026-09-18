@@ -1,8 +1,9 @@
-"""Frozen one-factor direction integration test, not learning or a route policy.
+"""Frozen fixed-controller mechanism tests, not learning or a route policy.
 
-Compare a fixed three-second motor-rate trace with validated, explicitly reused
-one-second controls. Every direction uses the same constant. No timed forced
-action, collision detector, RAM policy input, reward change or fitted parameter.
+Compare either a fixed three-second rate trace or the motor-adaptation/neutral-
+calibration candidate with validated, explicitly reused one-second controls.
+No forced action, collision detector, RAM policy input or reward change.
+The adaptation arm changes two coupled physiological settings, not the decoder.
 """
 
 from __future__ import annotations
@@ -23,6 +24,9 @@ from pokefly.runner import run_directory, write_json
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--baseline-report", type=Path, required=True)
+    p.add_argument(
+        "--candidate", choices=("direction-3s", "adaptive-motor"), default="direction-3s"
+    )
     args = p.parse_args()
     source = json.loads(args.baseline_report.read_text())
     controls = source["rows"]
@@ -36,14 +40,19 @@ def main():
         root = json.loads(path.read_text())
     else:
         raise ValueError("Missing original starting-state identity")
-    output = run_directory("direction-duration-comparison")
+    output = run_directory(
+        "direction-duration-comparison"
+        if args.candidate == "direction-3s"
+        else "motor-adaptation-comparison"
+    )
     report = {
         "scope": __doc__,
         "baseline_report": str(args.baseline_report),
         "baseline_report_sha256": sha256(args.baseline_report),
         "ancestry": ancestry,
         "state_sha256": root["state_sha256"],
-        "direction_trace_seconds": 3.0,
+        "candidate": args.candidate,
+        "direction_trace_seconds": 3.0 if args.candidate == "direction-3s" else 1.0,
         "reused_controls_not_new_trials": controls,
         "rows": [],
     }
@@ -68,6 +77,23 @@ def main():
                 config.brain, motor=replace(config.brain.motor, direction_trace_seconds=3.0)
             ),
         )
+        if args.candidate == "adaptive-motor":
+            assert config.brain.dynamics.motor_adaptation_increment == 0
+            calibration = Path("fly-data/intrinsic-neutral-adaptive-v1.npz")
+            assert calibration.is_file()
+            candidate = replace(
+                config,
+                brain=replace(
+                    config.brain,
+                    intrinsic_calibration=str(calibration).replace("\\", "/"),
+                    dynamics=replace(
+                        config.brain.dynamics,
+                        motor_adaptation_increment=0.02,
+                        motor_adaptation_seconds=3.0,
+                    ),
+                ),
+            )
+            report["neutral_calibration_sha256"] = sha256(calibration)
         path = train(
             TrainOptions(
                 rom=resolve_rom(None, Path.cwd()),

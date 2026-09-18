@@ -570,6 +570,69 @@ and signed membrane trace are saved/reset exactly. No action/cue label, RAM
 feature, fitted readout or external critic enters the rule. Visual acquisition,
 retention and reversal remain experimental, not established by the equation.
 
+## Optional intrinsic motor adaptation
+
+`sensorimotor-adaptive-v1` adds a spike-triggered current only in anatomically
+classified descending, central-brain motor and VNC motor neurons. Every spike
+adds 0.02; the current decays with a three-second time constant and subtracts
+from membrane drive. It is not a chosen-button timer, action quota, collision
+detector or new sensory channel. The mechanism follows the general modeling
+idea of [spike-triggered adaptation](https://doi.org/10.1152/jn.00686.2005), but
+these constants are engineering hypotheses, NOT measured fly motor physiology
+or the calibrated AdEx model from that paper.
+
+The changed dynamics receives its own fixed, neutral-gray intrinsic calibration
+using the existing all-nonsensory-cell homeostasis rule. No game image, reward
+or motor identity is used to fit the biases. Consequently the gameplay
+comparison tests adaptation PLUS its neutral calibration, not a pure one-factor
+adaptation effect. The decoder/rewards remain those of serial-v1.
+
+Generate its optional local calibration without overwriting existing files:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/probe_intrinsic.py --device cuda `
+  --calibration-only --motor-adaptation-increment 0.02 `
+  --motor-adaptation-seconds 3 --reset-probe-decisions 128 `
+  --export fly-data/intrinsic-neutral-adaptive-v1.npz
+```
+
+Three independent neutral probes keep every mapped motor population active
+(roughly 0.91..1.12 Hz); this is a sanity check, not an action-frequency target.
+The adaptation array is saved/reset explicitly and restricted to its anatomical
+population on restore. Missing settings mean exactly zero adaptation, so old
+models/checkpoints are not silently changed. Gameplay and learning benefits
+are still being evaluated; this is not a new default.
+
+## Oracle capacity controls are not trained brains
+
+`probe_synaptic_capacity.py` is deliberately a separate supervised positive
+control. It temporarily fits existing DNa02 inputs using fixed-source neural
+counts, tests the resulting REAL recurrent activity and fixed decoder on new
+noise streams, then discards the weights. It does not use the game or export a
+brain. Positive-only and both-sign controls keep sign-preserving factor bounds,
+local input budgets and predicted two-cue mean input fixed. These controls
+can expose model limitations but must NEVER be reported as reward learning or
+silently used to initialize Pokemon. Neither a fitted readout nor classifier
+enters the application.
+
+## Optional one-hop premotor learning scope
+
+`sensorimotor-premotor-v1` keeps the perturb-v3 rule, neutral calibration,
+original neural dynamics, pixel input and fixed decoder. Its explicit
+`premotor-one-hop-v2` scope adds existing positive inputs to central-brain
+intrinsic cells that directly project to any descending neuron. Selection uses
+the connectome and superclass labels, not the button registry or game state.
+Original descending/motor targets remain included. No new edges are added;
+signs, factor bounds and per-cell input budgets stay fixed.
+
+This expands the targets from 2,129 to 21,848 cells (4,300,611 positive edges).
+It tests whether restricting plasticity to the last motor stage was limiting
+learned sensory control. This is an engineering hypothesis, NOT an established
+biological map of plastic synapses. Inactive learning must produce exactly the
+same neural activity/actions as perturb-v3. Missing scope fields keep the old
+`motor-inputs-v1` selection, including in checkpoints. Synthetic assay weights
+are not game initialization. No learning benefit is assumed from broader scope.
+
 ## Display interpretation (kept out of the showcase layout)
 
 - In snapshot mode the game frame is the exact pre-action image the fly received;

@@ -30,6 +30,7 @@ class PlasticityConfig:
     input_budget_fraction: float = 0.0
     slow_eligibility_seconds: float = 0.0
     trace_mixing: str = "mean-v1"
+    scope: str = "motor-inputs-v1"
 
     def __post_init__(self):
         if self.rule not in (
@@ -50,12 +51,18 @@ class PlasticityConfig:
             raise ValueError("Unknown plasticity rule")
         if not isinstance(self.normalize_inputs, bool):
             raise ValueError("normalize_inputs must be boolean")
+        if self.scope not in ("motor-inputs-v1", "premotor-one-hop-v2"):
+            raise ValueError("Unknown plasticity scope")
+        if self.scope != "motor-inputs-v1" and not self.rule.startswith("sensorimotor-"):
+            raise ValueError("Premotor scope requires a sensorimotor learning rule")
         if self.trace_mixing not in ("mean-v1", "impulse-balanced-v2"):
             raise ValueError("Unknown eligibility trace mixing")
         if self.trace_mixing != "mean-v1" and not self.slow_eligibility_seconds:
             raise ValueError("Impulse-balanced mixing requires a slow eligibility trace")
         if not all(
-            np.isfinite(v) for k, v in asdict(self).items() if k not in ("rule", "trace_mixing")
+            np.isfinite(v)
+            for k, v in asdict(self).items()
+            if k not in ("rule", "trace_mixing", "scope")
         ):
             raise ValueError("Plasticity parameters must be finite")
         if not 0 <= self.learning_rate <= 1:

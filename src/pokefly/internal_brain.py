@@ -12,6 +12,7 @@ from pokefly.compartments import compartment_gates
 from pokefly.dynamics import DynamicsConfig, HybridDynamics
 from pokefly.motors import MOTOR_GROUPS, MotorConfig, MotorDecoder, populations
 from pokefly.pixel_brain import PixelBrain, PixelObservation
+from pokefly.plastic_edges import csr_offsets_for_edges, sensorimotor_targets
 from pokefly.plasticity import (
     CompartmentPlasticity,
     DANTargetedPlasticity,
@@ -104,9 +105,7 @@ class InternalBrain(PixelBrain):
         sensorimotor = config.plasticity.rule.startswith("sensorimotor-")
         if sensorimotor:
             # Anatomy only, independent of the selected motor-to-button registry.
-            eligible_post = np.isin(
-                b.superclass.astype(str), ["descending_neuron", "cb_motor", "vnc_motor"]
-            )
+            eligible_post = sensorimotor_targets(b, config.plasticity.scope)
             eligible_sign = (
                 b.weights != 0
                 if config.plasticity.rule == "sensorimotor-score-v3"
@@ -141,15 +140,9 @@ class InternalBrain(PixelBrain):
             from pokefly.deterministic import DeterministicCUDAInput
 
             b.synaptic_input = DeterministicCUDAInput(b)
-            ptr = b._W.indptr.get()
-            csr_offsets = np.empty(len(pre), np.int64)
-            for cell in np.unique(post):
-                chosen = np.flatnonzero(post == cell)
-                indices = b._W.indices[ptr[cell] : ptr[cell + 1]].get()
-                local = np.searchsorted(indices, self.plasticity.pre[chosen])
-                if not np.array_equal(indices[local], self.plasticity.pre[chosen]):
-                    raise RuntimeError("CUDA plastic-edge indexing mismatch")
-                csr_offsets[chosen] = ptr[cell] + local
+            csr_offsets = csr_offsets_for_edges(
+                self.plasticity.pre, post, b._W.indptr.get(), b._W.indices.get()
+            )
             self.csr_offsets = b.xp.asarray(csr_offsets)
             if not np.array_equal(b._W.data[self.csr_offsets].get(), self.plasticity.base):
                 raise RuntimeError("CPU/CUDA initial plastic weights disagree")
@@ -332,6 +325,8 @@ class InternalBrain(PixelBrain):
         stored["config"]["dynamics"].setdefault("isolate_nonvisual_sensory", False)
         stored["config"]["dynamics"].setdefault("quiescent_nonvisual_sensory", False)
         stored["config"]["dynamics"].setdefault("spike_temperature", 0.0)
+        stored["config"]["dynamics"].setdefault("motor_adaptation_increment", 0.0)
+        stored["config"]["dynamics"].setdefault("motor_adaptation_seconds", 3.0)
         stored["config"]["motor"] = dict(stored["config"]["motor"])
         stored["config"]["motor"].setdefault("arbitration", "exclusive-v1")
         stored["config"]["motor"].setdefault("direction_trace_seconds", 1.0)
@@ -343,6 +338,7 @@ class InternalBrain(PixelBrain):
         stored["config"]["plasticity"].setdefault("input_budget_fraction", 0.0)
         stored["config"]["plasticity"].setdefault("slow_eligibility_seconds", 0.0)
         stored["config"]["plasticity"].setdefault("trace_mixing", "mean-v1")
+        stored["config"]["plasticity"].setdefault("scope", "motor-inputs-v1")
         if weights_only:
             # New seed/backend allowed for retention evaluation; circuit settings stay fixed.
             stored["device"] = identity["device"]
