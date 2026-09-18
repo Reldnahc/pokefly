@@ -1,0 +1,6 @@
+{
+  "brain": {
+    "dynamics": {"profile": "hybrid-v1"},
+    "plasticity": {"rule": "dan-targeted-v1"}
+  }
+}

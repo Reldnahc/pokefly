@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pokefly"
+version = "0.2.0"
+description = "Drive Pokemon Red with the MaleCNS fruit-fly connectome"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "flybrain==0.1.0",
+  "numpy>=2.0,<3",
+  "numba>=0.61,<1",
+  "pillow>=11,<13",
+  "pyboy==2.7.0",
+  "scipy>=1.13,<2",
+]
+
+[project.optional-dependencies]
+gpu = ["flybrain[gpu]==0.1.0"]
+dev = [
+  "pytest>=8.3,<9",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+pokefly = "pokefly.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pokefly"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"THIRD_PARTY_NOTICES.md" = "pokefly/THIRD_PARTY_NOTICES.md"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src", "/tests", "/scripts", "/pyproject.toml", "/README.md",
+  "/PROJECT_BRIEF.md", "/EXPERIMENT.md", "/RESULTS.md", "/MODEL_VARIANTS.md", "/configs",
+  "/THIRD_PARTY_NOTICES.md", "/constraints-win-py312.txt",
+  "/.gitignore", "/.env.example",
+  "/IMPROVEMENT_PLAN.md",
+  "/FOLLOWTHROUGH_RESULTS.md",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

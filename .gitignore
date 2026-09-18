@@ -1,0 +1,46 @@
+# Legally supplied game ROMs and cartridge dumps must never be committed.
+*.[gG][bB]
+*.[gG][bB][cC]
+*.[gG][bB][aA]
+*.[gG][bB].*
+roms/
+
+# Emulator state and battery-backed saves.
+*.sav
+*.ram
+*.state
+*.rtc
+*.sym
+screenshots/
+recordings/
+
+# Fly connectome data and generated training artifacts.
+fly-data/
+data/
+checkpoints/
+runs/
+*.npz
+*.npy
+*.parquet
+
+# Python environments and caches.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+dist/
+*.egg-info/
+
+# Local configuration.
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

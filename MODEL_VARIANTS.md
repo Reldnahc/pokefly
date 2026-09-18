@@ -1,0 +1,349 @@
+# Neural variants and what the display means
+
+The purpose is to let the fly **play**, not demand that it master Pokemon.
+We assess screen-dependent activity, delivered actions, interaction with the
+game, internal memory, and retained learning separately. Exploration totals
+and the original house-exit milestone are measurements, not a route to teach.
+
+## Running the explicit experimental variant
+
+```powershell
+.\scripts\start.ps1 -Intro
+```
+
+The launcher defaults to `sensorimotor-bounded-v1`, also selectable with
+`train --config configs/sensorimotor-bounded-v1.json`. This includes the
+incoming sensory isolation, fixed neutral-image calibration and bounded internal
+sensorimotor learning described below. Use `-Profile sensory-isolated-v1` for
+the previous model, or `-Profile hybrid-v1` for the unisolated control.
+Bare `train` without a config
+retains baseline neural dynamics. Fresh runs use the approved
+`parallel-v2` button-adapter correction: one direction plus one A/B/Start command.
+`--resume` restores its saved profile **and decoder**; older checkpoints remain
+`exclusive-v1`. Do not supply another configuration during exact resume.
+No ROM or original connectome data file is changed. No motor threshold, reward
+category, reward amount, or movement/button assignment was changed in this work.
+
+Other research profiles remain **opt-in**. Current findings and reproduction
+details are in [FOLLOWTHROUGH_RESULTS.md](FOLLOWTHROUGH_RESULTS.md); historical
+results are in [RESULTS.md](RESULTS.md). The recorded protocol is
+in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
+
+| Profile | Change from sensory-isolated-v1 |
+| --- | --- |
+| `stream-v1` | Interleave neural updates with fresh raw frames during each pulse. |
+| `endpoint-v1` | Timing control for stream; repeat the pulse's final frame. |
+| `quiescent-v1` | Hold the unused nonvisual sensory population at rest. |
+| `compartment-ema-v1` | Partial compartment gates and expectation-centered plasticity. |
+| `intrinsic-v1` | Fixed neutral-image excitability calibration; earlier KC learning rule. |
+| `sensorimotor-v1` | Calibrated dynamics plus broad motor-input covariance plasticity; locks in. |
+| `sensorimotor-normalized-v1` | Exact local incoming-strength normalization; weak motor acquisition. |
+| `sensorimotor-bounded-v1` | Current launcher: every eligible edge bounded to 0.75--1.25x original. |
+| `sensorimotor-budget-v1` | Wider individual edge range, total incoming strength bounded +/-25%. |
+| `sensorimotor-perturb-v1` | Same bounded input budget, credit from actual neural-noise perturbations. |
+
+Use `-Profile NAME` for a **new** experiment. `-Resume` and `-Weights` restore
+the saved profile; neither silently converts a saved brain into another model.
+
+## Neutral intrinsic calibration and internal sensorimotor learning
+
+`intrinsic-neutral-v1.npz` stores fixed voltage-drive offsets indexed by exact
+neuron body IDs. Its checksum is part of checkpoint identity. On neutral gray
+(RGB 128), every nonsensory spiking cell follows the SAME equation:
+`bias += 0.001 * (1 Hz * dt - spike)`, clipped to `[-0.14, 0.2]`, for 10,000
+neural steps with seed 707. Graded retinal/lamina cells and all sensory classes
+are excluded. Offsets are frozen before gameplay; no game frames, motor labels,
+reward or button quota enters fitting. Original connectome files are untouched.
+The calibration is an engineering hypothesis, not measured cell-specific
+physiology. Fly firing-rate homeostasis motivates investigating excitability,
+not the chosen universal target ([primary study](https://elifesciences.org/articles/45717)).
+Fresh-reset rates can differ sharply from the fitting trajectory: KC and MBON
+rates fall substantially, so this is not a validated solution for memory dynamics.
+
+Reproduction, without a ROM (refuses to overwrite an existing artifact):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/probe_intrinsic.py --calibration-only `
+  --device cuda --export fly-data/intrinsic-neutral-v1.npz
+```
+
+All sensorimotor variants select EXISTING positive inputs to every neuron whose
+anatomical superclass is `descending_neuron`, `cb_motor` or `vnc_motor`:
+495,962 edges across 2,129 targets. Selection never consults the seven-button
+registry. No readout/encoder is fitted, no connection is added and no sign changes.
+This is a broader experimental plasticity hypothesis, not an anatomically
+resolved dopamine mechanism. Fly motor self-learning is not necessarily a
+mushroom-body-only process ([primary study](https://pubmed.ncbi.nlm.nih.gov/38779314/));
+that does not validate this rule or these selected cells.
+
+The covariance rule uses a 0.2 s presynaptic trace, postsynaptic firing centered
+against a preceding 10 s baseline, a 0.6 s eligibility trace and a 1 Hz activity
+reference. Eligibility is clipped to +/-5. Scalar feedback is `tanh(reward)`
+minus a preceding 30 s reward average; learning rate is 0.02. Reward omission
+can produce a negative internal prediction error, but no negative game reward
+or revisit penalty was added. Dopamine here remains a synthetic teaching signal,
+not a concentration or a measured molecular model. The broad idea is
+[reward-modulated spiking plasticity](https://florian.io/papers/2007_Florian_Modulated_STDP.pdf),
+not an exact reproduction of that paper.
+
+The default bounds each weight to 0.75--1.25 of its original value. The optional
+budget variant instead permits 0.25--4x individual weights while projecting each
+target's total positive incoming strength into 0.75--1.25 of its original sum.
+Projection is bounded, iterative and approximate to 1e-5 relative tolerance;
+it does not aim for any action distribution. Exact-normalization control fixes
+the sum at 1x and is not used by default.
+
+The optional perturbation rule uses the simulator's actual independent noise
+events, centered against their known Bernoulli probability, instead of firing
+minus a global firing baseline. Previous presynaptic activity supplies local
+eligibility; no action information or external critic enters it. Noise draws,
+noise amplitude, neural dynamics and button mapping are unchanged. This is a
+finite-noise/filtered-trace approximation inspired by
+[Fiete & Seung](https://doi.org/10.1103/PhysRevLett.97.048104), not their
+conductance model, an exact gradient guarantee, or validated fly biology.
+
+Checkpoints retain weights, eligibility, presynaptic/baseline traces, slow reward
+expectation and all dynamics. Exact resume keeps them; `--weights` intentionally
+keeps connections but resets fast dynamics and reward expectation for a new trial.
+Older configurations receive only inactive compatibility defaults on restore.
+The faster fused eligibility kernel is tested bit-for-bit against NumPy 2.
+
+## Input timing: stream-v1 and endpoint-v1
+
+The default `snapshot-v1` still integrates 12 neural updates from one pre-action
+image, selects buttons, executes 24 game frames, then applies accumulated reward.
+Stream samples the actual raw framebuffer at game-frame offsets 2, 4, ..., 24,
+integrating one neural update per image. No intermediate game frame is invented.
+The original 20 ms neural timestep, 23 held frames plus one released frame,
+decoder, general reward amounts, and pixel mapping are unchanged.
+
+The two new modes prepare one explicit 12-step static input window at startup,
+then repeat: select from the preceding window, execute the pulse and integrate
+the next window, apply accumulated reward. `endpoint-v1` repeats the endpoint
+image instead of interleaving images, keeping the same neural budget and reward
+ordering as stream. This is a control for the changed eligibility timing, not
+another visual model. Game time and neural time remain different clocks.
+
+Pending spike counts, last retinal drive, frame hashes and sample offsets are
+checkpointed. Exact resume does not add another startup window. The display
+shows the **last actual frame** of the window that selected the displayed pulse;
+its activity spans the whole window. It is not a replay of all intermediate
+images. Changing images more frequently works, but did not consistently improve
+Up or exploration in the matched frozen tests, so snapshot remains the default.
+
+## Quiescent unused sensory boundary: quiescent-v1
+
+This separately versioned candidate requires existing nonvisual sensory
+isolation and uses precisely the same 11,931-cell anatomical mask. After drawing
+the unchanged global neuronal-noise stream, it holds those cells' voltages at
+zero before diagnostic injection and spike detection. Thus their normal
+tonic/noise activity cannot drive the network; visual input is not silenced.
+Original outgoing connections remain stored, and other cells receive exactly
+the same random draws. This is a stronger experimental boundary condition, not
+a biological correction or a selective forward-neuron intervention.
+
+The circuit screen did not improve Up consistently. The setting defaults to
+false, including restoration of older checkpoints. It was not promoted to the
+normal experiment or combined with other changes to hunt for a favorable route.
+
+## Persistent sensory isolation: sensory-isolated-v1
+
+The user selected this controlled simplification for the pixels-only experiment,
+following the forward-current audit. It combines the hybrid dynamics and targeted
+internal plasticity below with `dynamics.isolate_nonvisual_sensory = true`.
+
+The fixed anatomical mask selects `superclass` labels containing `sensory`,
+excluding **every** cell in the original `brain.visual` population: 11,931 cells
+in the installed MaleCNS model. Their incoming network current is set to zero
+after synaptic propagation, before integration. It is identical to the tested
+temporary intervention, not a mask fitted to Up performance.
+
+- Original weight/sign arrays, visual input/feedback, and non-sensory currents
+  remain unchanged. No direct DNg100 stimulation or inhibition removal is used.
+- Isolated cells retain outgoing connections, tonic input and neuronal noise.
+  They are not deleted or completely silenced; this is not a simulated intact fly.
+- The setting, cell count and selected-body-ID checksum are stored in neural
+  identity/checkpoints. Resuming an old checkpoint defaults isolation to **off**;
+  switching models is never implicit, including weight-only retention runs.
+- The dashboard labels the setting and clarifies that its connection count
+  describes the original anatomical graph. RAM remains reward/measurement-only.
+
+This is a persistent, reversible experimental profile, not a claim that real
+flies lack sensory feedback. The unisolated control remains available. Changing
+the experimental assumption later requires a new trial/configuration, not
+silently editing a running or resumed experiment. See [RESULTS.md](RESULTS.md).
+
+## Dynamics: hybrid-v1
+
+All original signed connections remain. This is a local modeling hypothesis,
+not a downloaded validated replacement nervous system or a reproduction of
+flyvis. The constants below were fixed using non-game neural checks before the
+gameplay evaluation. They have not been fitted to physiological recordings.
+
+- 6,006 photoreceptors and 8,884 L1--L5 cells transmit graded values, not spikes.
+- Photoreceptor target is `clip(pixel_drive + signed_network_current, 0, 1)`.
+  Lamina target is `clip(0.6 + signed_network_current, 0, 1)`.
+  Both follow the target with a 40 ms time constant, and transmit 0.25 times
+  their normalized state through their existing signed outgoing connections.
+  The retinal map, full-screen input, and histaminergic weight signs are unchanged.
+- Other cells retain the baseline spiking equations. Each KC has tonic input
+  0.02 instead of 0.14 and a spike-triggered adaptive current: +0.25 on a spike,
+  exponential decay with a 1 s time constant, subtracted during integration.
+  This is an engineering stabilization hypothesis, not a claim that these are
+  measured KC parameters. No KC recurrent edges are cut or silently reweighted.
+- Neuronal noise, 20 ms timestep, and all other fast
+  connectome weights remain as before. Continuous propagation multiplies each
+  connection by its actual graded value; it does not round activity to spikes.
+
+Upstream's homogeneous spiking model does not represent the graded early
+visual relay; its author documents that limitation in
+[fly.ai's findings](https://github.com/alextitonis/fly.ai#what-we-found).
+Our minimal hybrid relay addresses that specific modeling gap, not every
+missing part of fly vision. Other visual neurons are still modeled as spiking.
+
+`circuit-evaluate` compares baseline, KC-adaptation-only, and hybrid variants
+with identical noise and static images. It reports full-window and post-startup
+spike differences. A separate direct neural injection checks each of the seven
+readouts. This injection is never available to the normal game controller.
+All readouts passed, so there was no justification to fit per-button thresholds
+or introduce balancing/forced actions. Splitting direction/function arbitration
+now lets rare valid Up signals reach the game. Pixel-driven access to the forward
+cells remains poor. [RESULTS.md](RESULTS.md) records the separate current audit:
+nonvisual sensory recurrence contributes to persistent forward inhibition.
+Those current-removal experiments are not enabled by this profile.
+
+## Learning: dan-targeted-v1
+
+The original global centered-eligibility rule is retained as `centered-v1`.
+The experimental rule selects 335 `KCg-d`/`KCab-p` visual-KC candidates and their
+4,407 existing KC-to-MBON edges. The choice of cell classes is motivated by
+[Ganguly et al. (2024)](https://pmc.ncbi.nlm.nih.gov/articles/PMC11228034/),
+which describes direct and indirect visual input to those classes in FlyWire.
+The population counts here come from our MaleCNS files, not that paper, and
+matching type names does not validate every cell's visual function in our model.
+
+For each plastic edge, shared DAN input to its KC and MBON defines an overlap
+gate: sum `sqrt(abs(DAN->KC weight) * abs(DAN->MBON weight))` across the selected
+DANs, then max-normalize across eligible edges. PAM and PPL1 define separate
+channels. This produces 3,549 positive-channel and 3,675 negative-channel gated
+edges. Neither channel creates new connections.
+
+Reward still enters as one scalar. Positive reward drives the PAM proxy;
+negative reward would drive the PPL1 proxy (current gameplay rewards do not
+include punishments). This coarse valence assignment is a stated assumption,
+**not validated valence for every DAN or a resolved compartment map**. Release
+is synthetic; it is not derived from measured dopamine or simulated DAN spikes.
+The baseline fast effects of DAN connections have not been reclassified.
+
+KC spike probability uses a 0.2 s trace, converted to activity relative to
+5 Hz and clipped to [0,1]. A 2 s eligibility trace retains this activity. For
+original-weight multiplier `f`, eligible activity `e`, and anatomical gate `g`:
+
+```text
+f <- clip(f - 0.02 * abs(tanh(reward)) * g * (e + f - 1), 0.25, 4)
+```
+
+Active tagged inputs depress; inactive inputs recover toward the original
+weight during modulation. With zero reward or frozen learning, weights do not
+change. Signs and sparsity remain fixed. Depression/recovery is motivated by
+[Gkanias et al. (2022)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8975552/),
+but this bounded overlap-gated rule is our approximation, not their complete
+incentive circuit. Anatomical compartments and receptor-specific effects remain
+unfinished modeling work; this variant must not be described as solved dopamine.
+
+`association-evaluate` is a separate raw-image task, never a Pokemon reward.
+Left/right half-white images are presented with matched noise; A gets reward,
+B does not. Controls freeze weights or alternate reward between A/B (the report
+labels this balanced nonpredictive control `shuffled`; it is not random shuffling).
+Every presentation starts with fresh dynamics and a black warmup, isolating
+synaptic storage from transient activity. Tests have no reward. Reversal rewards B.
+Fixed-input suppression measures a stored weight effect, not a behavioral choice.
+
+The measured results are in [RESULTS.md](RESULTS.md). The new learning rule did
+**not** establish reliable image-specific association, reversal, or improved
+game exploration. More movement and changing weights are not sufficient evidence.
+
+## Partial learning candidate: compartment-ema-v1
+
+This opt-in candidate keeps the same 335 visual-KC candidates and 4,407 existing
+edges, but only gates a conservative subset using these type-level assignments:
+
+| Compartment proxy | DAN type | MBON types | KC type | Synthetic feedback |
+| --- | --- | --- | --- | --- |
+| gamma5 | PAM01 | MBON01, MBON27 | KCg-d | Positive reward |
+| alpha1 | PAM11 | MBON07 | KCab-p | Positive reward |
+| gamma1pedc | PPL101 | MBON11 | KCg-d | Negative reward |
+
+Assignments are motivated by [Li et al. (2020), figures 22, 26 and 30](https://elifesciences.org/articles/62576).
+They are **cross-dataset, partial type-level approximations**: our installed
+MaleCNS metadata lacks synapse-level compartments and the finer DAN subtypes
+needed to validate all these assignments. Missing types or an empty shared-input
+gate fail loudly. The gate uses only existing shared DAN targets, the same
+geometric-mean overlap as above, and normalization within each compartment.
+In the installed data, 416, 258 and 186 edges respectively have nonzero gates;
+all other plastic-edge slots have zero gates. No MBON is manually assigned a
+button or an approach/avoidance function; no new fast connection is created.
+
+Each compartment has an internal recency average of its synthetic release,
+with a fixed 30-second **neural-time** constant. With `D = tanh(reward)`, positive
+proxies receive `max(D,0)` and the negative proxy receives `max(-D,0)`. For
+release `r`, old expectation `m`, eligibility `e`, and gate `g`:
+
+```text
+prediction_error = r - m
+f <- clip(f - 0.02 * sum_compartments(prediction_error * g) * e, 0.25, 4)
+m <- exp(-elapsed_neural_time / 30) * m
+     + (1 - exp(-elapsed_neural_time / 30)) * r
+```
+
+Positive error depresses tagged inputs; reward omission after prior positive
+feedback can potentiate them. This is an internal plasticity signal, **not** a
+new negative game reward or a revisit punishment. From zero expectation, absent
+reward leaves weights unchanged. Frozen mode never updates weights or the
+expectation. Signs, sparsity and fixed action mapping remain intact.
+
+Expectation-centering is motivated by [Rajagopalan et al. (2023)](https://pubmed.ncbi.nlm.nih.gov/37733736/).
+This recency average is a simple internal adaptation proxy, not a reproduction
+of that circuit, a learned state-value function, temporal-difference learning,
+or a solution to long-horizon credit assignment. It receives no action identity,
+cue label, game coordinates or externally learned features. Actual DAN spikes
+still do not drive the synthetic release. Exact checkpoints retain all feedback
+state; weights-only loading starts with fresh modulation and neural dynamics.
+
+`scripts/evaluate_learning_choices.py` tests actual fixed-decoder choices in a
+separate ROM-free operant assay. Synthetic cue/choice rewards belong **only** to
+that diagnostic, never the Pokemon reward observer. Counterbalanced assignments,
+within-cue reward permutations, frozen controls, reward-free retention, reversal,
+and disk reload distinguish stored weight changes from learned choice specificity.
+The assay is a limited capacity screen, not a claim that arbitrary directions
+must be learnable through these particular synapses.
+The completed three-seed comparison did not establish reliable target-specific
+choices or reversal for either rule. The candidate remains experimental and
+opt-in; stored weight changes alone did not justify promotion.
+
+## Display interpretation (kept out of the showcase layout)
+
+- In snapshot mode the game frame is the exact pre-action image the fly received;
+  in temporal modes it is the last image of the preceding input window. The
+  displayed pulse follows that input. RAM is measurement/reward input only.
+- The retina is a display-precision copy of the fixed grayscale/bilinear input.
+- Amber dots are actual spikes within the sample. Their short glow is a visual
+  persistence effect, not extra firing. Motor highlights use exact firing IDs.
+- Blue dots in hybrid mode show normalized graded visual state at the last
+  neural step. They are not spikes or firing rates. Population means include
+  unpositioned neurons even when those neurons cannot be plotted.
+- At most 6,000 positioned spiking cells are plotted per sample. Anatomical
+  coordinates exist for 140,638 of 166,700 model cells. No positions, synapses,
+  action proposals, or activity are fabricated for presentation.
+- Synthetic D means the bounded reward modulator, not measured dopamine.
+  Changed-edge counts establish implementation activity, not learned behavior.
+  For the compartment candidate, hover details separately identify internal
+  prediction errors; these must not be confused with a new game penalty.
+- The dashboard is a local desktop showcase; human buttons are disabled during
+  autonomous runs. Observation/manual diagnostics remain distinctly labeled.
+
+Checkpoints include adaptive currents and continuous release as well as all
+baseline state, learning traces, gates, weights, and random-stream state. Exact
+same-backend resume and fractional sparse propagation are regression tested.
+Browser layout verification remains unavailable when the in-app browser cannot
+connect; DOM tests and live HTTP/SSE checks are not a substitute for visual QA.

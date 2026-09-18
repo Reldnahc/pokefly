@@ -1,0 +1,10 @@
+{
+  "brain": {
+    "dynamics": {
+      "profile": "hybrid-v1",
+      "isolate_nonvisual_sensory": true
+    },
+    "motor": {"arbitration": "parallel-v2"},
+    "plasticity": {"rule": "dan-targeted-v1"}
+  }
+}

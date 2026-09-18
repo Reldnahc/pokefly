@@ -1,0 +1,7 @@
+{
+  "brain": {
+    "dynamics": {"profile": "hybrid-v1", "isolate_nonvisual_sensory": true},
+    "motor": {"arbitration": "parallel-v2"},
+    "plasticity": {"rule": "compartment-ema-v1", "reward_expectation_seconds": 30.0}
+  }
+}
