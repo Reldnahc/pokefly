@@ -733,6 +733,22 @@ connectivity; it is therefore NOT an exact flyvis reproduction. Neither model
 has yet established reward-specific visual learning or reliable progression.
 Synthetic assay/oracle weights are never gameplay initialization.
 
+After generating the optional reference and neutral calibration above, launch:
+
+```powershell
+.\scripts\start.ps1 -Intro -Profile visual-rate-v1
+```
+
+The default remains unchanged pending controlled retained-learning evidence.
+`configs/visual-release-v2.json` is a preserved FAILED neutral-only sensitivity
+test: maximum graded release 1.0 instead of 0.25 for every calibrated visual
+cell, with the same 1 Hz neutral-only spiking calibration. Escape/B remains
+9.0..9.3 Hz across three frozen reset probes. It is not launcher-listed or
+promoted to gameplay. Calibration artifact/protocol:
+`intrinsic-probe-20260918T142524Z-2de05f`, generated with
+`--visual-model calibrated-rate-v1 --graded-release 1 --calibration-only
+--calibration-steps 10000 --reset-probe-decisions 256`.
+
 Exact resume also repairs a PyBoy 2.7 rendering omission: its window-line
 counter is not serialized. Before attaching reward observers, a temporary
 render is discarded by reloading the identical game bytes. The serialized

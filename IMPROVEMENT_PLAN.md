@@ -28,6 +28,55 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 14:43 UTC: independent gray-warmed FINAL-8192 retention is 58.49% / 59.56%
+  balanced (training seeds 501/601), versus 49.16% original. Right-cue accuracy
+  remains 44.76% / 47.39%, so BOTH fail the preselected promotion gate despite
+  measurable cue contrast. Shuffled checkpoints are still finishing. Complete
+  their identical 2501..2504 test panel; do not relabel this partial result a pass.
+  Preselect unchanged acquisition continuation at 16,384 and 32,768 decisions
+  for BOTH seeds/arms, then independent final-weight retention on 2601..2604.
+  This is a training-dose hypothesis after an improving curve, not selection
+  of a favorable checkpoint or a relaxed criterion. If it passes, reverse
+  contingencies from the SAME acquired state in paired and shuffled arms.
+  No synthetic weights enter Pokemon.
+- Both actual-game 6,000-decision pairs completed. Learning/frozen tiles:
+  seed401 213/188; seed402 233/193. All four leave the house and use Up ~25%.
+  Only seed402 learning obtains a starter and reaches Route 1; no arm wins a
+  battle. This is not retained-learning proof. Preselect exact continuations
+  of ALL FOUR runs to 24,000 total decisions (18,000 additional), same seeds,
+  unchanged model/rewards and no game reset. Preserve both less-successful
+  seed401 runs, not only the promising trajectory. Evaluate final game-trained
+  weights separately on held-out game/noise resets before any promotion.
+- Strong-release v2 FAILED its neutral-only calibration: B population ~9.2 Hz
+  versus the uniform 1 Hz target; three reset probes reproduce 9.0..9.3 Hz.
+  No game tests or learning promotion. Preserve the diagnostic profile/artifact.
+  The new visual-model SUPERVISED capacity assay reaches 61.38% forward and
+  65.65% reversed balanced accuracy, versus 50.01% original. All temporary
+  oracle weights discarded; this is capacity evidence, NOT reward learning.
+
+- 14:28 UTC: BOTH visual-rate paired curves reach ~65.5% balanced cue accuracy
+  at the preselected FINAL 8,192 checkpoint. Shuffled controls are still running;
+  this is preliminary, not a pass. Start independent reward-free retention of
+  original and paired weights on the already preselected seeds 2501..2504,
+  128 neutral-gray warmup decisions and 128 decisions/cue, all time bins
+  reported. Explicitly label this as a partial control panel; test the completed
+  shuffled checkpoints on the SAME seeds once available. Source assay weights
+  remain outside Pokemon. Require each-cue performance, control advantage and
+  same-acquired-state reversal, not just this encouraging preliminary mean.
+
+- 14:25 UTC: test the explicitly uncertain cross-model signal units, NOT any
+  Up/steering gain. The initial transfer maps the visual rate ceiling (5) to
+  maximum transmitter release 0.25, inherited from the old lamina prototype.
+  Preselect the alternative existing graded-release setting 1.0 for EVERY
+  calibrated visual cell (fourfold boundary signal, same internal parameters,
+  anatomy, eye map and fixed output decoder). This maps the maximum to one
+  spiking neuron's 20 ms release unit. It is an engineering sensitivity test,
+  not measured physiological calibration. Refit ONLY uniform neutral-gray
+  spiking offsets by the same 1 Hz / 10,000-step protocol, then freeze. Check
+  reset activity and generic input contrast before any game promotion. No
+  action labels, reward or game images choose the calibration. Existing v1
+  comparisons finish unchanged; never modify their fixed profile mid-run.
+
 - 14:17 UTC: visual-rate current audit still finds tiny static-cue contrast
   at the original steering rows (contrast / current std 0.0009 and 0.015).
   Distributed cue information does not imply useful output wiring. While all

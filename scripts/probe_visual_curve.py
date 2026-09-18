@@ -29,6 +29,10 @@ def main():
         help="Explicitly allow changing the cue contingency when continuing saved training",
     )
     p.add_argument(
+        "--same-start-reversal", action="store_true",
+        help="Start BOTH reversal arms from the same acquired paired neural checkpoint",
+    )
+    p.add_argument(
         "--buttons",
         nargs=2,
         default=["left", "right"],
@@ -47,6 +51,10 @@ def main():
         help="Completed paired/shuffled curve; restore full training dynamics",
     )
     args = p.parse_args()
+    if args.allow_reversal and not args.continue_from:
+        p.error("Reversal continuation requires a completed source curve")
+    if args.same_start_reversal and not (args.continue_from and args.allow_reversal):
+        p.error("Same-start reversal requires explicit reversal continuation")
     buttons, cues = tuple(args.buttons), tuple(args.cues)
     if (
         len(set(buttons)) != 2
@@ -67,11 +75,17 @@ def main():
     initial, state = c.snapshot()
     patterns = test_patterns()
     previous_report, starting_step = None, 0
-    if args.allow_reversal and not args.continue_from:
-        p.error("Reversal continuation requires a completed source curve")
     if args.continue_from:
         previous_report = json.loads((args.continue_from / "report.json").read_text())
         starting_step = max(previous_report["checkpoints"])
+        complete_arms = {
+            row["arm"] for row in previous_report["rows"]
+            if row["training_decisions"] == starting_step
+        }
+        if complete_arms != {"paired", "unpaired_within_cue"}:
+            p.error("Finish both source arms before continuation")
+        if args.same_start_reversal and previous_report["reverse_mapping"] == args.reverse:
+            p.error("Same-start reversal must actually reverse the acquired contingency")
         if (
             previous_report["seed"] != args.seed
             or (previous_report["reverse_mapping"] != args.reverse and not args.allow_reversal)
@@ -99,6 +113,7 @@ def main():
         "pre_score": score(pretest, args.reverse, buttons=buttons, cues=cues),
         "rows": [],
         "status": "running",
+        "same_acquired_start_for_both_reversal_arms": args.same_start_reversal,
     }
     if previous_report:
         report["previous_report"] = str(args.continue_from / "report.json")
@@ -111,6 +126,15 @@ def main():
                 for row in previous_report["rows"]
                 if row["training_decisions"] == starting_step
             }
+            if args.same_start_reversal:
+                paired_score = report["pre_reversal_scores"]["paired"]
+                report["pre_reversal_scores"] = {
+                    arm: paired_score for arm in ("paired", "unpaired_within_cue")
+                }
+                label = args.continue_from / f"paired-{starting_step}"
+                report["shared_reversal_initial_state_sha256"] = {
+                    suffix: sha256(label.with_suffix(suffix)) for suffix in (".npz", ".json")
+                }
     write_json(output / "report.json", report)
     paired_rewards, paired_cues = [], []
     if args.continue_from:
@@ -122,12 +146,13 @@ def main():
     for arm in ("paired", "unpaired_within_cue"):
         training = []
         if args.continue_from:
-            label = args.continue_from / f"{arm}-{starting_step}"
+            source_arm = "paired" if args.same_start_reversal else arm
+            label = args.continue_from / f"{source_arm}-{starting_step}"
             with np.load(label.with_suffix(".npz"), allow_pickle=False) as archive:
                 previous_arrays = {k: archive[k].copy() for k in archive.files}
             previous_state = json.loads(label.with_suffix(".json").read_text())
             c.restore(previous_arrays, previous_state)
-            training = json.loads((args.continue_from / f"{arm}-training.json").read_text())
+            training = json.loads((args.continue_from / f"{source_arm}-training.json").read_text())
             if len(training) != starting_step:
                 raise ValueError("Incomplete source training history")
         else:

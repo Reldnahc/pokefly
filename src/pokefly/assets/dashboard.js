@@ -279,6 +279,12 @@ async function init() {
     $("synapses").title = ($("synapses").title || "")
       + " Frozen neural excitability calibrated on a neutral image, without game rewards or button labels. Experimental model; not measured physiology.";
   }
+  if (state.visual_calibration) {
+    $("synapses").textContent += " · visual-rate";
+    $("synapses").title = ($("synapses").title || "")
+      + ` ${state.visual_calibration.neurons.toLocaleString()} visual neurons use frozen calibrated rate dynamics. `
+      + "Blue is normalized continuous activity, not spikes. Same raw retina and fixed motor-to-button mapping; no external visual policy.";
+  }
   const map = state.retina;
   setLabel("mapping", `${(map.direct + map.inferred).toLocaleString()} / ${map.photoreceptors.toLocaleString()} receptors mapped`,
     `${map.direct.toLocaleString()} annotated, ${map.inferred.toLocaleString()} inferred; ${map.unplaced_zero_driven} unplaced receptors receive zero input. `

@@ -26,10 +26,17 @@ def main():
     p.add_argument("--curve", type=Path, required=True)
     p.add_argument("--seeds", type=int, nargs="+", default=[1311, 1312])
     p.add_argument(
+        "--arms", nargs="+", choices=("original", "paired", "unpaired_within_cue"),
+        default=["original", "paired", "unpaired_within_cue"],
+        help="Optional explicit partial panel while other registered controls finish",
+    )
+    p.add_argument(
         "--baseline-state", type=Path, help="Explicit acquired .npz for reversal baseline"
     )
     p.add_argument("--unpaired-state", type=Path, help="Explicit matched-control .npz")
     args = p.parse_args()
+    if len(set(args.arms)) != len(args.arms) or len(set(args.seeds)) != len(args.seeds):
+        p.error("Duplicate arms/seeds are not independent observations")
     source = json.loads((args.curve / "report.json").read_text())
     step = max(source["checkpoints"])
     cues = tuple(source.get("cue_images", ["left", "right"]))
@@ -45,6 +52,9 @@ def main():
         "checkpoint": step,
         "source_report_sha256": sha256(args.curve / "report.json"),
         "seeds": args.seeds,
+        "arms": args.arms,
+        "complete_control_panel": set(args.arms) == {"original", "paired", "unpaired_within_cue"},
+        "source_status_at_start": source.get("status", "legacy report without status"),
         "neutral_warmup": 128,
         "test_decisions_per_cue": 128,
         "bins": [[0, 8], [8, 16], [16, 48], [48, 128]],
@@ -52,7 +62,7 @@ def main():
         "baseline_state": str(args.baseline_state) if args.baseline_state else None,
         "unpaired_state": str(args.unpaired_state) if args.unpaired_state else None,
     }
-    for arm in ("original", "paired", "unpaired_within_cue"):
+    for arm in args.arms:
         explicit = (
             args.baseline_state
             if arm == "original"

@@ -17,6 +17,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 async function harness({manual = true, autonomous = false, mode = "learn", graded = false, isolated = false,
                         speedControl = autonomous, speedError = false, hz = 5,
                         visualTiming = "snapshot-v1", quiescent = false, intrinsic = false,
+                        visualCalibrated = false,
                         motorArbitration = "parallel-v2", buttonTiming = "simultaneous-v1"} = {}) {
   const elements = new Map(), requests = [], intervals = [], pendingImages = new Map();
   let stream, now = 10000, speedDelay = null;
@@ -61,6 +62,7 @@ async function harness({manual = true, autonomous = false, mode = "learn", grade
     motor_arbitration: motorArbitration,
     button_timing: buttonTiming,
     intrinsic_calibration: intrinsic ? {rule: "uniform-neutral-rate-homeostasis-v1"} : null,
+    visual_calibration: visualCalibrated ? {neurons: 71080, frozen: true} : null,
     sensory_isolation: {enabled: isolated, neurons: isolated ? 2 : 0,
                         mode: quiescent ? "nonvisual-quiescent-v1" : "nonvisual-incoming-v1"},
     retina: {indices: [0, 1], u: [0, 1], v: [0, 1], direct: 1, inferred: 1,
@@ -336,6 +338,17 @@ test("intrinsic calibration is labeled once, not appended on every frame", async
   for (let sample = 1; sample <= 3; sample++) await ui.send(ui.packet(sample));
   assert.equal(ui.elements.get("synapses").textContent, label);
   assert.equal(ui.elements.get("synapses").title, detail);
+});
+
+test("frozen visual calibration is identified without calling rates spikes or a new policy", async () => {
+  const ui = await harness({manual: false, autonomous: true, graded: true, visualCalibrated: true});
+  const label = ui.elements.get("synapses").textContent;
+  assert.match(label, /visual-rate/);
+  assert.match(ui.elements.get("synapses").title, /71,080 visual neurons/);
+  assert.match(ui.elements.get("synapses").title, /no external visual policy/);
+  await ui.send(ui.packet());
+  assert.equal(ui.elements.get("synapses").textContent, label);
+  assert.ok(ui.buttons.every(button => button.disabled));
 });
 
 test("a combined neural pulse highlights every delivered button then clears on wait", async () => {

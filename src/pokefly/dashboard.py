@@ -89,6 +89,10 @@ class BrainView:
             "a_population": "MN9 / CB0701 (MaleCNS 10331, 16949); model function unvalidated",
             "sensory_isolation": getattr(controller, "sensory_isolation", {"enabled": False}),
             "intrinsic_calibration": getattr(controller, "intrinsic_calibration_info", None),
+            "visual_calibration": (
+                {"neurons": hybrid.visual_circuit.n, "frozen": True}
+                if hybrid and getattr(hybrid, "visual_circuit", None) is not None else None
+            ),
         }
 
     def activity(self, observation) -> dict:

@@ -5,7 +5,55 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 14:17 UTC
+## Latest evidence, 2026-09-18 14:49 UTC
+
+The first calibrated-model paired/shuffled visual curves are complete. At
+8,192 decisions, the small interim retention probes score 65.47% / 65.38%
+balanced for paired rewards, versus 49.59% / 48.64% for shuffled rewards
+(training seeds 501/601). However, the stricter independent test after 128
+neutral-gray warmup decisions gives only **58.49% / 59.56%**, versus 49.16%
+original. Right-cue accuracy is 44.76% / 47.39%. BOTH fail the preselected
+>=60%, each-cue >=55% gate. Shuffled independent retention is still running.
+These are descriptive small-sample results, not a statistical claim.
+
+Artifacts: `visual-learning-curve-20260918T140900Z-5b30a6` and
+`...T140910Z-f1ebf1`; independent 2501..2504 reset tests
+`visual-retention-probe-20260918T142820Z-179f1f` and `...T142831Z-7f96e5`.
+The identical original control in the two reports is a reproducibility check,
+not two independent controls. Preselected unchanged training continuations to
+16,384/32,768 and final-weight independent seeds 2601..2604 are ongoing. No
+assay weights enter Pokemon. Reversal must start both arms from the SAME
+acquired state; protocol unit tests now verify that intervention and shuffling.
+
+The literal-application 6,000-decision pairs also completed:
+
+| Seed | Frozen / learning tiles | Starter and Route 1 | Up, frozen / learning |
+|---|---:|---|---:|
+| 401 | 188 / 213 | Neither arm | 24.45% / 25.33% |
+| 402 | 193 / 233 | Learning only; starter at 3,748 | 24.87% / 24.70% |
+
+All four leave the house; none wins a battle in this interval. This does not
+establish retained gameplay improvement. All four are now explicitly resumed
+to 24,000 total decisions without a reset or changing reward/model parameters,
+including the less-successful seed401. Artifacts:
+`visual-model-gameplay-20260918T141410Z-cda52c` and `...T141421Z-31e87a`;
+continuations `...T144408Z-70369b` and `...T144408Z-e4332d`.
+
+The neutral-only stronger-release v2 sensitivity test failed: escape/B activity
+stays 9.0..9.3 Hz across reset probes despite a uniform 1 Hz calibration target.
+It is NOT used in gameplay (`intrinsic-probe-20260918T142524Z-2de05f`). The
+calibrated-v1 supervised capacity diagnostic reaches 61.38% forward / 65.65%
+reverse versus 50.01% original (`oracle-synaptic-capacity-20260918T141731Z-f42512`).
+Those temporary oracle fits were discarded, never exported: capacity, not learning.
+
+Current verification: 297 Python tests, 24 JS tests and lint pass
+(`verify-ea76cc06ad2a4f27846085cc2d288de6`). The desktop model label identifies
+frozen internal visual-rate calibration without mislabeling rates as spikes.
+The launcher accepts opt-in `-Profile visual-rate-v1`; default is unchanged.
+Browser-rendered verification remains unavailable; actual HTTP/stream checks
+and prior exact neural/emulator resume tests pass as detailed below.
+
+## Implementation evidence archived at 14:17 UTC
 
 The user authorized offline calibration of INTERNAL visual neurons on generic
 stimuli/published responses, frozen before Pokemon learning. The fly still

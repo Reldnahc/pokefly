@@ -39,6 +39,7 @@ def main():
     parser.add_argument(
         "--visual-model", choices=("legacy-v1", "calibrated-rate-v1"), default="legacy-v1"
     )
+    parser.add_argument("--graded-release", type=float, default=0.25)
     parser.add_argument("--calibration-only", action="store_true")
     parser.add_argument(
         "--reset-every",
@@ -76,6 +77,7 @@ def main():
             motor_adaptation_increment=args.motor_adaptation_increment,
             motor_adaptation_seconds=args.motor_adaptation_seconds,
             visual_model=args.visual_model,
+            graded_release=args.graded_release,
         ),
     )
     c = InternalBrain(device=args.device, config=cfg)

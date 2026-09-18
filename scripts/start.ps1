@@ -19,7 +19,8 @@ param(
         'sensorimotor-score-delayed-v2', 'sensorimotor-outcome-v3',
         'sensorimotor-serial-outcome-v3', 'sensorimotor-score-centered-v4',
         'sensorimotor-adaptive-v1', 'sensorimotor-premotor-v1',
-        'sensorimotor-score-projected-v5', 'sensorimotor-gain12-v1')][string]$Profile = 'sensorimotor-bounded-v1',
+        'sensorimotor-score-projected-v5', 'sensorimotor-gain12-v1',
+        'visual-rate-v1')][string]$Profile = 'sensorimotor-bounded-v1',
     [string]$LoadState,
     [string]$Resume,
     [string]$Weights
