@@ -28,6 +28,98 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 15:37 UTC: preselect actual-game FINAL-24,000 retained-weight comparisons
+  for BOTH401/402 trained brains, frozen original versus frozen retained,
+  fresh intro resets, held-out seeds1501/1502,6,000 decisions per arm/seed.
+  Start402 first because it completed first, not because it played better:
+  297tiles,starter,Route1miny28,no wins.401 follows when its unchanged budget
+  completes. Report both seeds/arms regardless of outcome; duplicated original
+  controls are reproducibility checks, not additional independent controls.
+  Only ACTUAL-game checkpoints, pinned to final completion, enter these tests.
+  No synthetic weights, reward changes or hand-selected progression start.
+  These short tests can show retained starting behavior, not long-horizon
+  progression or eventual completion. Keep starter/wins/exploration and button
+  availability separate; do not equate altered actions with improvement.
+
+- 15:32 UTC: wider UNIFORM neutral calibration passes independent reset checks:
+  mapped populations 0.75..1.20 Hz across seeds301..303; escape/B 0.90..1.16
+  instead of 9 Hz. One escape cell needs bias -0.452, explaining the old bound
+  failure. Artifact `intrinsic-probe-20260918T152313Z-f5a2bf`. Freeze the NPZ
+  before tests; no game data or named motor target enters fitting. Preselect
+  same frozen static/motion latency panel seeds801..804 for release-wide-v3,
+  then the SAME paired/shuffled 501/601 learning curves (512/2048/8192) and
+  independent final-weight retention seeds2801..2804 with the unchanged gate.
+  Actual-ROM exact-resume/frozen/no-reward smoke is a software check only.
+  No new visual model/default promotion on neutral calibration alone.
+
+- 15:21 UTC: stronger learning-rate candidate FAILS both complete 6,000-game
+  comparisons: 175/111 tiles, no starter, versus v1 learning 213/233 (one starter)
+  and frozen 188/193. Seed401 B rises to 42.9% and lower-town dwell 25.2%.
+  Reject promotion; do not extend only a favorable arm. Fallback-unit scale0.05
+  also does NOT solve visual saturation: LC4 gray rises to 2.55/4.78 versus
+  0.093/3.94 at scale1; motion sensitivity is mixed. Keep production scale1.
+  Artifacts `calibrated-visual-probe-20260918T151830Z-5ad577` / `...-7dcd60`.
+  The earlier stronger-release calibration hit its artificial bias lower bound
+  (-0.14) at the overactive cell. Test a SEPARATELY VERSIONED wider uniform
+  intrinsic calibration range [-0.5,0.5], same 1 Hz neutral-gray equation,
+  10,000 steps/seed707 and independent reset seeds301..303. EVERY eligible
+  non-sensory spiking neuron uses the same equation/bounds; no motor labels,
+  game images, rewards or action quotas enter fitting. Freeze before any tests.
+  Keep release1 and all other visual-v2 settings unchanged; this isolates the
+  calibration-range constraint. No game promotion unless neutral reset probes
+  are stable, followed by sensory/learning and actual-game comparisons.
+
+- 15:18 UTC: test a specific VISUAL transfer-unit hypothesis on generic stimuli
+  only. Reference-fitted edges use raw reference rates; original fallback edges
+  currently also use those rates with gain 3. However, original visual outgoing
+  edges elsewhere see r * 0.25 / 5. Thus fallback edges have a 20x higher input
+  unit scale than the SAME source's original cross-boundary edges. Preselect
+  fallback scale 0.05 (0.25/5), with no fitted weight/sign deletion, no changes
+  to reference-covered/photo-lamina conductances, retina, biases or time constants.
+  This is an engineering unit-consistency hypothesis, not proven physiology.
+  Compare standalone scale1 and scale0.05 generic gray/static/eight-direction
+  responses on identical current 71,080-cell graphs. No game/motor labels or
+  rewards, no production profile change yet. Existing registered runs finish
+  unchanged, regardless of this diagnostic result.
+
+- 15:03 UTC: direct current audit of the acquired 8,192 weights finds the
+  correct cue contrast at BOTH DNa02 steering cells in BOTH training seeds:
+  contrast / sample std ~0.45..0.57 versus ~0.001..0.015 original; shuffled
+  ~0.05..0.07. This reuses original input samples, so is first-order evidence,
+  not a full recurrent prediction. Global current drift also remains. Artifact:
+  `retained-current-audit-20260918T150116Z-225a19`.
+  Explicit protocol extension BEFORE further results: start an EXPLORATORY
+  same-acquired-state reversal from the 8,192 paired checkpoints even though
+  the acquisition promotion gate failed. This tests contingency-following,
+  not a retroactive gate pass; the longer acquisition comparison also continues.
+  Both training seeds, checkpoints 8,704/10,240/16,384 (512/2,048/8,192 added);
+  paired and within-cue shuffled reversal start from identical acquired full
+  neural states. Final independent retention: 2701..2704, with the original
+  acquired state as frozen pre-reversal baseline. Report all arms/seeds.
+
+- 14:57 UTC: first independent shuffled-retention panels complete at 48.81% /
+  49.83%, versus paired 58.49% / 59.56%. There is a modest retained cue contrast,
+  but the original both-cues gate still FAILS. Continue the preselected unchanged
+  training-dose test; no promotion or softened criterion.
+  A distinct GAME-learning-dose mismatch is now quantified: sum(tanh(reward))
+  is 1,488.92 in the 8,192-decision seed501 assay but only 14.56 in the completed
+  6,000-decision seed402 game run. This is not itself an expected gradient, but
+  shows why an assay learning rate may have little effect with sparse rewards.
+  Preselect ONE 10x internal learning-rate candidate, 0.2 vs 0.02. Everything
+  else, including raw reward amounts/timing, visual calibration, existing-edge
+  bounds/budgets, retina and buttons, stays fixed. Run both original 401/402
+  starts for 6,000 decisions; validate exact 64-decision frozen prefixes before
+  explicitly reusing the existing full frozen and 0.02 controls. No new oracle
+  or assay weights. Treat as exploratory, require frozen transfer on new seeds
+  before attributing any improved game progress to retained learning.
+- CUDA visual update dispatch has a bit-exact fused alternative. Random-array
+  tests and complete 64-decision learning branches (all neural state, choices
+  and counts) match exactly. Two shared-GPU timings show only ~2..7% end-to-end
+  benefit, not a large speed claim. Real-ROM learn/resume/frozen/no-reward smoke
+  passes after integration (`internal-smoke-20260918T145416Z-f513e0`). Existing
+  running jobs retain their loaded implementation; neither computes different
+  neural states. No model parameter, timestep or checkpoint identity changes.
+
 - 14:43 UTC: independent gray-warmed FINAL-8192 retention is 58.49% / 59.56%
   balanced (training seeds 501/601), versus 49.16% original. Right-cue accuracy
   remains 44.76% / 47.39%, so BOTH fail the preselected promotion gate despite

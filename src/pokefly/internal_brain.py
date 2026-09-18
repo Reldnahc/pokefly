@@ -10,6 +10,7 @@ import numpy as np
 
 from pokefly.compartments import compartment_gates
 from pokefly.dynamics import DynamicsConfig, HybridDynamics
+from pokefly.intrinsic import load_intrinsic
 from pokefly.motors import MOTOR_GROUPS, MotorConfig, MotorDecoder, populations
 from pokefly.pixel_brain import PixelBrain, PixelObservation
 from pokefly.plastic_edges import csr_offsets_for_edges, sensorimotor_targets
@@ -169,26 +170,10 @@ class InternalBrain(PixelBrain):
         self.intrinsic_calibration_info = None
         if config.intrinsic_calibration:
             path = Path(config.intrinsic_calibration)
-            with np.load(path, allow_pickle=False) as calibration:
-                if not np.array_equal(calibration["body_ids"], self.body_ids):
-                    raise ValueError("Intrinsic calibration neuron identity mismatch")
-                bias = np.asarray(calibration["bias"], np.float32)
-                allowed = np.char.find(b.superclass.astype(str), "sensory") < 0
-                allowed[self.hybrid.graded_host] = False
-                if (
-                    bias.shape != (b.n, 1)
-                    or not np.isfinite(bias).all()
-                    or (bias < -0.140001).any()
-                    or (bias > 0.200001).any()
-                    or np.any(bias[~allowed])
-                ):
-                    raise ValueError("Invalid intrinsic calibration offsets")
-                self.hybrid.intrinsic_bias = b.xp.asarray(bias.copy())
-            self.intrinsic_calibration_info = {
-                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                "rule": "uniform-neutral-rate-homeostasis-v1",
-                "scope": "frozen internal excitability offsets; no game/reward/motor labels",
-            }
+            allowed = np.char.find(b.superclass.astype(str), "sensory") < 0
+            allowed[self.hybrid.graded_host] = False
+            bias, self.intrinsic_calibration_info = load_intrinsic(path, self.body_ids, allowed)
+            self.hybrid.intrinsic_bias = b.xp.asarray(bias)
         if self.hybrid and self.hybrid.visual_circuit is not None:
             if np.isin(self.plasticity.post, self.hybrid.graded_host).any():
                 raise ValueError("Game plasticity may not change frozen calibrated visual cells")

@@ -20,6 +20,7 @@ from pokefly.actions import count_buttons
 from pokefly.checkpoint import read_checkpoint
 from pokefly.experiment import load_config
 from pokefly.internal_brain import InternalBrain
+from pokefly.intrinsic import WIDE_RULE
 from pokefly.pixel_brain import test_patterns
 from pokefly.runner import run_directory, write_json
 
@@ -40,6 +41,8 @@ def main():
         "--visual-model", choices=("legacy-v1", "calibrated-rate-v1"), default="legacy-v1"
     )
     parser.add_argument("--graded-release", type=float, default=0.25)
+    parser.add_argument("--wide-bias", action="store_true",
+                        help="Explicit v3 uniform [-0.5,0.5] fitting range; default unchanged")
     parser.add_argument("--calibration-only", action="store_true")
     parser.add_argument(
         "--reset-every",
@@ -55,6 +58,7 @@ def main():
     )
     parser.add_argument("--export", type=Path)
     args = parser.parse_args()
+    bounds = [-0.5, 0.5] if args.wide_bias else [-0.14, 0.2]
     if args.calibration_steps < 2 or not np.isfinite(args.target_hz) or args.target_hz <= 0:
         parser.error("Positive finite rate and at least two neural steps required")
     if args.reset_every < 0 or args.reset_probe_decisions < 0:
@@ -103,14 +107,14 @@ def main():
         fired = b.step(eye_drive=drive)
         bias[allowed, 0] += np.float32(0.001 * args.target_hz * b.dt)
         bias[b.fired, 0] -= np.float32(0.001)
-        bias[:] = xp.clip(bias, -0.14, 0.2)
+        bias[:] = xp.clip(bias, *bounds)
         bias[xp.asarray(np.flatnonzero(~mask)), 0] = 0
         if step >= args.calibration_steps // 2:
             counts[fired] += 1
     calibrated = bias.copy()
     protocol = {
         "rule": (
-            "uniform-neutral-rate-homeostasis-reset-v2"
+            WIDE_RULE if args.wide_bias else "uniform-neutral-rate-homeostasis-reset-v2"
             if args.reset_every
             else "uniform-neutral-rate-homeostasis-v1"
         ),
@@ -119,7 +123,7 @@ def main():
         "steps": args.calibration_steps,
         "target_hz": args.target_hz,
         "step_size": 0.001,
-        "bounds": [-0.14, 0.2],
+        "bounds": bounds,
         "config": c.identity(),
     }
     if args.reset_every:

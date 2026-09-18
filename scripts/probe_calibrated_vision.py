@@ -26,8 +26,22 @@ def grating(angle, step, phase):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--parameters", choices=("fitted", "flyvis"), default="fitted")
+    parser.add_argument(
+        "--fallback-release-scale", type=float, default=1.0,
+        help="Standalone unit-sensitivity diagnostic ONLY; never changes a gameplay profile",
+    )
     args = parser.parse_args()
+    if not 0 < args.fallback_release_scale <= 1:
+        parser.error("Fallback diagnostic scale must be in (0,1]")
     c = CalibratedVisualCircuit(parameters=args.parameters)
+    original = c.matrix.data.copy()
+    if args.fallback_release_scale != 1:
+        c.matrix.data[c.fallback_edge_mask] *= np.float32(args.fallback_release_scale)
+        c.propagate.brain._W.data[:] = c.xp.asarray(c.matrix.data)
+        np.testing.assert_array_equal(np.sign(original), np.sign(c.matrix.data))
+        np.testing.assert_array_equal(
+            original[~c.fallback_edge_mask], c.matrix.data[~c.fallback_edge_mask]
+        )
     data = configure_runtime()
     hashes = {name: sha256(data / name) for name in ("brain.npz", "weights.npz", "retina.npz")}
     output = run_directory("calibrated-visual-probe")
@@ -43,6 +57,10 @@ def main():
         "neutral_warmup_seconds": 2, "stimulus_seconds": 2.56,
         "scoring_window_seconds": [1.28, 2.56], "phases_pixels": [0, 8, 16],
         "angles_degrees": list(range(0, 360, 45)), "rows": [],
+        "fallback_release_scale_diagnostic_only": args.fallback_release_scale,
+        "original_fallback_edges": int(c.fallback_edge_mask.sum()),
+        "reference_and_real_photo_lamina_conductances_unchanged": True,
+        "gameplay_profile_modified": False,
     }
     gray = np.full((144, 160, 3), 128, np.uint8)
     for phase in report["phases_pixels"]:

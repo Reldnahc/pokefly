@@ -48,30 +48,48 @@ def measure(path):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--source-run", type=Path, required=True)
-    p.add_argument("--load-state", type=Path, required=True)
+    start = p.add_mutually_exclusive_group(required=True)
+    start.add_argument("--load-state", type=Path)
+    start.add_argument(
+        "--intro", action="store_true", help="Explicit fresh-game intro intervention"
+    )
     p.add_argument("--seeds", type=int, nargs="+", default=[701, 702, 703])
     p.add_argument("--steps", type=int, default=6000)
     args = p.parse_args()
-    if len(args.seeds) < 2 or args.steps < 1:
-        p.error("At least two seeds and a positive evaluation budget are required")
+    if len(set(args.seeds)) != len(args.seeds) or len(args.seeds) < 2 or args.steps < 1:
+        p.error("At least two DISTINCT seeds and a positive evaluation budget are required")
     pointer = args.source_run / "latest-checkpoint.json"
     _, state = read_checkpoint(pointer)
+    source = json.loads((args.source_run / "config.json").read_text())
+    summary = json.loads((args.source_run / "summary.json").read_text())
+    if (
+        source["options"]["mode"] != "learn" or state["experiment"]["mode"] != "learn"
+        or summary["reason"] != "step_limit"
+        or state["experiment"]["sample"] != summary["samples"]
+    ):
+        raise ValueError("Retention requires the final checkpoint of a completed learning run")
+    if source["options"]["seed"] in args.seeds:
+        raise ValueError("Held-out seeds must not include the source training launch seed")
+    checkpoint = Path(state["directory"])  # Pin it; never follow a moving latest pointer.
     output = run_directory("retained-gameplay")
     # Materialize the exact saved model settings, not whatever a named profile
     # might contain after future edits. This is a new experimental artifact.
     config = output / "saved-config.json"
-    source = json.loads((args.source_run / "config.json").read_text())
-    write_json(config, source["config"])
+    write_json(config, state["experiment"]["config"])
     report = {
         "source_run": str(args.source_run),
         "source_checkpoint": state["directory"],
-        "start_state": str(args.load_state),
-        "start_state_sha256": sha256(args.load_state),
+        "source_brain_sha256": sha256(checkpoint / "brain.npz"),
+        "source_completed_sample": summary["samples"],
+        "start_state": str(args.load_state) if args.load_state else None,
+        "start_state_sha256": sha256(args.load_state) if args.load_state else None,
+        "intro_intervention": args.intro,
         "seeds": args.seeds,
         "steps_per_trial": args.steps,
         "protocol": "Both arms frozen; matched game state/noise, different internal weights only",
         "caveat": "Town-edge occupancy includes stationary menu/dialogue time; not collision time",
         "rows": [],
+        "status": "running",
     }
     write_json(output / "report.json", report)
     for index, seed in enumerate(args.seeds):
@@ -83,13 +101,14 @@ def main():
                     device="cuda",
                     seed=seed,
                     load_state=args.load_state,
+                    intro=args.intro,
                     steps=args.steps,
                     mode="frozen",
                     hz=0,
                     dashboard=False,
                     checkpoint_every=0,
                     config=config if arm == "original" else None,
-                    weights=pointer if arm == "retained" else None,
+                    weights=checkpoint if arm == "retained" else None,
                 )
             )
             row = {"arm": arm, "seed": seed, **measure(path)}
@@ -97,6 +116,10 @@ def main():
             report["rows"].append(row)
             write_json(output / "report.json", report)
             print(json.dumps(row), flush=True)
+            if json.loads((path / "summary.json").read_text())["reason"] != "step_limit":
+                raise RuntimeError("Stopped; incomplete retention panel preserved")
+    report["status"] = "completed"
+    write_json(output / "report.json", report)
     print("Report:", output, flush=True)
 
 

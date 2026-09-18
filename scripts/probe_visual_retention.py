@@ -21,6 +21,16 @@ from pokefly.pixel_brain import test_patterns
 from pokefly.runner import run_directory, write_json
 
 
+def validate_reversal_controls(source, arms, baseline_state, unpaired_state):
+    if "pre_reversal_scores" not in source:
+        return
+    if "original" in arms and baseline_state is None:
+        raise ValueError("Reversal baseline must explicitly name the acquired neural state")
+    if ("unpaired_within_cue" in arms and unpaired_state is None
+            and not source.get("same_acquired_start_for_both_reversal_arms")):
+        raise ValueError("Reversal needs a shuffled control from the same acquired start")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--curve", type=Path, required=True)
@@ -38,6 +48,7 @@ def main():
     if len(set(args.arms)) != len(args.arms) or len(set(args.seeds)) != len(args.seeds):
         p.error("Duplicate arms/seeds are not independent observations")
     source = json.loads((args.curve / "report.json").read_text())
+    validate_reversal_controls(source, args.arms, args.baseline_state, args.unpaired_state)
     step = max(source["checkpoints"])
     cues = tuple(source.get("cue_images", ["left", "right"]))
     buttons = tuple(source.get("rewarded_button_pair", ["left", "right"]))
@@ -61,6 +72,7 @@ def main():
         "rows": [],
         "baseline_state": str(args.baseline_state) if args.baseline_state else None,
         "unpaired_state": str(args.unpaired_state) if args.unpaired_state else None,
+        "status": "running",
     }
     for arm in args.arms:
         explicit = (
@@ -108,6 +120,8 @@ def main():
         report["rows"].append(row)
         write_json(output / "report.json", report)
         print(arm, row["overall"], row["time_bins"], flush=True)
+    report["status"] = "completed"
+    write_json(output / "report.json", report)
     print("Report:", output, flush=True)
 
 

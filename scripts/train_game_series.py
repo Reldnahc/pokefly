@@ -15,22 +15,63 @@ from pathlib import Path
 
 from evaluate_saved_gameplay import measure
 
-from pokefly.checkpoint import sha256
+from pokefly.checkpoint import read_checkpoint, sha256
 from pokefly.experiment import TrainOptions, load_config, train
 from pokefly.rom import resolve_rom
 from pokefly.runner import run_directory, write_json
 
 
+def completed_game_source(path):
+    """Pin an actual game checkpoint; ROM-free assay .npz files are not accepted."""
+    stored = json.loads((path / "config.json").read_text())
+    summary = json.loads((path / "summary.json").read_text())
+    if stored["options"]["mode"] != "learn" or summary["reason"] != "step_limit":
+        raise ValueError("Initial source must be a completed actual-game learning run")
+    _, saved = read_checkpoint(path / "latest-checkpoint.json")
+    if (
+        saved["experiment"]["mode"] != "learn"
+        or saved["experiment"]["sample"] != summary["samples"]
+    ):
+        raise ValueError("Source must use its final completed learning checkpoint")
+    checkpoint = Path(saved["directory"])
+    return (
+        checkpoint,
+        saved["experiment"]["config"],
+        {
+            "run": str(path),
+            "checkpoint": str(checkpoint),
+            "brain_sha256": sha256(checkpoint / "brain.npz"),
+            "config_sha256": sha256(path / "config.json"),
+            "rom_sha1": saved["rom_sha1"],
+            "completed_samples": summary["samples"],
+            "source_launch_seed": stored["options"]["seed"],
+        },
+    )
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--config", type=Path, default=Path("configs/sensorimotor-dual-v1.json"))
+    p.add_argument(
+        "--config",
+        type=Path,
+        help="Defaults to sensorimotor-dual-v1; incompatible with --initial-game-run",
+    )
+    p.add_argument(
+        "--initial-game-run",
+        type=Path,
+        help="Continue actual-game-trained synapses across explicit new-game attempts",
+    )
     p.add_argument("--training-seeds", nargs="+", type=int, default=[1401, 1402, 1403, 1404])
     p.add_argument("--eval-seeds", nargs="+", type=int, default=[1501, 1502])
     p.add_argument("--steps", type=int, default=12000)
+    p.add_argument(
+        "--evaluation-steps", type=int, help="Frozen budget per evaluation arm; defaults to --steps"
+    )
     p.add_argument("--port", type=int, default=8779)
     args = p.parse_args()
     if (
         args.steps < 1
+        or (args.evaluation_steps is not None and args.evaluation_steps < 1)
         or len(args.training_seeds) < 2
         or len(args.eval_seeds) < 2
         or set(args.training_seeds) & set(args.eval_seeds)
@@ -39,9 +80,20 @@ def main():
         or not 0 <= args.port <= 65535
     ):
         p.error("Positive budget, valid port, and distinct training/evaluation seeds required")
+    if args.config and args.initial_game_run:
+        p.error("An initial game run restores its saved configuration; omit --config")
+    evaluation_steps = args.evaluation_steps or args.steps
     output = run_directory("retained-game-series")
     config = output / "fixed-config.json"
-    write_json(config, asdict(load_config(args.config)))
+    initial, provenance = None, None
+    if args.initial_game_run:
+        initial, source_config, provenance = completed_game_source(args.initial_game_run)
+        if provenance["source_launch_seed"] in args.eval_seeds:
+            p.error("Evaluation seed overlaps the source training launch")
+        write_json(config, source_config)
+    else:
+        profile = args.config or Path("configs/sensorimotor-dual-v1.json")
+        write_json(config, asdict(load_config(profile)))
     rom = resolve_rom(None, Path.cwd())
     report = {
         "scope": __doc__,
@@ -50,13 +102,16 @@ def main():
         "training_seeds": args.training_seeds,
         "eval_seeds": args.eval_seeds,
         "steps_per_attempt": args.steps,
+        "evaluation_steps_per_arm": evaluation_steps,
+        "initial_actual_game_source": provenance,
         "rows": [],
+        "status": "running",
         "evaluation": "Original and retained weights frozen, matched intro/game/noise seeds",
     }
     write_json(output / "report.json", report)
     previous = None
     for seed in args.training_seeds:
-        source = previous / "latest-checkpoint.json" if previous else None
+        source = previous / "latest-checkpoint.json" if previous else initial
         path = train(
             TrainOptions(
                 rom=rom,
@@ -95,7 +150,7 @@ def main():
                     rom=rom,
                     device="cuda",
                     seed=seed,
-                    steps=args.steps,
+                    steps=evaluation_steps,
                     hz=0,
                     mode="frozen",
                     intro=True,
@@ -112,6 +167,8 @@ def main():
             print(json.dumps(row), flush=True)
             if json.loads((path / "summary.json").read_text())["reason"] != "step_limit":
                 raise RuntimeError(f"Evaluation stopped; partial results saved: {output}")
+    report["status"] = "completed"
+    write_json(output / "report.json", report)
     print("Report:", output, flush=True)
 
 

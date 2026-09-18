@@ -5,7 +5,46 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 14:49 UTC
+## Latest evidence, 2026-09-18 15:34 UTC
+
+The 10x learning-rate candidate completed and FAILED both 6,000-decision
+comparisons: 175/111 tiles, no starter, versus v1 learning 213/233 tiles
+(one starter) and frozen 188/193. In seed401, B rises to 42.9% and lower-town
+dwell to 25.2%. Do not promote it. Artifacts:
+`visual-learning-rate-gameplay-20260918T145757Z-5084e4` / `...-ffee91`.
+
+The first 24,000-decision v1 continuation is complete: FROZEN seed401 gets
+352 tiles, a starter, one rival and one wild win, level6, Route1 minimum y29.
+This is untrained control capacity, NOT learning evidence. Its matched learning
+arm and both seed402 controls are still running. Do not compare different
+seeds as a paired treatment effect. The independent menu replay of seed402
+learning decisions6001..12000 reproduces all recorded states/rewards and finds
+41.89% of emulator frames inside Start/nested menus. Remaining weak contextual
+control is measurable (`recorded-menu-audit-20260918T151409Z-603e0d`).
+
+The stronger visual-release calibration failure was traced to its uniform
+bias floor: one escape cell hit -0.14. The separately versioned, ROM-free
+wide-range calibration uses [-0.5,0.5] for EVERY eligible neuron, with the same
+neutral-gray 1 Hz equation, no button/game/reward labels. It reaches stable
+0.75..1.20 Hz mapped populations over three independent resets (B0.90..1.16).
+Artifact `intrinsic-probe-20260918T152313Z-f5a2bf`, frozen before any evaluation.
+Static/motion and paired/shuffled learning tests are registered, not a promotion.
+Its actual-ROM learn/resume/frozen/no-reward smoke passes:
+`internal-smoke-20260918T153208Z-5db90f`.
+
+A separate standalone fallback-edge unit-scale diagnostic was NEGATIVE/MIXED.
+Scaling only unfitted visual edges to0.05 does not reduce overall saturation
+and raises LC4 gray activity from0.093/3.94 to2.55/4.78 (left/right), with mixed
+motion selectivity. Production remains scale1; no game model was changed by
+this probe. Artifacts `calibrated-visual-probe-20260918T151830Z-5ad577` / `...-7dcd60`.
+
+Full suite:307 Python,24 JavaScript tests and lint pass
+(`verify-3a89e46df41a4db58008b6902ff2457f`). After the versioned intrinsic loader
+refactor, both original-user and new-visual checkpoints match their ORIGINAL
+recorded20-decision trajectories as well as independent split resumes:
+`checkpoint-window-verification-20260918T152359Z-89da19` / `...-dde349`.
+
+### Acquisition and matched-play evidence through 15:12 UTC
 
 The first calibrated-model paired/shuffled visual curves are complete. At
 8,192 decisions, the small interim retention probes score 65.47% / 65.38%
@@ -13,7 +52,9 @@ balanced for paired rewards, versus 49.59% / 48.64% for shuffled rewards
 (training seeds 501/601). However, the stricter independent test after 128
 neutral-gray warmup decisions gives only **58.49% / 59.56%**, versus 49.16%
 original. Right-cue accuracy is 44.76% / 47.39%. BOTH fail the preselected
->=60%, each-cue >=55% gate. Shuffled independent retention is still running.
+>=60%, each-cue >=55% gate. Completed independent shuffled controls score
+48.81% / 49.83%; all four individual noise streams improve with paired
+weights versus original in both training seeds, but this is still modest.
 These are descriptive small-sample results, not a statistical claim.
 
 Artifacts: `visual-learning-curve-20260918T140900Z-5b30a6` and
@@ -24,6 +65,18 @@ not two independent controls. Preselected unchanged training continuations to
 16,384/32,768 and final-weight independent seeds 2601..2604 are ongoing. No
 assay weights enter Pokemon. Reversal must start both arms from the SAME
 acquired state; protocol unit tests now verify that intervention and shuffling.
+Shuffled artifacts: `visual-retention-probe-20260918T144721Z-359cfe` and
+`...T144721Z-92caab`. The acquired-weight direct-current audit also finds the
+correct cue contrast at BOTH steering cells in both seeds (~0.45..0.57 sample
+standard deviations, versus ~0.001..0.015 original and ~0.05..0.07 shuffled).
+It reuses original presynaptic samples and therefore excludes recurrent
+changes: `retained-current-audit-20260918T150116Z-225a19`.
+
+Protocol extension, explicitly exploratory despite the failed acquisition
+gate: same-start reversal of the 8,192 acquired brains is now running at
+512/2,048/8,192 additional decisions, with independent 2701..2704 retention
+preselected. Artifacts `visual-learning-curve-20260918T150238Z-ab054c` (501)
+and `...T150238Z-718867` (601). This does not retroactively pass acquisition.
 
 The literal-application 6,000-decision pairs also completed:
 
@@ -52,6 +105,26 @@ frozen internal visual-rate calibration without mislabeling rates as spikes.
 The launcher accepts opt-in `-Profile visual-rate-v1`; default is unchanged.
 Browser-rendered verification remains unavailable; actual HTTP/stream checks
 and prior exact neural/emulator resume tests pass as detailed below.
+
+One additional GAME learning-dose candidate is registered, not promoted:
+`visual-fast-learning-v2`, same brain/rewards but internal rate 0.2 instead of
+0.02. The 8,192 assay had 1,488.92 total tanh reward versus 14.56 in the
+6,000-decision seed402 game. This is not a gradient estimate, but motivates
+testing learning rate without adding denser/shaped rewards. Both fresh 401/402
+6,000-decision candidates were registered (negative results above). Frozen 64-decision prefixes reproduce
+the original controls exactly, including raw input hashes; those existing
+controls are reused, not counted as new trials.
+
+The visual Euler update now fuses CUDA dispatch while explicitly preserving
+each float32 rounding operation. All neural arrays, actions and spike counts
+match over four 64-decision learning branches. Shared-GPU timing benefit is
+only ~2..7%, not a large speedup. Artifacts `visual-update-benchmark-20260918T145259Z-73f582`
+and `...T145409Z-e7fa9e`. Real-game exact resume/frozen/no-reward checks pass
+(`internal-smoke-20260918T145416Z-f513e0`), as do live pixel/brain/button/speed
+checks (`internal-learn-20260918T145811Z-42f1e9`). The full suite at 15:01 passes
+299 Python / 24 JS tests and lint (`verify-6da5246c70af41f4bdffa89e39b10917`).
+Subsequent protocol guards have separate passing unit checks. Browser retry
+at 15:03 remains unavailable; no rendered-layout verification is claimed.
 
 ## Implementation evidence archived at 14:17 UTC
 

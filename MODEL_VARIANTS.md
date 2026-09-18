@@ -749,6 +749,47 @@ promoted to gameplay. Calibration artifact/protocol:
 `--visual-model calibrated-rate-v1 --graded-release 1 --calibration-only
 --calibration-steps 10000 --reset-probe-decisions 256`.
 
+`visual-fast-learning-v2.json` is a separate learning-dose hypothesis, not a
+new visual calibration: only the internal learning rate changes (0.02 -> 0.2).
+Game reward categories, magnitudes and timing stay unchanged. The matched
+harness rejects any additional configuration difference and verifies an exact
+frozen-control prefix before reusing earlier full controls:
+`scripts/evaluate_visual_learning_rate.py`. Neither this profile nor the
+strong-release failure is a launcher default. All successful and unsuccessful
+trials are retained in the follow-through report.
+
+The completed fast-learning candidate is NEGATIVE:175/111 tiles and no starter
+in both registered6,000-decision seeds, below the original learning and frozen
+comparisons. Increasing weight-change magnitude did not fix useful learning.
+
+`visual-release-wide-v3.json` isolates the old calibration's restrictive bias
+floor. Same release1, gray stimulus, uniform1Hz target and10,000-step procedure,
+but EVERY eligible neuron's offset is bounded to[-0.5,0.5], not[-0.14,0.2].
+The immutable artifact carries the explicit `uniform-neutral-rate-homeostasis-wide-v3`
+version; old artifacts/checkpoint identities remain unchanged. Reproduce with:
+
+```powershell
+.venv\Scripts\python.exe scripts/probe_intrinsic.py --device cuda --visual-model calibrated-rate-v1 --graded-release 1 --wide-bias --calibration-only --calibration-steps 10000 --reset-probe-decisions 256 --export fly-data/intrinsic-neutral-visual-release-wide-v3.npz
+```
+
+Independent neutral-reset motor means0.75..1.20Hz are a calibration check, not
+gameplay/learning success. Visual parameters and these offsets stay frozen
+during subsequent tests. No named motor target participates in fitting; the
+same raw retina and fixed buttons remain. This is not a launcher default.
+
+`probe_calibrated_vision.py --fallback-release-scale 0.05` is a separate private,
+standalone visual-unit diagnostic. It does not export a game model or change
+production weights. The initial scale0.05 comparison was negative/mixed; the
+production fallback scale remains1. Fitted/reference and photoreceptor-lamina
+conductances are excluded from this diagnostic scaling.
+
+`train_game_series.py --initial-game-run <run>` can pin final ACTUAL-game-trained
+weights for further full new-game attempts, followed by frozen evaluation.
+This is an explicit episode reset, not uninterrupted progression. It rejects
+incomplete/frozen source runs and restores the source's exact model settings;
+ROM-free assay arrays are not game checkpoints. `--evaluation-steps` optionally
+sets a separate held-out budget. No best-checkpoint selection is performed.
+
 Exact resume also repairs a PyBoy 2.7 rendering omission: its window-line
 counter is not serialized. Before attaching reward observers, a temporary
 render is discarded by reloading the identical game bytes. The serialized

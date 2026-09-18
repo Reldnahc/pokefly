@@ -58,6 +58,7 @@ def test_calibration_only_uses_real_cells_edges_and_original_signs(circuit):
     assert c.matrix[2, 1] == 0.5
     assert c.matrix[1, 2] == -1.5
     assert c.info["existing_internal_edges"] == 3
+    assert not c.fallback_edge_mask.any()  # Two covered edges plus calibrated real receptor.
     np.testing.assert_array_equal(c.photo_indices, [0])
     release = np.array([0.8, 0.6, 0.7, 1, 0], np.float32)
     np.testing.assert_allclose(c.incoming_current(release, 3), [0, 1.2, 0])

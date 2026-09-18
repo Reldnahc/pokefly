@@ -92,6 +92,8 @@ class CalibratedVisualCircuit:
         if (strength < 0).any() or not np.isfinite(strength).all():
             raise ValueError("Calibrated strengths must preserve every existing sign")
         positive = strength > 0
+        calibrated_edges = np.zeros(matrix.nnz, bool)
+        calibrated_edges[offsets[positive]] = True
         matrix.data[offsets[positive]] = (
             signs[positive] * reference.arrays["edges.weight"][keep][positive] * strength[positive]
         )
@@ -108,9 +110,13 @@ class CalibratedVisualCircuit:
                 if aggregate >= 0 or (matrix.data[edges] >= 0).any():
                     raise ValueError("Expected original histaminergic photoreceptor signs")
                 matrix.data[edges] *= abs(aggregate) / np.abs(matrix.data[edges]).sum()
+                calibrated_edges[edges] = True
                 photo_edges += len(edges)
                 photo_targets += 1
         self.matrix = matrix
+        # Read-only diagnostics can distinguish transferred conductances from
+        # original fallback edges; this mask does not change production dynamics.
+        self.fallback_edge_mask = ~calibrated_edges
         expected = original[selected][:, selected].tocsr()
         expected.sort_indices()
         if not (
@@ -133,7 +139,10 @@ class CalibratedVisualCircuit:
             import cupy as cp
             import cupyx.scipy.sparse as csparse
 
+            from pokefly.cuda_visual import CUDAVisualUpdate
+
             self.xp = cp
+            self.cuda_update = CUDAVisualUpdate(cp)
             wrapper = SimpleNamespace(n=self.n, batch=1, xp=cp, _W=csparse.csr_matrix(matrix))
             self.propagate = DeterministicCUDAInput(wrapper)
             boundary_wrapper = SimpleNamespace(
@@ -142,6 +151,7 @@ class CalibratedVisualCircuit:
             self.propagate_boundary = DeterministicCUDAInput(boundary_wrapper)
         elif device == "cpu":
             self.xp = np
+            self.cuda_update = None
             self.propagate = None
             self.propagate_boundary = None
         else:
@@ -210,8 +220,13 @@ class CalibratedVisualCircuit:
                 self.propagate.dense(self.rate)[:, 0]
                 if self.propagate else self.matrix @ self.rate
             )
-            self.voltage += self.alpha * (current + self.bias + drive - self.voltage)
-            self.rate = xp.clip(self.voltage, 0, self.maximum_rate)
+            if self.cuda_update is None:
+                self.voltage += self.alpha * (current + self.bias + drive - self.voltage)
+                self.rate = xp.clip(self.voltage, 0, self.maximum_rate)
+            else:
+                self.rate = self.cuda_update(
+                    current, self.bias, drive, self.alpha, self.voltage, self.maximum_rate
+                )
             self.steps += 1
         return self.rate
 

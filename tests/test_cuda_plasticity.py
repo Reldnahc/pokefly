@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from pokefly.cuda_plasticity import CUDAEligibility
+from pokefly.cuda_visual import CUDAVisualUpdate
 from pokefly.fast_plasticity import sensorimotor_eligibility
 from pokefly.runtime import configure_runtime
 
@@ -72,3 +73,23 @@ def test_cuda_eligibility_rejects_changed_edges_and_misaligned_arrays(gpu):
         cuda(pre, post, vector[:1], vector, vector, eligible, 0.02, 0.8)
     with pytest.raises(ValueError, match="slow"):
         cuda(pre, post, vector, vector, vector, eligible, 0.02, 0.8, slow_eligibility=vector)
+
+
+def test_fused_visual_update_matches_original_bits_including_resumed_voltage(gpu):
+    rng = np.random.default_rng(417)
+    n = 10037
+    arrays = [gpu.asarray(rng.normal(0, 2, n).astype(np.float32)) for _ in range(4)]
+    current, bias, drive, initial = arrays
+    alpha = gpu.asarray(rng.uniform(0.001, 1, n).astype(np.float32))
+    expected, actual = initial.copy(), initial.copy()
+    update = CUDAVisualUpdate(gpu)
+    for step in range(20):
+        expected += alpha * (current + bias + drive - expected)
+        expected_rate = gpu.clip(expected, 0, 5)
+        rate = update(current, bias, drive, alpha, actual, 5)
+        np.testing.assert_array_equal(actual.get(), expected.get())
+        np.testing.assert_array_equal(rate.get(), expected_rate.get())
+        if step == 8:
+            actual = actual.copy()
+    with pytest.raises(ValueError, match="float32"):
+        update(current.astype(gpu.float64), bias, drive, alpha, actual, 5)
