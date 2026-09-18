@@ -883,7 +883,7 @@ sampled positions and no starter, versus wide-v3 learning 287/255 and one
 starter. The timing candidate is NOT promoted. A causal-looking implementation
 change is not automatically a successful behavioral change.
 
-## Prepared projected learning-dose test (not yet evaluated or promoted)
+## Projected learning-dose test (completed, failed; not promoted)
 
 `visual-wide-projected-fast-v6.json` changes ONLY learning rate, 0.02 to 0.2,
 relative to `visual-wide-projected-v4`. Existing edges, sign/input bounds,
@@ -911,3 +911,78 @@ including exact resume and frozen/no-reward checks. The completed default-wide
 practice studies produced a promising but small retained-game result; their
 independent 3701/3702 follow-up takes priority before the queued rate games.
 That follow-up does not train or change any model, and 3601/3602 remain reserved.
+
+Completed September18 23:01 UTC: both fast-rate games failed to acquire a
+starter, win a battle or reach Route1 within6,000 decisions. Positions220/251;
+B appeared in81.52%/43.20% of windows. The slower projected parent acquired
+a starter on401 and covered185/290 positions. The stronger rate fails the
+predeclared retention-priority criterion; no favorable intermediate checkpoint
+is selected, and3601/3602 are not spent on this negative candidate. Reports
+`visual-learning-rate-gameplay-20260918T224350Z-e6e62f` and
+`visual-learning-rate-gameplay-20260918T224450Z-a47070`.
+
+## Wide-vision earlier-outcome test (running; not promoted)
+
+`visual-wide-outcome-v7.json` combines the unchanged showcase wide-v3 brain
+with the EXISTING `last-faint-v3` reward delivery hook. This changes only when
+the same general battle/capture rewards arrive, not their value or categories.
+It does not include the unsuccessful decision-window eligibility candidate,
+the projected rule, or the faster learning rate. Old checkpoints and the
+showcase launcher remain unchanged.
+
+Exact replay of two actual wide-v3 rival victories verifies identical final
+outcomes/reward amounts and identical novelty timing, with win feedback moved
+32/45 decisions earlier (7.68/10.80 neural seconds):
+`reward-timing-audit-20260918T222844Z-22372c`. That is a mechanism diagnosis,
+NOT two new battles or proof that earlier feedback improves learning. It is
+particularly relevant because the current eligibility time constant is 0.6s.
+The earlier hook was tested on older visual models; its interaction with the
+new wide-vision model must be tested separately. Full-game tests need longer
+than the existing 6,000-decision wide-v3 pairs, which delivered no battle-win
+reward at all. Two complete-game learning/frozen pairs now run18,000 decisions
+per arm, seeds401/402. This is not an isolated comparison against late-timing
+learning at18k. Fresh retained-weight tests remain necessary after improvement.
+
+The user explicitly declined focused battle-reset training on September18.
+Future practice starts at the beginning of the game with learned synapses
+retained, or exactly continues the fly's own saved game. Getting back to a
+battle is part of what must be learned; no stage-specific starts are allowed.
+
+## Optional accumulated-input homeostasis (prepared, not behaviorally tested)
+
+`visual-wide-homeostatic-v8.json` differs from the failed fast projected-v6
+ONLY in its internal plasticity rule, `sensorimotor-perturb-homeostatic-v5`.
+It retains the centered local neural-noise eligibility, rate0.2, actual graph,
+frozen calibration, raw pixels, decoder, reward values and timing. It introduces
+no neuron state, action-frequency target, game feature or external learner.
+
+For positive original weight b and current presynaptic release mean m, the
+proposed weight FACTORS f are projected to satisfy, separately at each target:
+
+```text
+sum(b * m * f) = sum(b * m),  with minimum_factor <= f <= maximum_factor.
+```
+
+This constrains accumulated learned weights against original estimated input,
+not merely the next update against the previous weights. A deterministic
+safeguarded scalar solve uses `clip(proposed - lambda*m)` in a positive b metric.
+Per-target release normalization handles nearly-silent/subnormal trace values.
+If the ordinary total-input budget is exceeded, contract factors towards all
+ones, a feasible original-weight anchor. This preserves the mean constraint
+and box while satisfying the same25% resource budget. It is NOT the closest
+joint projection or an exact reward gradient, and final float32 rounding remains.
+Exact-normalization mode can conservatively erase the whole proposed change;
+the candidate uses the nonzero25% budget, not that mode.
+
+The rule acts only during enabled nonzero-error updates. Frozen evaluation
+retains the exact saved weights, with no hidden ongoing normalization. Current
+release means vary by context and recurrence is nonlinear: preserving this
+local estimate does NOT guarantee fixed neutral firing or improved behavior.
+It is an experimental homeostasis hypothesis, not calibrated fly physiology.
+
+CPU tests cover locality, absent inputs, bounds, resource limits, subnormal
+traces, unchanged observation/frozen behavior, and exact synthetic continuation.
+Private-copy saved-brain audit `credit-update-audit-20260918T233346Z-d87f04`
+checks the numeric constraint without exports. Full neural/gameplay checks and
+retained behavioral evidence are still required. Do not load those diagnostic
+copies, migrate old brains to this rule, or promote it to the showcase default.

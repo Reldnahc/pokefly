@@ -57,6 +57,14 @@ try {
     } else {
         Write-Host "Model: $Profile"
     }
+    if ($Resume) {
+        Write-Host 'Learning history: continuing the saved brain AND its saved game.'
+    } elseif ($Weights) {
+        Write-Host 'Learning history: retaining learned synapses for this new game attempt.'
+    } else {
+        Write-Host 'Learning history: NEW brain, original weights. Earlier checkpoints are not loaded.'
+        Write-Host 'Use -Resume to continue a saved game, or -Weights <checkpoint> -Intro for a new game with prior learning.'
+    }
     Write-Host 'Ctrl+C completes the current decision and saves a checkpoint.'
     & $projectPython @launchArgs
     if ($LASTEXITCODE -ne 0) { throw "Pokefly stopped with exit code $LASTEXITCODE." }

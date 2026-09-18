@@ -6,6 +6,8 @@ copies. No neural exports, emulator, button labels or policy fitting are used.
 """
 
 import argparse
+from dataclasses import replace
+from time import perf_counter
 
 import numpy as np
 
@@ -47,11 +49,23 @@ def probe_update(p, reward):
     }
 
 
+def input_drift(p):
+    mean = p.post_baseline[p.pre].astype(float)
+    reference = np.bincount(p.post, weights=p.base * mean, minlength=p.n)
+    actual = np.bincount(p.post, weights=p.weights * mean, minlength=p.n)
+    active = reference > 0
+    relative = (actual[active] - reference[active]) / reference[active]
+    return {"relative_to_original": summary(relative),
+            "maximum_absolute_relative": float(np.abs(relative).max())}
+
+
 def main():
     from pathlib import Path
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoints", type=Path, nargs="+", required=True)
+    parser.add_argument("--compare-homeostasis", action="store_true",
+                        help="Private CPU copies only: test optional constraint; no neural export")
     args = parser.parse_args()
     output = run_directory("credit-update-audit")
     report = {"scope": __doc__, "status": "running", "rows": []}
@@ -80,6 +94,25 @@ def main():
         p.restore(arrays, saved["neural"]["plasticity"])
         np.testing.assert_array_equal(p.weights, arrays["weights"])
         row["source_brain_sha256"] = sha256(Path(saved["directory"]) / "brain.npz")
+        if args.compare_homeostasis:
+            # Deliberately NOT a migrated checkpoint or a game-trained candidate.
+            # The saved source is immutable; only private numerical copies change.
+            candidate = NeuralPerturbationPlasticity(
+                arrays["pre"], arrays["post"], arrays["base"], len(arrays["post_baseline"]),
+                replace(config, rule="sensorimotor-perturb-homeostatic-v5"),
+            )
+            comparisons = []
+            for reward in (0.0, 0.05, 1.0):
+                candidate.restore(arrays, saved["neural"]["plasticity"])
+                before = input_drift(candidate)
+                started = perf_counter()
+                candidate.reinforce(reward)
+                comparisons.append({"hypothetical_reward": reward, "before": before,
+                                    "after": input_drift(candidate),
+                                    "cpu_seconds_including_first_jit": perf_counter() - started})
+            row["private_homeostatic_constraint_checks"] = comparisons
+            if sha256(Path(saved["directory"]) / "brain.npz") != row["source_brain_sha256"]:
+                raise ValueError("Source neural file changed during private-copy diagnostic")
         report["rows"].append(row)
         write_json(output / "report.json", report)
         print(row, flush=True)

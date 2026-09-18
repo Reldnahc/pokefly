@@ -1,5 +1,12 @@
 # Pokefly
 
+Training protocol: the same fly keeps its learned internal synapses across
+whole-game attempts. Do not train from battle-start or other stage-specific
+resets; learning to reach those situations is part of the task. Use `-Resume`
+to continue its saved game, or `-Weights <checkpoint> -Intro` for a new game
+with its learned brain. Plain `-Intro` starts original weights; it does not
+automatically load prior learning. Original-weight/frozen runs are controls.
+
 Project goals, proposed features, and open decisions are recorded in
 [PROJECT_BRIEF.md](PROJECT_BRIEF.md).
 
@@ -16,14 +23,15 @@ is in [FOLLOWTHROUGH_RESULTS.md](FOLLOWTHROUGH_RESULTS.md): neutral neural
 excitability calibration increased Up from 3.9% to 22.1% and exploration from
 25 to 232 positions in a matched 6,000-decision comparison. Bounded internal
 plasticity learns and reverses motor preferences against frozen/shuffled controls.
-Actual learning runs obtained starters; one won the first rival battle and
-entered Route 1. Saved weights obtained starters in 3/3 held-out trials versus
-1/3 with original weights, but did not improve battle wins in that whole-game
-panel. Separately, a dual-trace candidate trained on eight explicitly reset
-rival encounters won 6/8 on each of two frozen test panels, versus 4/8 and 3/8
-with original weights. This is limited battle retention, not whole-game
-autonomy or statistical proof. A stronger internally calibrated visual model
-now passes a retained two-cue association test in two training seeds: about69%
+Actual game runs obtained starters, won battles and entered Route 1, but these
+outcomes alone do not establish learning. With the current wide-vision model,
+repeated whole-game practice first produced a promising retained result
+(3/4 starters and one rival win versus 0/2 original starters); the independent
+follow-up FAILED (0/4 retained starters versus 1/2 original). Neither practiced
+brain is promoted as a reliably improved player. Older battle-reset studies
+remain archived evidence, not the currently authorized training protocol.
+The stronger internally calibrated visual model passes a retained two-cue
+association test in two training seeds: about69%
 balanced accuracy versus45% original and36..37% shuffled feedback, with both
 cues above the preset threshold. Reversal and gameplay transfer are still under
 test; no synthetic assay-trained weights are used in Pokemon.

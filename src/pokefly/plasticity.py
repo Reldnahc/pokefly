@@ -44,6 +44,7 @@ class PlasticityConfig:
             "sensorimotor-perturb-v2",
             "sensorimotor-perturb-v3",
             "sensorimotor-perturb-projected-v4",
+            "sensorimotor-perturb-homeostatic-v5",
             "sensorimotor-score-v1",
             "sensorimotor-score-v2",
             "sensorimotor-score-v3",
@@ -284,33 +285,7 @@ class SensorimotorPlasticity(EligibilityPlasticity):
                 factor = self.weights / self.base
                 eligibility = self.factor_eligibility()
                 factor += self.config.learning_rate * float(self.prediction_error) * eligibility
-                np.clip(factor, self.config.minimum_factor, self.config.maximum_factor, out=factor)
-                if self.config.normalize_inputs or self.config.input_budget_fraction:
-                    # Local synaptic-resource competition for every anatomical
-                    # target neuron, not an action-frequency quota. Bounds hold
-                    # even when the iterative budget projection is approximate.
-                    for _ in range(12):
-                        total = np.bincount(
-                            self.resource_group,
-                            weights=self.resource_base * factor,
-                            minlength=self.resource_size,
-                        )
-                        fraction = self.config.input_budget_fraction
-                        target = np.clip(
-                            total[self.resource_group],
-                            self.input_budget[self.resource_group] * (1 - fraction),
-                            self.input_budget[self.resource_group] * (1 + fraction),
-                        )
-                        ratio = total[self.resource_group] / target
-                        if np.max(np.abs(ratio - 1)) < 1e-5:
-                            break
-                        factor /= ratio
-                        np.clip(
-                            factor,
-                            self.config.minimum_factor,
-                            self.config.maximum_factor,
-                            out=factor,
-                        )
+                factor = self.constrain_factors(factor)
                 self.weights[:] = self.base * factor
                 self.last_changed = int(np.count_nonzero(old != self.weights))
                 self.updates += 1
@@ -319,6 +294,32 @@ class SensorimotorPlasticity(EligibilityPlasticity):
             self.reward_mean += (1 - decay) * self.dopamine
         self.feedback_elapsed[...] = 0
         return self.metrics()
+
+    def constrain_factors(self, factor):
+        # Preserve the historical clipping/resource operations and their order.
+        np.clip(factor, self.config.minimum_factor, self.config.maximum_factor, out=factor)
+        if self.config.normalize_inputs or self.config.input_budget_fraction:
+            # Local competition for every anatomical target, not button quotas.
+            for _ in range(12):
+                total = np.bincount(
+                    self.resource_group,
+                    weights=self.resource_base * factor,
+                    minlength=self.resource_size,
+                )
+                fraction = self.config.input_budget_fraction
+                target = np.clip(
+                    total[self.resource_group],
+                    self.input_budget[self.resource_group] * (1 - fraction),
+                    self.input_budget[self.resource_group] * (1 + fraction),
+                )
+                ratio = total[self.resource_group] / target
+                if np.max(np.abs(ratio - 1)) < 1e-5:
+                    break
+                factor /= ratio
+                np.clip(
+                    factor, self.config.minimum_factor, self.config.maximum_factor, out=factor,
+                )
+        return factor
 
     def factor_eligibility(self):
         if self.slow_eligibility is not None and self.config.trace_mixing == "impulse-balanced-v2":
@@ -410,6 +411,25 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
     NOT their conductance model or a validated fly molecular mechanism.
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.config.rule == "sensorimotor-perturb-homeostatic-v5":
+            from pokefly.synaptic_homeostasis import target_order
+
+            self.mean_constraint_order = target_order(self.post, self.n)
+
+    def constrain_factors(self, factor):
+        if self.config.rule != "sensorimotor-perturb-homeostatic-v5":
+            return super().constrain_factors(factor)
+        from pokefly.synaptic_homeostasis import bounded_mean_factors
+
+        c = self.config
+        budget = 0.0 if c.normalize_inputs else c.input_budget_fraction or -1.0
+        return bounded_mean_factors(
+            factor, self.base, self.post_baseline[self.pre], *self.mean_constraint_order,
+            c.minimum_factor, c.maximum_factor, budget,
+        )
+
     def reset_modulation(self):
         super().reset_modulation()
         self.pending_credit = None
@@ -478,7 +498,10 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         # Presynaptic history before this step's perturbation: no future spikes.
         decay = np.exp(-dt / c.pre_trace_seconds)
         self.pre_trace *= decay
-        centered = c.rule in ("sensorimotor-perturb-v3", "sensorimotor-perturb-projected-v4")
+        centered = c.rule in (
+            "sensorimotor-perturb-v3", "sensorimotor-perturb-projected-v4",
+            "sensorimotor-perturb-homeostatic-v5",
+        )
         incoming = (
             self.pre_trace - np.float32(decay) * self.post_baseline if centered else self.pre_trace
         )
@@ -522,6 +545,9 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         return {
             **super().metrics(),
             "rule": (
+                "sensorimotor-bounded-mean-input-homeostasis-v5"
+                if self.config.rule == "sensorimotor-perturb-homeostatic-v5"
+                else
                 "sensorimotor-mean-input-projected-perturbation-v4"
                 if self.config.rule == "sensorimotor-perturb-projected-v4"
                 else

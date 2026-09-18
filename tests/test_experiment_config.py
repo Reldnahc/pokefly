@@ -92,10 +92,37 @@ def test_setup_prepares_showcase_dependencies_without_overwriting_existing_calib
     assert "--export fly-data/intrinsic-neutral-visual-release-wide-v3.npz" in setup
 
 
+def test_launcher_makes_new_brain_and_retained_learning_explicit():
+    launcher = Path("scripts/start.ps1").read_text()
+    assert "continuing the saved brain AND its saved game" in launcher
+    assert "retaining learned synapses for this new game attempt" in launcher
+    assert "NEW brain, original weights. Earlier checkpoints are not loaded" in launcher
+
+
 def test_missing_reward_timing_retains_legacy_checkpoint_behavior():
     assert ExperimentConfig.from_dict({}, checkpoint=True).rewards.timing == "encounter-end-v1"
     config = ExperimentConfig.from_dict({"rewards": {"timing": "last-faint-v3"}})
     assert ExperimentConfig.from_dict(asdict(config), checkpoint=True) == config
+
+
+def test_wide_outcome_candidate_changes_only_existing_reward_delivery_timing():
+    old = asdict(load_config(Path("configs/visual-release-wide-v3.json")))
+    new = asdict(load_config(Path("configs/visual-wide-outcome-v7.json")))
+    assert old["rewards"].pop("timing") == "encounter-end-v1"
+    assert new["rewards"].pop("timing") == "last-faint-v3"
+    assert old == new
+    assert "$Profile = 'visual-release-wide-v3'" in Path("scripts/start.ps1").read_text()
+
+
+def test_homeostatic_candidate_changes_only_internal_rule_and_does_not_migrate_checkpoints():
+    old = asdict(load_config(Path("configs/visual-wide-projected-fast-v6.json")))
+    candidate = load_config(Path("configs/visual-wide-homeostatic-v8.json"))
+    new = asdict(candidate)
+    assert old["brain"]["plasticity"].pop("rule") == "sensorimotor-perturb-projected-v4"
+    assert new["brain"]["plasticity"].pop("rule") == "sensorimotor-perturb-homeostatic-v5"
+    assert new == old
+    assert ExperimentConfig.from_dict(asdict(candidate), checkpoint=True) == candidate
+    assert "$Profile = 'visual-release-wide-v3'" in Path("scripts/start.ps1").read_text()
 
 
 def test_missing_learning_scope_retains_legacy_checkpoint_behavior():

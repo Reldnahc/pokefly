@@ -1,5 +1,144 @@
 # Pokefly: neural-control and learning improvement plan
 
+23:39 UTC: launcher now explicitly labels NEW brain versus retained synapses
+versus exact game/brain continuation. Loading remains explicit, never an
+automatic choice of the most recently modified research checkpoint. The
+latest full CPU suite after the safeguarded solver passes387 Python/26JS/lint
+(`verify-ad7181d375ab4e2687bc0504918524c1`); seven additional launcher/legacy
+constraint tests subsequently pass in the30-test focused subset. Six parity
+cases check the old clipping/normalization operation order bit-for-bit for
+positive and separately budgeted signed inputs. Default and live jobs unchanged.
+
+23:35 UTC: v7 learning401 completed18k: starter3122,346 positions, Route1
+minimum y34, NO victories. Its frozen comparison now runs in the same session,
+`internal-frozen-20260918T233132Z-c90b1d`. Frozen402 completed18k: starter7780,
+rival victory8955,313 positions, noRoute1; learning402 now runs
+`internal-learn-20260918T232612Z-c14eea`. These are NOT matched final effects
+yet. All6,000 initial raw records in the first two arms match their old shared
+development prefixes exactly (apart from run ID/wall timing), not extra trials.
+
+Optional prepared mechanism candidate: `visual-wide-homeostatic-v8.json`
+changes ONLY the internal rule relative to failed fast projected-v6, retaining
+rate0.2. Existing positive synapses are constrained against ORIGINAL estimated
+input at the CURRENT local release means, with factor bounds and the same25%
+resource budget. Unlike incremental projection, this addresses accumulated
+mean-input drift and does not break the mean constraint when clipping occurs.
+No action labels, desired motor rates, RAM features or external critic enter it.
+Frozen mode does not perform homeostasis or change weights. Original profiles
+and checkpoint identities remain unchanged. This is an engineering hypothesis,
+not measured fly physiology or established useful learning.
+
+Private-copy CPU audit initially exposed a numerical solver failure for
+nearly-silent float32 release traces, plus an overly strict absolute test
+tolerance. Corrected target normalization/bracketing and added subnormal tests.
+Final safeguarded-Newton audit `credit-update-audit-20260918T233346Z-d87f04`
+reduces maximum original-input residuals from51.05%/43.09% to<5.7e-8 relative
+on BOTH sources for all three hypothetical rewards. Sources were hash-checked;
+no corrected arrays were exported or used in gameplay. Measured warm CPU cost
+~17..19ms/update here; no whole-application speedup claim. These are numeric
+constraint checks, not behavior, and cannot establish a cure for B dominance.
+
+CPU suite passes387 Python/26JS/lint before the final solver acceleration;
+14 focused tests pass after it. Artifact `verify-f28e10b849824e15b02d3c3ebb54728c`.
+No v8 GPU trial has begun. Finish the ongoing v7 pairs; when a slot becomes
+available, run full regression/real-ROM smoke before any v8 behavioral test.
+Synthetic cue diagnostic weights must never initialize a game. Any subsequent
+game practice carries a named lineage across whole-game starts, never battles.
+
+23:19 UTC USER REQUIREMENT: whole-game training only. The user explicitly
+declined focused battle-start practice. Across new-game training attempts,
+carry forward the same fly's learned synapses; it must learn to reach battles
+again, not be placed there. Exact continuation of its own stopped game is
+distinct from a stage-reset curriculum. Original-weight/frozen arms are
+explicit controls only. Earlier pending-question entries below are historical
+and now resolved: NO battle-start episodes. Keep all historical evidence.
+
+The two existing full-game v7 pairs survived the conversation interruption;
+no replacement jobs were launched. Reports `visual-model-gameplay-
+20260918T230017Z-c8f22a` (401) / `...T230049Z-fade7a` (402), sessions30649/65999.
+The regular launcher already supports full resume and weights-only new games;
+plain -Intro does NOT load previous learning. Do not silently select the most
+recent research checkpoint as the user's fly. Continued training must use an
+explicit saved-brain lineage, not repeatedly initialize original weights.
+
+CPU-only regression suite passes373 Python/26 JavaScript/lint
+(`verify-aaae4a787817449fa2f7256f97ad09c8`); ten CUDA kernel tests explicitly
+omitted while both GPU slots are occupied. No claim of rendered browser QA.
+
+23:09 UTC credit audit `credit-update-audit-20260918T230848Z-497d86` detects
+the fast projected candidate's mean-input projection being broken by subsequent
+factor/resource bounds in hypothetical private-copy updates. This is a
+mechanism lead, NOT a causal explanation or a new trained brain. At the final
+saved presynaptic means, one B-readout input estimate is +51.05% in401 and
+another +22.07% in402 relative to original weights. Moving release means and
+recurrence also matter; a zero first-order update is not constant neural firing.
+No fix or new default has been promoted from this diagnostic.
+
+23:01 UTC: BOTH fast projected trials COMPLETE, no starter/win/Route1.
+Seed401220 positions/B81.52%; seed402251/B43.20%. Parent projected185/290,
+starter only401; original frozen268/188. Rate increase fails the declared
+retention-priority criterion, is not promoted, and is not rescued by selecting
+a favorable intermediate checkpoint. Reports `visual-learning-rate-gameplay-
+20260918T224350Z-e6e62f` / `...T224450Z-a47070`; all negative evidence retained.
+Longer earlier-outcome tests begin: session30649 learns401 then freezes its
+original control,18k per arm;402 uses reversed arm order, also18k each.
+Both start original synapses with the same intro; no training-stage resets.
+
+The sandbox's NEW terminal launcher stalled on two read-only diagnostics;
+waiting/retrying did not recover it. Canceled those orchestration requests,
+not the game processes. Approved project-scoped elevated launches work.
+Read-only process-tree checks found exactly two experiments plus their venv
+launchers, no matching diagnostic processes; disk free432,753,778,688 bytes.
+Do not launch extra jobs to compensate for tool latency. Existing experiment
+sessions continued normally and both fast runs exited with complete artifacts.
+
+22:49 UTC ledger: fast projected401/402 are the ONLY two GPU jobs, sessions
+15910/49741, reports `visual-learning-rate-gameplay-20260918T224350Z-e6e62f`
+and `visual-learning-rate-gameplay-20260918T224450Z-a47070`, actual learning
+runs `internal-learn-20260918T224403Z-c15ce2` / `...T224502Z-9e4596`.
+Both frozen64 prefixes exactly reproduce the shared original controls.
+Earlier-outcome v7 real-ROM smoke passed
+`internal-smoke-20260918T224333Z-520129`. Browser skill was read and connection
+retried; even a minimal connection check times out, so no rendered UI QA is
+claimed. Read-only live HTTP/SSE checks of both active dashboards verify raw
+screen/retina/input-window synchronization and disabled manual controls
+(observed samples1908/1341). Experiments are not interrupted by that UI limit.
+
+22:44 UTC: independent3701/3702 follow-up COMPLETE and NEGATIVE. Original
+starter1/2; BOTH practice brains0/2 each; no wins/Route1. Source401 tiles292/
+265, source402254/295, original278/246. Audit passes
+`game-retention-panel-audit-20260918T224333Z-7384d6`. Do not promote either
+practiced brain or call the earlier win a robust learning result. Full suite
+377 Python/26 JS/lint passes (`verify-b0c0236d5d7d450b8cfc958d95886b0f`).
+Session15910 now runs fast projected development401; session91743 is the
+v7 actual-ROM smoke. After smoke exits, start fast402 in the other slot.
+Only these two GPU jobs. The independent retention scripts have exited.
+
+22:43 UTC pre-training decision rule for the queued fast projected games:
+tile coverage alone is not enough to prioritize retention. Both final brains
+will go to3601/3602 frozen retention if BOTH development games acquire a
+starter, or a new battle victory/Route1 visit appears without losing starter
+acquisition on seed401 (the projected parent's successful seed). This is a
+queue-priority criterion, not proof or a statistical gate. Otherwise finish
+and retain both negative/mixed dose trials, then run the registered longer
+earlier-outcome pairs. Do not select an intermediate successful checkpoint.
+
+22:39 UTC: reward-timing replay now verifies TWO actual wide-v3 victories,
+with the same rewards32/45 decisions earlier under the existing last-faint-v3
+hook and unchanged novelty. Artifact `reward-timing-audit-20260918T222844Z-22372c`.
+Prepared `visual-wide-outcome-v7`, changing ONLY that timing versus wide-v3,
+not learning rate/rule/eligibility/physics or reward categories/values. Not
+promoted or trained yet. The first full-game fast-rate pair remains next.
+If it does not show a consistent improvement worth immediate retention tests,
+the next full-game experiment is two original-weight learning/frozen pairs
+with v7, seeds401/402,18,000 decisions per arm, no mid-game resets. This tests
+learning with the earlier reward in a longer opportunity window, NOT an
+isolated claim of improvement over late-timing learning at18k (that matched
+late-learning control has not been run). Existing6k prefixes are shared
+development evidence, never additional independent trials. Any apparent
+benefit still needs fresh frozen retention, preselect3801/3802. Do not use
+the synthetic cue brains or infer permission for focused battle practice.
+
 22:25 UTC: first independent follow-up arms complete: original3701 gets a
 starter at2114 (278 positions, no win); retained source402/3702 gets no starter
 (295 positions). These are DIFFERENT seeds, not a matched effect estimate;

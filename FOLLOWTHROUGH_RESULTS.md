@@ -1,5 +1,69 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Learning-dose result and next full-game tests, 2026-09-18 23:19 UTC
+
+Both projected10x-rate trials completed6,000 decisions and FAILED the declared
+retention-priority criterion: no starter, battle victory or Route1 on either
+401 or402. Positions220/251, with B in81.52%/43.20% of windows. The slower
+projected parent acquired a starter on401 and covered185/290 positions. These
+are not successful improvements, and the candidate is not promoted. Reports
+`visual-learning-rate-gameplay-20260918T224350Z-e6e62f` and
+`visual-learning-rate-gameplay-20260918T224450Z-a47070`.
+
+The timing-only wide-v7 model is now in two18,000-decision learning/frozen
+full-game comparisons, reports `visual-model-gameplay-20260918T230017Z-c8f22a`
+and `...T230049Z-fade7a`. Same original synapses, intro, physical brain, pixels,
+buttons and reward values; only the existing battle-outcome delivery hook
+differs from the showcase default. No final improvement result yet. Shared
+6k development prefixes are not extra independent trials. A new audit reports
+paid early outcomes separately from fully completed encounters; it does not
+count a rival bonus as a second battle or claim that open dialogue was cleared.
+
+The user confirmed whole-game-only practice with learned synapses carried
+between games. No future battle-start episodes: learning to reach the battle
+again is part of the task. Historical battle-reset results remain archived,
+not a proposal for the current curriculum. Original/frozen arms are controls,
+not the normal training mode. The default showcase remains wide-v3.
+
+CPU-only verification passes373 Python/26 JavaScript/lint, explicitly omitting
+ten CUDA kernel tests while both GPU slots are occupied:
+`verify-aaae4a787817449fa2f7256f97ad09c8`.
+## Independent practice follow-up, 2026-09-18 22:44 UTC
+
+The promising starter-acquisition advantage below **did not replicate** on
+the two prospectively selected new seeds. All six arms completed 6,000
+decisions with weights frozen and identical fresh-game starts:
+
+| Final internal weights | Seed 3701 | Seed 3702 |
+| --- | --- | --- |
+| Original shared control | 278 positions; starter 2114 | 246 positions; no starter |
+| Practice source 401 (final episode 1402) | 292 positions; no starter | 265 positions; no starter |
+| Practice source 402 (final episode 1404) | 254 positions; no starter | 295 positions; no starter |
+
+No wins or Route 1 in any arm. Both practice brains are included; no selected
+checkpoint or training source is substituted. Each original control counts
+once. The higher coverage of some trained arms is not better Pokemon play:
+retained starter acquisition is 0/4 versus original 1/2 in this independent
+follow-up. The earlier rival victory is genuine, but these completed results
+do not establish reliable useful gameplay learning. Practice brains are NOT
+promoted to the showcase default.
+
+Audit: `game-retention-panel-audit-20260918T224333Z-7384d6`. Raw panels:
+`game-retention-panel-20260918T221429Z-8b795c` and
+`game-retention-panel-20260918T221440Z-d732f1`. Audit verifies actual frozen
+synapses, every outcome, matching model/ROM/start state and both final sources.
+Recorded playback of the earlier victory independently matches all 6,000
+states/rewards: `recorded-replay-proof-20260918T222416Z-7bb39d`; frames 4206
+and 4216 show level 6 and the defeated rival. This is playback, not another win.
+
+Experiments continue with the preregistered projected 10x-rate candidate.
+Separately, replay verifies that the existing earlier-outcome hook moves the
+same rewards 32/45 decisions earlier on the two actual victories, without new
+rewards or changed novelty (`reward-timing-audit-20260918T222844Z-22372c`).
+The wide-v7 timing-only profile is prepared for a longer full-game comparison;
+neither candidate is the showcase default. Full verification now passes
+377 Python/26 JavaScript tests and lint (`verify-b0c0236d5d7d450b8cfc958d95886b0f`).
+
 ## Learning follow-through, 2026-09-18 22:14 UTC
 
 After three explicitly reset actual-game learning episodes (18,000 decisions

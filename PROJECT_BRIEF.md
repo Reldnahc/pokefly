@@ -1,6 +1,6 @@
 # Pokefly project brief
 
-Draft 0.18 — September 17, 2026
+Draft 0.19 — September 18, 2026
 
 This is a living record of the user's goals and the design discussion. It
 distinguishes explicit requests, proposed requirements, and unresolved choices.
@@ -8,6 +8,13 @@ It does not mark proposed features as implemented or all recommendations as
 approved. Setup and launch commands remain in [README.md](README.md).
 
 ## Intended outcome
+
+Confirmed September 18: training must cover the whole game. Keep learned
+internal synapses across new-game attempts; do not start training episodes at
+battles or other later-game checkpoints. Repeating a battle means the fly must
+learn to reach it again, including navigation and interaction along the way.
+Exact resume continues its own saved game; original-weight/frozen runs are
+separately labeled experimental controls, not a requirement to discard learning.
 
 Connect an open-source simulation based on a fruit fly's reconstructed brain
 wiring to Pokemon Red, investigate how it perceives, acts, and learns while playing,
@@ -113,13 +120,17 @@ complete the game or a claim that eventual completion has been demonstrated.
 
 The dated [FOLLOWTHROUGH_RESULTS.md](FOLLOWTHROUGH_RESULTS.md) supersedes the
 earlier implementation snapshots below. Current launcher default is
-`sensorimotor-bounded-v1`: preserved incoming sensory isolation, frozen
-neutral-image excitability calibration and bounded internal motor-input learning.
-Matched control tests fix the severe Up bias, immediate-feedback diagnostics
-show retained motor preference/reversal, and actual games have won rival/wild
-battles. Reliable visual strategy, delayed credit and further-game navigation
-remain open. Optional serial button delivery fixes a demonstrated naming-screen
-priority trap and is under whole-game comparison; it is not promoted by fiat.
+`visual-release-wide-v3`: preserved incoming sensory isolation, frozen generic
+visual/intrinsic calibration, streaming raw pixels, serial button delivery and
+bounded internal motor-input learning. Retained two-cue association is
+demonstrated under a separate diagnostic protocol; useful retained whole-game
+learning is not established. A promising whole-game practice result failed its
+independent follow-up. Current longer experiments keep those negative results
+visible and never initialize gameplay with diagnostic-assay-trained weights.
+
+The historical battle-reset studies below and in the results archive are not
+the current training protocol. The user's September 18 requirement rules out
+further focused battle-start training, even from a battle the fly itself reached.
 
 ### Earlier implementation/evaluation snapshots (retained, not current defaults)
 

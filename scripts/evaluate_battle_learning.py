@@ -1,4 +1,8 @@
-"""Controlled repeated-battle learning, not autonomous whole-game progression.
+"""HISTORICAL battle-reset study; not the current authorized training protocol.
+
+The user declined battle-start practice on 2026-09-18. Preserve this harness
+for the existing evidence, but do not run further battle-reset training.
+Use train_game_series.py for whole-game attempts carrying learned synapses.
 
 Every episode explicitly resets the same recorded game state/reward history.
 Pixels alone drive the fly; existing game outcome rewards alone change internal
