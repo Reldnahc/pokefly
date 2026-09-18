@@ -49,6 +49,23 @@ def completed_game_source(path):
     )
 
 
+def defer_evaluation(report, output, source):
+    """Pin the final trained brain; defer tests without calling the study complete."""
+    if not report.get("defer_evaluation", False):
+        return False
+    _, saved = read_checkpoint(source)
+    if (saved["experiment"]["mode"] != "learn"
+            or saved["experiment"]["sample"] != report["steps_per_attempt"]):
+        raise ValueError("Deferred evaluation requires the final completed training brain")
+    checkpoint = Path(saved["directory"])
+    report.update(status="training_completed", evaluation_pending=True,
+                  evaluation_source=str(checkpoint),
+                  evaluation_brain_sha256=sha256(checkpoint / "brain.npz"))
+    write_json(output / "report.json", report)
+    print("Training complete; shared frozen evaluation remains pending:", output, flush=True)
+    return True
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
@@ -68,11 +85,13 @@ def main():
         "--evaluation-steps", type=int, help="Frozen budget per evaluation arm; defaults to --steps"
     )
     p.add_argument("--port", type=int, default=8779)
+    p.add_argument("--defer-evaluation", action="store_true",
+                   help="Train the full sequence, then use a separate shared-control panel")
     args = p.parse_args()
     if (
         args.steps < 1
         or (args.evaluation_steps is not None and args.evaluation_steps < 1)
-        or len(args.training_seeds) < 2
+        or len(args.training_seeds) < (1 if args.initial_game_run else 2)
         or len(args.eval_seeds) < 2
         or set(args.training_seeds) & set(args.eval_seeds)
         or len(set(args.training_seeds + args.eval_seeds))
@@ -106,9 +125,11 @@ def main():
         "initial_actual_game_source": provenance,
         "rows": [],
         "status": "running",
+        "defer_evaluation": args.defer_evaluation,
         "evaluation": "Original and retained weights frozen, matched intro/game/noise seeds",
     }
     write_json(output / "report.json", report)
+    print("Series:", output, flush=True)
     previous = None
     for seed in args.training_seeds:
         source = previous / "latest-checkpoint.json" if previous else initial
@@ -142,6 +163,8 @@ def main():
         previous = path
     source = previous / "latest-checkpoint.json"
     report["evaluation_source"] = str(source)
+    if defer_evaluation(report, output, source):
+        return
     for i, seed in enumerate(args.eval_seeds):
         arms = ("original", "retained") if i % 2 == 0 else ("retained", "original")
         for arm in arms:

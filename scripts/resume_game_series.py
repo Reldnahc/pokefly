@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 from continue_rule_gameplay import measure_complete, read_rows, stitch
 from evaluate_saved_gameplay import measure
+from train_game_series import defer_evaluation
 
 from pokefly.checkpoint import read_checkpoint, sha256
 from pokefly.experiment import ExperimentConfig, TrainOptions, load_config, train
@@ -30,7 +31,7 @@ def validate_schedule(report):
             or not report.get("initial_actual_game_source")):
         raise ValueError("An interrupted original actual-game practice series is required")
     training, evaluation = report["training_seeds"], report["eval_seeds"]
-    if (len(training) < 2 or len(evaluation) < 2
+    if (len(training) < 1 or len(evaluation) < 2
             or len(set(training + evaluation)) != len(training + evaluation)
             or report["initial_actual_game_source"]["source_launch_seed"] in evaluation
             or report["steps_per_attempt"] < 1 or report["evaluation_steps_per_arm"] < 1):
@@ -170,6 +171,8 @@ def main():
     report["evaluation_source"] = str(previous)
     report["evaluation_brain_sha256"] = sha256(previous / "brain.npz")
     write_json(output / "report.json", report)
+    if defer_evaluation(report, output, previous):
+        return
     for index, seed in enumerate(source["eval_seeds"]):
         arms = ("original", "retained") if index % 2 == 0 else ("retained", "original")
         for arm in arms:

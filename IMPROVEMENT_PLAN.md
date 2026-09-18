@@ -1,5 +1,37 @@
 # Pokefly: neural-control and learning improvement plan
 
+23:53 UTC prospective next whole-game phase: learning402 has now won its
+rival at12523, level6; its matched original won earlier at8955. This is an
+actual early-timed training reward, not evidence of improvement yet. Finish
+both18k pairs and audit them. Then continue BOTH exact final v7 brains through
+one more whole new-game learning attempt each,18k decisions, noise4101/4102
+for initial401/402 respectively. Each fly will have36k actual-game training
+across two full-game starts, never a battle reset. No intermediate checkpoint
+selection, changed rewards, synthetic weights or model/rate changes.
+
+Use train_game_series --initial-game-run ... --training-seeds <4101 or4102>
+--eval-seeds3801 3802 --steps18000 --evaluation-steps18000 --defer-evaluation.
+The new option pins the final brain as training_completed/evaluation_pending;
+it does not mark a learning study successful or completed. Then evaluate BOTH
+final brains on3801/3802,18k decisions per arm, learning OFF, one shared original
+per seed (six arms total). Compare starter/battle access, victories and areas,
+not just weights, total rewards or positions. Frozen follow-up3803/3804 is
+reserved if the complete first panel looks beneficial. The older1601/1602 and
+3701/3702 data are not recycled as new confirmation.
+
+One additional practice attempt is allowed only when a completed actual-game
+learning source is explicitly supplied; a new from-original series still needs
+at least two attempts. Recovery preserves the exact interrupted game and the
+planned deferral. Numerical v8 work remains separate and unpromoted. Run its
+real-ROM smoke and full CUDA-inclusive suite in a freed slot before continuing
+practice; no third GPU job. Future v8 behavioral comparisons are still queued,
+not an excuse to discard the current flies' learning histories.
+
+Verification encountered one Windows10053 loopback connection abort; the
+30-test dashboard retry and subsequent complete397-test CPU run passed.
+Three line-length lint failures were corrected; separate lint and26JS tests
+then passed. No observer/control assertion was removed or relaxed.
+
 23:39 UTC: launcher now explicitly labels NEW brain versus retained synapses
 versus exact game/brain continuation. Loading remains explicit, never an
 automatic choice of the most recently modified research checkpoint. The

@@ -838,6 +838,13 @@ This is an explicit episode reset, not uninterrupted progression. It rejects
 incomplete/frozen source runs and restores the source's exact model settings;
 ROM-free assay arrays are not game checkpoints. `--evaluation-steps` optionally
 sets a separate held-out budget. No best-checkpoint selection is performed.
+`--defer-evaluation` stops after the entire registered training sequence and
+pins its final saved brain, marking the report `training_completed` with
+evaluation still pending (not a completed learning study). This lets multiple
+independent practice lineages share one original control per held-out seed
+through `evaluate_game_retention_panel.py`. Interrupted-series recovery preserves
+that choice. All new training episodes start from the same whole-game intro
+and carry the preceding fly's internal synapses; no stage-specific starts.
 
 Exact resume also repairs a PyBoy 2.7 rendering omission: its window-line
 counter is not serialized. Before attaching reward observers, a temporary

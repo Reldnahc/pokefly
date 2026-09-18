@@ -68,8 +68,9 @@ def test_interrupted_attempt_requires_same_weights_seed_model_and_budget(monkeyp
         m.validate_interrupted(report, game, wrong, fixed, expected)
 
 
+@pytest.mark.parametrize("deferred", [False, True])
 def test_recovery_restores_full_attempt_then_carries_weights_and_freezes_evaluation(
-    monkeypatch, tmp_path,
+    monkeypatch, tmp_path, deferred,
 ):
     m = script(monkeypatch)
     source, output = tmp_path / "source", tmp_path / "output"
@@ -83,6 +84,7 @@ def test_recovery_restores_full_attempt_then_carries_weights_and_freezes_evaluat
     config = source / "config.json"
     write(config, {})
     report = source_report()
+    report["defer_evaluation"] = deferred
     report.update(config=str(config), config_sha256=m.sha256(config))
     report["initial_actual_game_source"].update({
         "run": str(initial), "checkpoint": str(initial_checkpoint),
@@ -135,6 +137,8 @@ def test_recovery_restores_full_attempt_then_carries_weights_and_freezes_evaluat
         return run
 
     monkeypatch.setattr(m, "read_checkpoint", lambda path: snapshots[str(path)])
+    monkeypatch.setattr(importlib.import_module("train_game_series"), "read_checkpoint",
+                        lambda path: snapshots[str(path)])
     monkeypatch.setattr(m, "train", train)
     monkeypatch.setattr(m, "run_directory", lambda name: output)
     monkeypatch.setattr(m, "resolve_rom", lambda *args: Path("ignored.gb"))
@@ -148,17 +152,21 @@ def test_recovery_restores_full_attempt_then_carries_weights_and_freezes_evaluat
     monkeypatch.setattr(sys, "argv", ["resume_game_series.py", "--source", str(source),
                                      "--interrupted-run", str(interrupted)])
     m.main()
-    assert len(calls) == 6
+    assert len(calls) == (2 if deferred else 6)
     assert calls[0].resume == checkpoint and calls[0].steps == 8 and not calls[0].intro
     assert calls[0].weights is None and calls[0].config is None
     assert calls[1].intro and calls[1].steps == 32 and calls[1].resume is None
     assert calls[1].weights == output / "run-1" / "checkpoint"
-    assert [o.seed for o in calls] == [7, 8, 9, 9, 10, 10]
+    assert [o.seed for o in calls] == ([7, 8] if deferred else [7, 8, 9, 9, 10, 10])
     assert all(o.mode == "frozen" and o.intro and o.steps == 48 for o in calls[2:])
     final_checkpoint = output / "run-2" / "checkpoint"
-    assert [o.weights for o in calls[2:]] == [None, final_checkpoint, final_checkpoint, None]
+    assert [o.weights for o in calls[2:]] == (
+        [] if deferred else [None, final_checkpoint, final_checkpoint, None]
+    )
     completed = json.loads((output / "report.json").read_text())
-    assert completed["status"] == "completed"
+    assert completed["status"] == ("training_completed" if deferred else "completed")
+    if deferred:
+        assert completed["evaluation_pending"]
     assert completed["recovery"]["overlap_decisions_exact"] == 4
     assert completed["rows"][0]["samples"] == 32
     assert json.loads((source / "report.json").read_text()) == report
