@@ -379,7 +379,8 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
                             print(
                                 f"step={completed} tiles={len(visited_this_trial)} "
                                 f"reward={rewards.total:.3f} "
-                                f"changed_edges={learning['changed_edges']}",
+                                f"edges_vs_original={learning['changed_edges']} "
+                                f"updated_now={learning['changed_this_reward']}",
                                 flush=True,
                             )
                         pacing.wait(clock_start, stopped=lambda: stop.requested)

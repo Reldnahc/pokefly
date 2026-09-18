@@ -877,3 +877,37 @@ established Pokemon learning. Frozen/no-reward dynamics remain unchanged.
 The strict one-factor harness accepts `--factor credit_timing` and first
 verifies the original frozen-control prefix before reusing completed controls.
 Use its explicit config for a new experiment; it is not the launcher default.
+
+Both registered 6,000-decision gameplay comparisons underperformed: 210/128
+sampled positions and no starter, versus wide-v3 learning 287/255 and one
+starter. The timing candidate is NOT promoted. A causal-looking implementation
+change is not automatically a successful behavioral change.
+
+## Prepared projected learning-dose test (not yet evaluated or promoted)
+
+`visual-wide-projected-fast-v6.json` changes ONLY learning rate, 0.02 to 0.2,
+relative to `visual-wide-projected-v4`. Existing edges, sign/input bounds,
+mean-input projection, neural dynamics, scalar rewards and decoder stay fixed.
+The hypothesis is that larger internal updates could help sparse real-game
+reinforcement after tonic motor drift has been reduced. This is not a new
+reward category, route bonus or externally learned adapter.
+
+The older 10x-rate test on weak visual-v1 without projection FAILED. This new
+combination must earn its own evidence; no successful outcome is assumed.
+It is queued ONLY if its projected parent's full independent visual gate
+passes, and after the interrupted practice studies have been completed.
+The preselected development games are the same 401/402, 6,000 decisions each,
+from original weights. `derive_game_baseline.py` checks the original rule-test
+protocol, exact recovery segments, checkpoints and shared controls before
+composing a baseline for the existing one-factor learning-rate harness.
+These derived reports contain NO new trials. A positive development result
+would still need retained-weight tests on unused game noise seeds 3601/3602;
+the current repeated-practice panel's 1601/1602 is not recycled as a new
+independent confirmation after it has informed further model selection.
+
+The projected parent passed its complete independent visual gate for both
+training seeds. The prepared dose candidate passes its real-ROM smoke,
+including exact resume and frozen/no-reward checks. The completed default-wide
+practice studies produced a promising but small retained-game result; their
+independent 3701/3702 follow-up takes priority before the queued rate games.
+That follow-up does not train or change any model, and 3601/3602 remain reserved.

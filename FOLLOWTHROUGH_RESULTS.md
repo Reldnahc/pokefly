@@ -1,32 +1,101 @@
 # Follow-through: movement, internal learning and actual gameplay
 
-## Learning follow-through, 2026-09-18 21:08 UTC
+## Learning follow-through, 2026-09-18 22:14 UTC
 
-The first causal-credit run completed 6,000 decisions: **210 sampled positions,
-no starter**, first house exit359. This is worse than wide-v3 learning287/starter
-at3122 and frozen268/no starter on that seed. Its registered402 comparison is
-still running; no promotion or overall effect is claimed.
-Artifact `visual-credit-timing-gameplay-20260918T204817Z-b4a1c9`.
+After three explicitly reset actual-game learning episodes (18,000 decisions
+per independent brain), freeze ALL learning and start fresh games from the
+same scripted intro. The complete audited results are:
+
+| Final internal weights | Seed 1601 | Seed 1602 |
+| --- | --- | --- |
+| Original shared control | 250 positions; no starter | 349 positions; no starter |
+| Practice source 401 | 221 positions; no starter | 275 positions; starter 3238, no win |
+| Practice source 402 | 173 positions; starter 4598, no win | 251 positions; starter 3533, one rival win, level 6 |
+
+Thus retained brains obtained a starter in 3/4 tests versus 0/2 original
+controls, and one retained brain won one encounter. The duplicated original
+controls reproduce ALL 6,000 records exactly apart from run ID/wall timing
+and are counted once per seed. No arm reached Route 1. This is promising
+retained behavior, **not yet a replicated general gameplay-learning result**:
+only two evaluation seeds, lower coverage in every retained arm, and source 402
+had no training battle victory. Its test victory cannot be attributed
+specifically to having received battle-win reinforcement during training.
+
+Audit: `runs/retained-game-series-audit-20260918T221314Z-fe4d56`.
+Practice panels: `resumed-game-series-20260918T212058Z-14a067` and
+`resumed-game-series-20260918T212058Z-5e8d18`. Source weights, exact model,
+matched start states, frozen zero-update records and every evaluation outcome
+were verified. No synthetic weights or action features entered these games.
+Independent follow-up 3701/3702 is now preregistered for BOTH final brains,
+with one original control per seed; the showcase default remains unchanged.
+
+The neutral probe (`game-motor-drift-probe-20260918T221128Z-a4b169`) records
+B in 219/384 windows (57.03%) for source 401, 91/384 (23.70%) for source 402,
+versus original 110/384 (28.65%). All seven anatomical groups were observed;
+weights/rewards off, same 3201..3203 noise, 128 warmup + 128 scored windows.
+The repeated original exactly matches previous probes and is shared, not a
+new independent control. Tonic changes are heterogeneous, and are not by
+themselves proof of contextual improvement or universally harmful drift.
+
+Verification: 369 Python/26 JavaScript tests and lint pass, artifact
+`runs/verify-23623b86a8cd4d43802a810829911a36`. The queued fast projected
+candidate also passes real-ROM learn/resume/frozen/no-reward smoke
+`internal-smoke-20260918T221315Z-c31c77`. These are implementation checks,
+not behavioral evidence or rendered-browser QA.
+
+## Learning follow-through, 2026-09-18 21:21 UTC
+
+Projected-wide's final independent visual-retention gate PASSES for both
+training seeds after all shuffled controls completed:
+
+| Training seed | Original balanced | Reward-paired balanced | Shuffled balanced | Paired left/right |
+| --- | --- | --- | --- | --- |
+| 501 | 40.70% | 71.45% | 36.44% | 72.11% / 70.78% |
+| 601 | 40.70% shared | 68.62% | 39.17% | 70.28% / 66.97% |
+
+This uses the final 8,192-decision synapses, fresh noise 3001..3004, a 128-window
+neutral warmup and 128 scored windows per cue/seed. Learning and rewards are
+off. The unchanged gate requires balanced accuracy >=60%, each cue >=55%,
+and >=5 points over BOTH controls for BOTH training seeds. These are descriptive
+engineering criteria, not a significance test. Accuracy is conditional on the
+competing Left/Right choices; correct targets occurred in 38.96%/41.21% of ALL
+windows. Both original panels match exactly and count as one shared control.
+This supports retained two-cue association while reducing tonic motor drift,
+NOT learned Pokemon navigation. Synthetic-trained weights never enter the game.
+Audit: `visual-retention-gate-20260918T212057Z-3b0724`; raw panels
+`visual-retention-probe-20260918T211130Z-b17f16` / `...-ccbda7`.
+
+Both causal-credit runs completed 6,000 decisions: **210/128 sampled positions,
+no starter**, first house exits 359/495. Both underperformed wide-v3 learning
+(287/255 positions, starter at 3,122 in seed 401) and original frozen controls
+(268/188 positions, no starters). The candidate is NOT promoted.
+Artifacts `visual-credit-timing-gameplay-20260918T204817Z-b4a1c9` and
+`visual-credit-timing-gameplay-20260918T205918Z-821dab`.
 
 The original repeated-practice studies can now resume without discarding their
 training. `resume_game_series.py` validates the complete weight chain, model,
 ROM and original seed/budget schedule; copies previous evidence as explicitly
 shared, pins the interrupted checkpoint, checks overlapping recorded decisions,
 and then finishes the original fresh-start/frozen-weight test schedule. Both
-actual step4500 sources pass read-only preflight. They are queued behind the
-current candidate/control panels, not additional concurrent GPU workers.
+actual step-4,500 sources passed read-only preflight and are now running:
+`resumed-game-series-20260918T212058Z-14a067` / `...-5e8d18`. These are the only
+two GPU jobs. They retain the original practice/evaluation schedule; results
+are pending, not positive evidence yet.
 
 An exploratory read-only dose check illustrates a possible transfer gap, NOT
 a causal finding. Wide-v3's two successful 8,192-decision synthetic paired
-assays received sums of `tanh(reward)` of2800.38/2567.33; its two6,000-decision
-actual-game training runs received17.16/15.57. These are about163/165 times
-different in total, or119/121 times per decision. Cue structure, contingency,
+assays received sums of `tanh(reward)` of 2,800.38/2,567.33; its two 6,000-decision
+actual-game training runs received 17.16/15.57. These are about 163/165 times
+different in total, or 119/121 times per decision. Cue structure, contingency,
 reward frequency and magnitude all differ, so this does not isolate a gain
 effect or establish that stronger feedback will help. No reward has changed.
 
-Verification:348 Python tests,26 JS tests and lint pass, artifact
-`verify-2687f6ae44854423a3de171c1b589016`; all10 protected file hashes match.
-The ROM, brain data and run artifacts are still Git-ignored and untracked.
+Verification: 359 Python tests, 26 JS tests and lint pass, artifact
+`verify-996b60e4725e46da89472a486488b83a`; all 10 protected file hashes last
+matched at 21:05. One earlier full-suite attempt hit a Windows HTTP connection
+abort in an unchanged rejected-control request. All 30 dashboard tests then
+passed, followed by the full rerun; no guard or assertion was bypassed.
+The ROM, brain data and run artifacts remain Git-ignored and untracked.
 
 Work is ongoing. This supersedes the earlier "no improvement" conclusion for
 movement and basic motor learning, but does not claim Pokemon completion or

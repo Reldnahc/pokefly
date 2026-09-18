@@ -1,5 +1,6 @@
 param(
     [switch]$Live,
+    [switch]$SkipCudaUnitTests,
     [ValidateSet('auto', 'cpu', 'cuda')][string]$Device = 'auto'
 )
 
@@ -15,7 +16,13 @@ try {
     # Isolate temp/cache permissions between normal users and sandboxed test runs.
     $validationTemp = Join-Path $validationRoot 'temp'
     $validationCache = Join-Path $validationRoot 'cache'
-    & $projectPython -m pytest -q --basetemp $validationTemp -o "cache_dir=$validationCache"
+    $pytestArgs = @('-m', 'pytest', '-q', '--basetemp', $validationTemp,
+                    '-o', "cache_dir=$validationCache")
+    if ($SkipCudaUnitTests) {
+        Write-Host 'CUDA kernel unit tests explicitly skipped; live checks are controlled separately.'
+        $pytestArgs += '--ignore=tests/test_cuda_plasticity.py'
+    }
+    & $projectPython @pytestArgs
     if ($LASTEXITCODE -ne 0) { throw 'Python tests failed.' }
     & $projectPython -m ruff check src tests scripts
     if ($LASTEXITCODE -ne 0) { throw 'Lint checks failed.' }

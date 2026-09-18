@@ -1,5 +1,147 @@
 # Pokefly: neural-control and learning improvement plan
 
+22:25 UTC: first independent follow-up arms complete: original3701 gets a
+starter at2114 (278 positions, no win); retained source402/3702 gets no starter
+(295 positions). These are DIFFERENT seeds, not a matched effect estimate;
+finish all six registered arms. Preserve this counterevidence alongside the
+earlier promising result. New CPU-only verification passes366 Python/26 JS/lint
+(`verify-61b91f0b43d949d5b9b401967abee6e8`), explicitly excluding the ten CUDA
+kernel tests while both GPU slots are occupied. A preceding ad-hoc invocation
+failed fixture setup because its temporary PARENT directory did not exist;
+the normal script creates that parent and now supports `-SkipCudaUnitTests`.
+No product-code failure was suppressed. All ten protected file hashes match.
+
+22:21 UTC: independent retention is running in sessions85820/9637, reports
+`game-retention-panel-20260918T221429Z-8b795c` and
+`game-retention-panel-20260918T221440Z-d732f1`. Only these two GPU workers
+are active. The final-practice neutral probe completed: originalB110/384,
+source401219/384, source40291/384; full original rows exactly match the earlier
+shared probe. These are heterogeneous tonic changes, not a contextual-learning
+claim. Fast projected candidate real-ROM smoke passed
+`internal-smoke-20260918T221315Z-c31c77`; full rate games remain queued.
+Added a complete-panel audit with seven passing fabricated CPU-fixture tests;
+do not report unfinished actual panels as confirmation. Console progress now
+separates `edges_vs_original` from `updated_now`: a frozen trained brain can
+have many retained changes but ZERO new updates. This is labeling only; neural
+rules, trajectories, saved metrics and showcase defaults are unchanged.
+
+22:14 UTC: complete practice audit passes (`retained-game-series-audit-
+20260918T221314Z-fe4d56`): original0/2 starters/no wins; source401 retained1/2
+starters/no wins; source402 retained2/2 starters/one rival win. All weights
+frozen, every raw sample checked, repeated controls exact and counted ONCE.
+No Route1 in any arm. Source402 had NO training battle victory, so its frozen
+win is not evidence of learning specifically from battle-win reward.
+
+This newly completed result changes experiment PRIORITY, not the model or
+the old results: before the queued fast-rate games, independently repeat the
+fresh-game retention comparison for BOTH final18k brains on preselected
+unused3701/3702,6000 decisions per arm, one shared original per seed. Six
+arms total; exact final training checkpoints, no checkpoint selection, no
+new learning, no game-state assistance. Assess starter acquisition, victories,
+new areas and levels together with coverage; do not equate less walking with
+less playing. The original1601/1602 evidence is exploratory for this follow-up,
+not additional new controls or a statistical-significance claim. Keep future
+3601/3602 reserved for the fast candidate. The rate candidate is still queued,
+not canceled or promoted. At most two GPU jobs including smoke/unit tests.
+
+22:11 UTC: both final 18,000-decision practice brains now have at least one
+starter acquisition in their frozen fresh-game panel where the matched
+original does not. Source402 also won the rival in frozen1602 (one encounter,
+level6). This is more promising for PLAYING than tile coverage alone: all
+retained arms still cover fewer positions. Finish the registered final
+original control and audit both complete panels before interpretation.
+Next, repeat the preselected neutral motor probe3201..3203 on BOTH final
+practice brains,128 warmup plus128 scored decisions/seed, all seven groups,
+learning/rewards off. A tonic bias change is not automatically harmful;
+compare the observed interaction outcomes, not just proximity to original
+button frequencies. This is a mechanism probe, not another gameplay trial.
+The pending question concerns focused battle practice only; the already
+authorized full-game experiments continue without waiting for that answer.
+
+21:49 UTC: targeted replay of the actual rival victory finds a remaining
+battle-credit issue in the wide-v3 profile: final faint at5682, trainer-win
+confirmation5698, delivered reward5714. That is32 decisions /7.68 neural
+seconds after the faint, versus the0.6s fast eligibility trace. Artifact
+`recorded-outcome-latency-20260918T214659Z-faa7b2` verifies all1,500 resumed
+samples/states/rewards. The existing `last-faint-v3` hook is opt-in and NOT in
+wide-v3; it was previously tested on weaker profiles, not combined silently
+here. No new outcome/category is proposed. Asked the user ASYNCHRONOUSLY
+whether focused actual-battle practice resets are acceptable; until answered,
+continue the already registered full-game studies/rate test, do not assume
+approval for that proposed training curriculum or stop ongoing experiments.
+
+Source401's first frozen post-practice test1601 completed NEGATIVE:221 tiles
+versus original250, no starter/wins in either; exit3922 versus247. Retained
+B47.30% versus original28.23%. Exact recorded menu audits show23.26% versus
+32.85% menu time (`recorded-menu-audit-20260918T214533Z-7821fe` versus
+`...T213514Z-d953cf`). Less menu time does NOT establish better gameplay.
+All remaining registered held-out evaluations continue. Source402 completed
+its second practice1404:159tiles, starter5542, no win; no favorable episode
+or source is selected. The two original1601 controls agree through2500
+records so far; final audit will verify every record and count one control.
+
+Exploratory CPU-only observations (NOT model changes): three original frozen
+games have mean same-direction bouts1.19--1.20 decisions, median1/p95=2;
+raw command jitter may limit navigation but does not establish a readout fix.
+Saved natural screens retain varying raw retinal intensities. About3--5% of
+calibrated visual voltages exceed the rate ceiling and~65% are rectified to
+zero, similar to the synthetic cue snapshots; no blanket saturation diagnosis
+is justified. Voltages are not spike counts/Hz. Larger projected hypothetical
+single updates preserve mean input for tile rewards to rounding precision,
+but reward1 clips135/181 of~495k edges at the lower bound, leaving~0.2%
+residual in the projected update. These are PRIVATE CPU-copy diagnostics,
+not new training, and no diagnostic weights were exported. Check actual
+tonic drift again if the queued faster-learning model is run.
+
+21:32 UTC scheduling correction: the default unit suite also performs tiny
+real CUDA-kernel checks. Earlier full-suite calls briefly used a third CUDA
+context alongside the two experiments; those test processes all exited and
+none are orphaned. Count full-suite verification in the two-GPU budget from
+now on, or explicitly run CPU-only subsets while both experiment slots are
+occupied. No additional full CUDA suite until a slot is free. Latest completed
+suite:366 Python/26 JS/lint (`verify-f926e3146d274587916c48b63e47bd4c`).
+The new retained-series audit checks every registered evaluation arm, frozen
+weights, matched start states and full duplicate-control trajectories; it
+counts a rival win as ONE battle, not battle_win plus rival_win. Seven tiny
+protocol-fixture tests pass, but are NOT behavioral evidence. Actual panels
+are still running. Source401's final practice won one rival encounter at5714
+and reached level6; this single win is not retained-learning proof.
+
+21:21 UTC: projected-wide PASSES the complete unchanged independent visual
+retention gate for BOTH training seeds. Paired balanced71.445/68.625%, original
+shared40.698%, shuffled36.437/39.166%; paired cues72.11/70.78 and70.28/66.97%.
+Gate artifact `visual-retention-gate-20260918T212057Z-3b0724`, final8192 weights,
+neutral warmup128, fresh3001..3004,128 decisions/cue/seed, all learning/rewards
+off. This is limited retained cue association, not Pokemon competence or a
+statistical significance claim. Assay weights NEVER enter the game. This
+satisfies the prospective prerequisite for the later projected-rate test.
+Two registered real-game practice studies now resume from4500 in sessions
+9818 (source401, `resumed-game-series-20260918T212058Z-14a067`) and91866
+(source402, `resumed-game-series-20260918T212058Z-5e8d18`). These are the ONLY
+two GPU jobs; both finish their original training schedule then frozen1601/
+1602 comparisons. Candidate-rate games remain queued, not extra workers.
+Full suite359 Python/26 JS/lint passes at21:20
+(`verify-996b60e4725e46da89472a486488b83a`). A prior full-suite attempt had one
+Windows HTTP connection-abort in an unchanged rejection test; the dashboard
+suite alone30/30 and full rerun pass. No flaky-test bypass or guard weakening.
+
+21:13 UTC: causal-credit402 also underperforms:128 positions/no starter,
+versus wide-v3 learning255 and frozen188. Both causal-credit candidates fail
+the gameplay improvement screen; leave opt-in and do not select a favorable
+trajectory or spend the retention queue on them ahead of stronger evidence.
+Projected-wide independent3001..3004 retention for BOTH recovered curves is
+running. If that unchanged gate passes, the next prospective one-factor test
+will increase ONLY its internal learning rate0.02->0.2 (bounded, same existing
+edges/input projection, original synapses,401/402,6000each). It tests greater
+update dose after tonic drift was reduced. The older fast-learning-v2 test
+failed on weak visual-v1 without this projection; that negative result remains
+relevant and is not erased. No reward values/categories, pixels, physical
+dynamics or buttons change. Complete the already queued repeated-practice
+studies first. Derive a hash-checked matched baseline from the completed
+projected trials and their explicitly shared original frozen controls; this
+is evidence composition, never an additional trial. Do not run or promote the
+new dose candidate if its projected parent fails the independent cue gate.
+
 21:00 UTC: causal-credit401 completed210 tiles/no starter versus the matched
 default-wide287/starter3122 and original frozen268/no starter. This is negative
 for that seed, not grounds to stop/omit its preselected402 comparison (running).
