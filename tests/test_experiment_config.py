@@ -46,3 +46,9 @@ def test_button_timing_is_versioned_not_silently_migrated():
         ExperimentConfig(button_timing="unknown")
     with pytest.raises(ValueError):
         ExperimentConfig(button_timing="serial-v2", frames=3)
+
+
+def test_missing_reward_timing_retains_legacy_checkpoint_behavior():
+    assert ExperimentConfig.from_dict({}, checkpoint=True).rewards.timing == "encounter-end-v1"
+    config = ExperimentConfig.from_dict({"rewards": {"timing": "last-faint-v3"}})
+    assert ExperimentConfig.from_dict(asdict(config), checkpoint=True) == config

@@ -28,6 +28,108 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 10:02 UTC: the extended score-v2 paired visual arm drops from 52.0% at
+  8,192 to 46.2% at 16,384; shuffled control is still running. More training
+  alone has not produced cue discrimination. Test a local presynaptic-centering
+  hypothesis: subtract each neuron's prior 10-second release average in the
+  existing stochastic-spike innovation tag. Keep neurons, noise, weights,
+  calibration, decoder, learning rate, budget and 0.6-second trace unchanged.
+  This removes a stimulus-independent presynaptic component from the update;
+  it is NOT the exact likelihood gradient of the uncentered physical neuron
+  and is NOT validated fly physiology. The conditional spike innovation is
+  still zero-mean. No labels/actions/RAM enter the rule. Preselect ROM-free
+  paired/shuffled seed 501, checkpoints 512/2,048/8,192; require cue-specific
+  retention, reversal and independent training before any gameplay promotion.
+  Existing weak/negative curves remain reported; synthetic weights stay out
+  of Pokemon. Frozen forward trajectories must match score-v2 exactly.
+
+- 09:59 UTC: after serial transport resolves naming, the navigation hypothesis
+  is insufficient movement persistence, not unavailable Up. Preselect ONE
+  fixed 3-second direction-rate trace versus the existing 1-second serial
+  frozen controls: same seeds 1201/1202, same recorded Route-1 reset, 6,000
+  decisions each, no changed function timing/rewards/weights. All directions
+  share the trace; decaying actual spikes, not forced-duration actions. Report
+  all outcomes, including coverage loss or amplified boundary sticking. This
+  tests control capacity only; a favorable path still requires independent
+  confirmation and learned retention, not a declaration of solved navigation.
+
+- 09:54 UTC: first timing observer audit (`reward-timing-audit-20260918T095012Z-dcece8`)
+  preserves every recorded state/reward and all 119 completed encounters across
+  78,000 replayed decisions. Four rewarded encounters pay 6/7/21/24 decisions
+  earlier; no added outcomes. This is replay, not new wins. Source inspection
+  confirms we can also test the LAST trainer faint: live enemy HP zero, live
+  active player HP positive, valid enemy party count/index, and every OTHER
+  enemy's cached HP zero. Keep the conservative trainer-victory implementation
+  as `confirmed-outcome-v2`; new `last-faint-v3` makes this extra distinction.
+  Audit v3 separately before training. Preselect the same recorded rival reset,
+  eight training seeds 901..908 and frozen original/retained seeds 1001..1008,
+  3,000-decision cap, unchanged dual-trace neural model. No reused frozen
+  controls or silent alteration of reward amounts. Also compare a fresh literal
+  serial bedroom run against its completed same-seed 24,000-decision control.
+
+- 09:49 UTC: test an opt-in outcome-timing correction, NOT new reward shaping.
+  Keep all six categories and magnitudes. Pay trainer wins at the existing
+  confirmed trainer-victory hook, captures at successful ball completion, and
+  wild wins at the faint hook ONLY with zero live enemy HP and positive live
+  player HP; uncertain cases fall back to the existing encounter-end checks.
+  Reject demo/link encounters and pay at most once. Preserve legacy timing and
+  checkpoints exactly. First replay completed trajectories through both ledgers:
+  identical completed-encounter categories/totals, earlier delivery measured,
+  no policy changes. Test loss/flee/double-KO/stale-party/checkpoint cases before
+  controlled battle learning. This addresses avoidable post-outcome delay, not
+  missing long-horizon credit or navigation. No default promotion on speculation.
+
+- 09:37 UTC: after score-v2 passes immediate motor acquisition/reversal, extend
+  its EXISTING two-cue training curve (not a new model/parameter fit). Continue
+  exact paired/shuffled states from `visual-learning-curve-20260918T071646Z-518b1c`
+  at2,048 to preselected8,192 and16,384. Same seed501, unchanged cue mapping,
+  reward0 for other choices (not the separate negative-feedback experiment).
+  Existing2,048 result47.2% paired versus43.6% shuffled stays reported. Require
+  cue specificity, independent-noise retention, reversal and independent training
+  seed before game claims. No synthetic weights enter Pokemon. Do not substitute
+  a new external critic/encoder or fabricated dopamine anatomy for missing
+  behavioral evidence. A longer budget is a diagnostic, not a stopping condition.
+
+- 09:31 UTC: serial frozen comparison complete: both seeds reach only y24 versus
+  y20 in reused controls; positions285->337 and303->414, wins0->0 and2->1.
+  Clearer command access is not a navigation solution. Next one-factor sensory
+  test uses the CORRECTED calibrated/serial circuit, original frozen weights,
+  same recorded Route-1 state, seeds1201/1202,6,000 decisions each. Reuse serial
+  snapshot controls explicitly; compare endpoint pipeline versus streamed raw
+  frames within the same button phases, alternating mode order. Endpoint must
+  reproduce snapshot actions/states exactly; stream differs only in fresh
+  within-pulse images. Earlier18 short temporal trials used the uncalibrated
+  weak-Up model, so they do not establish the effect after these corrections.
+  No input features, route, reward or learned decoder is added. No default
+  change without useful actual-game evidence and persistence tests.
+
+- 09:29 UTC: existing score-v2 passes the preselected immediate-motor screen:
+  Up16.4->26.6% (shuffled17.2%); reversed Down43.8% (32.0% initial,31.3% after
+  acquisition,25.4% shuffled). Frozen exactly initial. Artifact
+  `operant-motor-probe-20260918T091957Z-f8c78b`. Advance to delay32,2,048 earning
+  decisions/stage, seed501, all controls. Candidate uses30s score accumulation;
+  unlike EMA traces, this SUM's stationary innovation variance rises with tau.
+  Preselect learning-rate rescaling from0.002 by
+  sqrt((1-exp(-2*0.02/30))/(1-exp(-2*0.02/0.6))) (~0.00028748), preserving
+  baseline update variance in the stationary uncorrelated-score approximation.
+  No fitted parameter search, changed neurons/decoder/reward or action feedback.
+  It is a temporal-credit plus analytic variance-control hypothesis, not yet
+  evidence of delayed learning; require acquisition/reversal against controls
+  then independent seed before game promotion. Earlier4x noise-dual failed
+  acquisition: paired Up23.8% versus shuffled30.5% and original24.6%.
+
+- 09:26 UTC: readout-noise mechanism audit, not another fitted policy. Feed the
+  SAME actual frozen motor spikes from existing acquired original/paired/shuffled
+  perturb-v3 brains through parallel-v2 and the already implemented fixed1s
+  sustained decoder. Preselect new retention seeds1701/1702,128 neutral warmup
+  and128 decisions per cue, report ALL time bins. First audit training seed501;
+  if meaningful cue-contrast gain persists versus original/shuffled, also audit
+  independent training seed601. No new training/learned thresholds/gains here;
+  weights were trained under the original decoder, so any rescore is only a
+  mechanism finding and requires new matched training before deployment claims.
+  The frozen visual input audit already shows strong cue information upstream;
+  this asks whether rapid noisy readout hides retained local sensory contrasts.
+
 - 09:20 UTC: first serial frozen Route-1 comparison is mixed: positions285->337,
   northernmost y20->24, no wins in either; no new town. Do not label increased
   coverage a navigation solution. Fresh serial bedroom run independently wins

@@ -5,6 +5,10 @@ uses discrete logistic escape noise and hard reset, NOT measured fly physiology
 or the paper's exact neuron model. Existing motor/descending inputs only:
 excitatory in v1/v2, both original signs in v3. No learned readout, action
 identity, cue label, or RAM input.
+
+The optional centered-v4 variant uses deviations from the neuron's prior
+release average. This is a local covariance/innovation approximation, NOT the
+exact likelihood gradient of the original uncentered physical neuron model.
 """
 
 import numpy as np
@@ -17,6 +21,11 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
     def reset_modulation(self):
         super().reset_modulation()
         self.membrane_trace = np.zeros_like(self.eligibility)
+        self.release_baseline = (
+            np.zeros(self.n, np.float32)
+            if self.config.rule == "sensorimotor-score-centered-v4"
+            else None
+        )
         if self.config.slow_eligibility_seconds:
             raise ValueError("Likelihood rule currently supports one eligibility trace")
 
@@ -48,20 +57,35 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
             np.exp(-dt / self.config.eligibility_seconds),
             gain,
             temperature,
+            **(
+                {"release_baseline": self.release_baseline}
+                if self.release_baseline is not None
+                else {}
+            ),
         )
+        if self.release_baseline is not None:
+            decay = np.exp(-dt / self.config.post_baseline_seconds)
+            self.release_baseline *= decay
+            self.release_baseline += (1 - decay) * release
         self.feedback_elapsed += dt
 
     def metrics(self):
         return {
             **super().metrics(),
             "rule": (
-                "sensorimotor-signed-likelihood-score-v3"
+                "sensorimotor-centered-spike-innovation-v4"
+                if self.config.rule == "sensorimotor-score-centered-v4"
+                else "sensorimotor-signed-likelihood-score-v3"
                 if self.config.rule == "sensorimotor-score-v3"
                 else "sensorimotor-preconditioned-likelihood-score-v2"
                 if self.config.rule == "sensorimotor-score-v2"
                 else "sensorimotor-logistic-likelihood-score-v1"
             ),
-            "modulation": "local stochastic-spike score; no decoder feedback or external critic",
+            "modulation": (
+                "local pre-centered spike innovation (approximate, not exact score gradient)"
+                if self.release_baseline is not None
+                else "local stochastic-spike score; no decoder feedback or external critic"
+            ),
         }
 
     def factor_eligibility(self):
@@ -71,20 +95,40 @@ class LikelihoodPlasticity(SensorimotorPlasticity):
         value = super().factor_eligibility()
         return (
             value / np.abs(self.base)
-            if self.config.rule in ("sensorimotor-score-v2", "sensorimotor-score-v3")
+            if self.config.rule
+            in ("sensorimotor-score-v2", "sensorimotor-score-v3", "sensorimotor-score-centered-v4")
             else value
         )
 
     def arrays(self):
-        return {**super().arrays(), "membrane_trace": self.membrane_trace}
+        return {
+            **super().arrays(),
+            "membrane_trace": self.membrane_trace,
+            **(
+                {"release_baseline": self.release_baseline}
+                if self.release_baseline is not None
+                else {}
+            ),
+        }
 
     def restore(self, arrays, metadata):
         trace = np.asarray(arrays["membrane_trace"], np.float32)
         if (
             trace.shape != self.membrane_trace.shape
             or not np.isfinite(trace).all()
-            or (trace < 0).any()
+            or (self.release_baseline is None and (trace < 0).any())
         ):
             raise ValueError("Invalid membrane eligibility checkpoint")
+        baseline = None
+        if self.release_baseline is not None:
+            baseline = np.asarray(arrays["release_baseline"], np.float32)
+            if (
+                baseline.shape != (self.n,)
+                or not np.isfinite(baseline).all()
+                or ((baseline < 0) | (baseline > 1)).any()
+            ):
+                raise ValueError("Invalid presynaptic release baseline")
         super().restore(arrays, metadata)
         self.membrane_trace = trace.copy()
+        if baseline is not None:
+            self.release_baseline = baseline.copy()

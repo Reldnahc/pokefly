@@ -48,7 +48,10 @@ def episode(
         raise ValueError("Recorded reward ledger must contain the active battle")
     events, finished = [], False
     actions, spike_totals = Counter(), Counter()
-    with RedEmulator(rom) as game:
+    with RedEmulator(
+        rom,
+        button_timing=experiment_config.button_timing if experiment_config else "simultaneous-v1",
+    ) as game:
         game.load(state_path, advance=False)
         if not game.state().battle:
             raise ValueError("Recorded game state is not in a battle")

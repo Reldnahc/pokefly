@@ -30,7 +30,9 @@ experiments remain in [RESULTS.md](RESULTS.md), with the continuing protocol in
 
 The immediate-feedback motor result does not yet generalize to delayed rewards.
 An optional fixed serial-button timing candidate also fixes a confirmed naming-
-screen input-priority trap; whole-game controls remain in progress. Neither
+screen input-priority trap. Its completed run obtained a starter and won rival
+and wild battles, but still plateaued around Pallet/Route 1. Earlier delivery of
+the same confirmed outcome rewards is now under controlled evaluation. Neither
 finding should be mistaken for learned navigation. See the dated follow-through
 report for current positive AND negative evidence.
 

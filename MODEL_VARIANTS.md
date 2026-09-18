@@ -75,9 +75,10 @@ Reproduction, without a ROM (refuses to overwrite an existing artifact):
   --device cuda --export fly-data/intrinsic-neutral-v1.npz
 ```
 
-All sensorimotor variants select EXISTING positive inputs to every neuron whose
+The initial sensorimotor variants select EXISTING positive inputs to every neuron whose
 anatomical superclass is `descending_neuron`, `cb_motor` or `vnc_motor`:
-495,962 edges across 2,129 targets. Selection never consults the seven-button
+495,962 edges across 2,129 targets. The separately described score-v3 also permits
+existing inhibitory inputs while preserving their signs. Selection never consults the seven-button
 registry. No readout/encoder is fitted, no connection is added and no sign changes.
 This is a broader experimental plasticity hypothesis, not an anatomically
 resolved dopamine mechanism. Fly motor self-learning is not necessarily a
@@ -536,6 +537,38 @@ None passed the512-earning-decision,32-delayed-decision operant diagnostic.
 Preserving a local tag does not establish useful causal learning. They remain
 unpromoted; no synthetic diagnostic weights enter Pokemon. Checkpoints restore
 all traces and modulation; missing `trace_mixing` means exact old mean mixing.
+
+## Optional outcome timing and centered-innovation tests
+
+Reward timing is separate from the learning rule. `encounter-end-v1` is the
+unchanged default, including old checkpoints missing the field. The opt-in
+`confirmed-outcome-v2` delivers existing outcome rewards at validated victory/
+capture hooks when safe. `last-faint-v3` also checks for the final trainer faint:
+living live active player, zero live enemy HP, valid enemy party count/index,
+and no other enemy with cached HP. Stale active party HP cannot by itself prove
+a wild win. Ambiguous/double-KO cases retain the conservative fallback. The
+once-paid encounter flag is checkpointed; categories and amounts are unchanged.
+
+`sensorimotor-outcome-v3` changes only reward timing from dual-v1;
+`sensorimotor-serial-outcome-v3` changes only reward timing from serial-v1.
+Both are research candidates, not new defaults or claims of retained learning.
+
+`sensorimotor-score-delayed-v2` uses the existing stochastic model and summed
+score trace, extended from 0.6 to 30 seconds. Its fixed learning rate is
+0.000287484 (approximately the stationary independent-innovation variance
+rescaling of 0.002). This approximation does not account for correlated neural
+activity. The 32-decision delayed motor assay did not pass its behavioral gate.
+
+`sensorimotor-score-centered-v4` subtracts the presynaptic neuron's PRIOR
+10-second release EMA while integrating its local membrane tag. The innovation
+is still the actual spike minus its conditional firing probability. This tests
+removing tonic-input variance to favor sensory contrasts; it is NOT the exact
+likelihood gradient of the original uncentered neuron. Existing excitatory
+descending/motor inputs only, same bounds/input budget, rate, 0.6-second trace,
+stochastic dynamics and fixed decoder as score-v2. Its additional release EMA
+and signed membrane trace are saved/reset exactly. No action/cue label, RAM
+feature, fitted readout or external critic enters the rule. Visual acquisition,
+retention and reversal remain experimental, not established by the equation.
 
 ## Display interpretation (kept out of the showcase layout)
 

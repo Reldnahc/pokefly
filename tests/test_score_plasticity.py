@@ -95,6 +95,76 @@ def test_v2_preconditioning_uses_only_original_synapse_size():
     )
 
 
+def centered_learner():
+    return LikelihoodPlasticity(
+        np.array([0]),
+        np.array([1]),
+        np.array([0.13], np.float32),
+        2,
+        PlasticityConfig(rule="sensorimotor-score-centered-v4", learning_rate=0.002),
+    )
+
+
+def test_centered_innovation_uses_prior_release_average_not_stimulus_labels():
+    p = centered_learner()
+    p.release_baseline[0] = 0.4
+    observe(p)
+    assert p.eligibility[0] == pytest.approx(0, abs=1e-7)  # float32 stored baseline
+    p.release_baseline[0] = 0.6
+    observe(p)
+    assert p.eligibility[0] < 0
+    assert 0.4 < p.release_baseline[0] < 0.6
+    np.testing.assert_array_equal(p.factor_eligibility(), p.eligibility / p.base)
+
+
+def test_centered_innovation_has_conditional_zero_mean_for_spike_and_silence():
+    scores = []
+    for fired in ([], [1]):
+        p = centered_learner()
+        p.release_baseline[0] = 0.7
+        p.observe(
+            np.array(fired, dtype=int),
+            0.02,
+            release=np.array([0.4, 0]),
+            probability=np.array([0, 0.13]),
+            membrane_decay=0.82,
+            gain=3,
+            temperature=0.05,
+        )
+        scores.append(p.eligibility[0])
+    assert 0.87 * scores[0] + 0.13 * scores[1] == pytest.approx(0, abs=1e-7)
+
+
+def test_centered_negative_trace_checkpoint_and_reset_are_exact():
+    p = centered_learner()
+    p.release_baseline[:] = 0.7
+    p.observe(
+        np.array([], dtype=int),
+        0.02,
+        release=np.array([0.4, 0]),
+        probability=np.array([0, 0.13]),
+        membrane_decay=0.82,
+        gain=3,
+        temperature=0.05,
+    )
+    assert p.membrane_trace[0] < 0
+    q = centered_learner()
+    q.restore({k: v.copy() for k, v in p.arrays().items()}, p.metrics())
+    for _ in range(4):
+        observe(p)
+        observe(q)
+        p.reinforce(0.4)
+        q.reinforce(0.4)
+    for key in p.arrays():
+        np.testing.assert_array_equal(p.arrays()[key], q.arrays()[key])
+    broken = {k: v.copy() for k, v in q.arrays().items()}
+    broken["release_baseline"][0] = 2
+    with pytest.raises(ValueError, match="baseline"):
+        p.restore(broken, q.metrics())
+    p.reset_modulation()
+    assert not p.release_baseline.any() and not p.membrane_trace.any()
+
+
 def test_signed_score_preserves_signs_and_separate_inhibitory_resource_budget():
     p = LikelihoodPlasticity(
         np.array([0, 1, 0, 1]),

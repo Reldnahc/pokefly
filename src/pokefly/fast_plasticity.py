@@ -12,6 +12,7 @@ from numba import njit
 def likelihood_eligibility(
     pre, post, base, release, spike, probability, membrane_trace, eligibility,
     membrane_decay, eligibility_decay, gain, temperature,
+    release_baseline=None,
 ):
     """Local log-likelihood score with respect to each original-weight factor.
 
@@ -21,7 +22,11 @@ def likelihood_eligibility(
     """
     for edge in range(len(pre)):
         j = post[edge]
-        trace = membrane_decay * membrane_trace[edge] + release[pre[edge]]
+        incoming = release[pre[edge]]
+        if release_baseline is not None:
+            # Optional centered innovation, not the original likelihood gradient.
+            incoming -= release_baseline[pre[edge]]
+        trace = membrane_decay * membrane_trace[edge] + incoming
         score = (spike[j] - probability[j]) * base[edge] * gain * trace / temperature
         eligibility[edge] = eligibility_decay * eligibility[edge] + score
         membrane_trace[edge] = 0.0 if spike[j] else trace

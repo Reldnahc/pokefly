@@ -45,6 +45,7 @@ class PlasticityConfig:
             "sensorimotor-score-v1",
             "sensorimotor-score-v2",
             "sensorimotor-score-v3",
+            "sensorimotor-score-centered-v4",
         ):
             raise ValueError("Unknown plasticity rule")
         if not isinstance(self.normalize_inputs, bool):

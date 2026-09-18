@@ -5,12 +5,12 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 09:12 UTC
+## Latest evidence, 2026-09-18 10:04 UTC
 
 Public source repository: https://github.com/Reldnahc/pokefly . ROM, model data,
 saves, checkpoints and raw runs remain local and Git-ignored.
 
-### Confirmed input-priority trap; serial-delivery test in progress
+### Confirmed input-priority trap; serial-delivery results
 
 The literal sustained/5-second-Start run remained in Bulbasaur's nickname
 screen for thousands of decisions. The game already reports party count 1 at
@@ -34,16 +34,30 @@ held 11, release 1. Same 24-frame budget, no added command, state detector,
 learned adapter or reward. Single-button commands retain their full pulse.
 Old checkpoints/default profiles retain simultaneous timing.
 
-Actual fresh-bedroom seed64 run `internal-learn-20260918T090356Z-7cfa7f` has
-already won the rival battle at decision 5,092 with original starting synapses
-and unchanged game rewards. Its full 24,000-decision outcome, two frozen
-Route-1 controls, and retained benefit are still pending. This is one interim
-autonomous success, not proof of general learned strategy. The same-seed
-simultaneous control eventually escaped the name screen too, after >11,500
-total decisions. Its delay was severe, not mathematically permanent.
+Actual fresh-bedroom seed 64 run `internal-learn-20260918T090356Z-7cfa7f`
+completed 24,000 decisions: 478 sampled positions, six maps, a fully initialized
+starter at 4,443, rival win at 5,092, one wild win, final level 6. It started
+with original synapses and unchanged game rewards. There was still no new
+town, capture or badge; this is not learned navigation. The same-seed
+simultaneous control reached 501 positions but no wins. It eventually escaped
+the name screen after >11,500 total decisions: a severe delay, not a permanent
+lock. Exact recorded replay through 5,500 matches every state and reward
+(`recorded-replay-proof-20260918T091426Z-1c786a`); that replay is not a new win.
+
+Frozen Route-1 comparisons, 6,000 decisions each, are mixed:
+
+| Seed | Simultaneous / serial positions | Northernmost Route-1 y | Wild wins |
+| --- | --- | --- | --- |
+| 1201 | 285 / 337 | 20 / 24 | 0 / 0 |
+| 1202 | 303 / 414 | 20 / 24 | 2 / 1 |
+
+Smaller y is farther north. Serial delivery improved command access and
+coverage but not northward progress. The validated simultaneous controls are
+explicitly reused, not additional trials. Artifact:
+`button-timing-comparison-20260918T090536Z-f73dce`.
 
 Initial serial trials were launched before a telemetry cleanup: their old
-`pulse_frames` field still says23 on paired commands, although delivery was
+`pulse_frames` field still says 23 on paired commands, although delivery was
 11+1+11+1. The recorded configuration identifies the exact timing; original
 artifacts are not rewritten. New logs include phase schedules and correct
 22-frame total held duration. UI hover no longer calls serial buttons simultaneous.
@@ -69,9 +83,84 @@ Pokemon. Before training: Up24.6%, Down22.7% on256 reward-free decisions.
 | Event/Hebbian impulse dual | 21.9% /21.9% | 26.6% /20.7% |
 
 None establishes acquisition plus reversal. Frozen controls reproduce the
-pretest. Immediate feedback results below therefore do NOT establish delayed
-causal credit. A4x-duration test of the unchanged noise-dual model is running;
-it is not an independent replication and does not supersede these failures.
+pretest. At four times the training duration, the unchanged noise-dual model
+also fails acquisition: Up 23.8% paired versus 24.6% before and 30.5% shuffled
+(`operant-motor-probe-20260918T090913Z-b82659`).
+
+The stochastic-spike score-v2 rule passes the immediate motor screen on one
+seed: Up 16.4% -> 26.6% versus 17.2% shuffled; reversed Down 43.8% versus 32.0%
+before and 25.4% shuffled (`...T091957Z-f8c78b`). Its 30-second delayed-score
+variant, with an analytically variance-rescaled learning rate, does NOT pass
+the delayed screen: Up 19.5% versus 16.4% before/shuffled; reversed Down 36.7%
+versus 32.0% before and 33.6% shuffled (`...T092802Z-b87a7a`). Both gains are
+below the preselected five-point requirement. Immediate learning does not
+establish delayed credit. No synthetic assay-trained weights enter Pokemon.
+
+### Earlier delivery of unchanged outcome rewards: implemented, being evaluated
+
+`confirmed-outcome-v2` pays the same win at confirmed trainer victory, a wild
+faint with a living active player, or a successful completed capture. The
+stricter `last-faint-v3` can also pay at the final trainer faint, checking live
+active HP, valid enemy party count/index and every other enemy's cached HP.
+Double-KOs and uncertain cases fall back to the existing victory/end checks.
+Both exclude demos/link battles and persist a once-paid flag. No HP reward,
+waypoint, chosen-button feedback, category or amount was added. The [pinned
+battle implementation](https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/engine/battle/core.asm)
+is the basis for these execution-hook checks.
+
+V3 exact replay: 88,000 recorded decisions, 120 completed encounters, identical
+sampled states, legacy rewards, novelty timing and completed outcome totals.
+Five rewarded encounters deliver 42/6/7/21/32 decisions earlier, respectively.
+Artifact `reward-timing-audit-20260918T095419Z-6880e9`. These are old recorded
+battles, not new successes; no actual capture occurred in this replay panel.
+Capture and edge-case coverage is currently unit-fixture evidence.
+
+Optional profiles `sensorimotor-outcome-v3` and `sensorimotor-serial-outcome-v3`
+are being tested in matched repeated-battle learning and a fresh literal
+24,000-decision bedroom run. Their learning benefit is not established yet.
+Old profiles and checkpoints retain exact `encounter-end-v1` timing.
+
+### Fresh images during commands: more battles, not solved navigation
+
+With the corrected calibrated/serial controller and original frozen weights,
+endpoint timing reproduces every snapshot action/state on both seeds. Streaming
+fresh raw frames during commands changes only sensory timing:
+
+| Seed | Snapshot / streamed positions | Northernmost Route-1 y | Wild wins |
+| --- | --- | --- | --- |
+| 1201 | 337 / 281 | 24 / 22 | 0 / 3 |
+| 1202 | 414 / 401 | 24 / 24 | 1 / 3 |
+
+Same recorded Route-1 reset, 6,000 decisions, no new town in either arm.
+The snapshot controls are reused explicitly; duplicate endpoint trajectories
+are validation, not independent successes. This is control/sensing evidence,
+not learned battle strategy. Artifact:
+`corrected-temporal-comparison-20260918T093145Z-5acca8`.
+
+### Longer training and retained readout checks
+
+The held-out whole-game tests after four 12,000-decision training attempts
+do not show a better general player. Seed 1501: original / retained positions
+444 / 408, wins 2 / 0. Seed 1502: positions 353 / 414, wins 1 / 0. Both original
+brains won the rival battle; neither retained brain did. Retained B use grew
+from 30.1% / 31.1% to 43.2% / 43.0%. No new town, capture or badge. This panel
+does not isolate the cause of the B bias, but it rejects assuming that longer
+training has helped. Saved synaptic changes are not general improvement. Artifact:
+`retained-game-series-20260918T075051Z-705a0c`.
+
+Re-reading the same actual motor spikes with a fixed one-second direction
+trace barely changes overall cue accuracy for the acquired perturb-v3 brain:
+52.7% -> 52.9%. The favorable late time bin is not a new trained result. Both
+original and shuffled brains remain worse, but this is one training seed and
+not an independent learning replication. Artifact:
+`retained-readout-audit-20260918T092556Z-20ebae`.
+
+Extending the existing score-v2 visual curve gives paired accuracy 52.0% at
+8,192 then 46.2% at 16,384; its shuffled extension is still running. A separately
+versioned presynaptically centered spike-innovation rule is now in ROM-free
+testing. It is an approximation, not the exact score gradient of the physical
+neuron, and has not been promoted to gameplay. Frozen full-neuron activity
+matches score-v2 for 64 paired windows. No synthetic weights enter Pokemon.
 
 ### Longer-game plateau and fixed control comparisons
 
@@ -412,6 +501,19 @@ The launcher default remains unchanged while these candidates are tested.
 
 ## Verification so far
 
+- Latest full suite: 263 Python tests, 23 JavaScript tests and lint pass
+  (`verify-714b5668c68246fdaae6fd76ff49cc2a`). All ten protected source/ROM/
+  model/user-run hashes still match at 10:06 UTC.
+- Early-outcome checkpoint at decision 5,050 contains a paid but unfinished
+  rival encounter. Resuming it reproduces all next 50 samples, final neural
+  arrays and rewards exactly, without duplicate payment
+  (`checkpoint-window-verification-20260918T101037Z-65eccc`). This is a
+  verification branch, not another autonomous win.
+- The original user checkpoint reproduces recorded samples 68,501..68,520,
+  and its split continuation reproduces all final arrays/rewards
+  (`checkpoint-window-verification-20260918T101118Z-9e8f3d`). Source unchanged.
+- Centered-innovation and serial/outcome profiles pass real-ROM exact resume,
+  frozen and no-reward smoke checks. Smoke runs are not gameplay evidence.
 - Exact application checkpoint continuation, including neural arrays and rewards.
 - Frozen and zero-reinforcement controls leave original weights unchanged.
 - Real live stream matches input pixels, neural buttons and releases; live speed

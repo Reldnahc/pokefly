@@ -156,3 +156,139 @@ def test_giovanni_only_gym_when_gym_flag_is_set():
         assert ("gym_win" in [e["category"] for e in r.drain()[1]]) == bool(gym)
     with pytest.raises(ValueError):
         RewardConfig(capture=-1)
+
+
+def early_rewards():
+    return GeneralRewards(RewardConfig(timing="confirmed-outcome-v2"))
+
+
+@pytest.mark.parametrize(
+    "trainer,extra", [(0, None), (1, None), (0x22, "gym_win"), (0x19, "rival_win")]
+)
+def test_confirmed_outcome_pays_earlier_once_and_survives_reload(trainer, extra):
+    r, m = early_rewards(), battle(trainer=trainer)
+    m[0xD016] = 20  # Live battle HP, not merely the cached party HP.
+    r.event("start", m)
+    hook = "trainer_win" if trainer else "faint"
+    r.event(hook, m)
+    _, events = r.drain()
+    assert [e["category"] for e in events] == ["battle_win"] + ([extra] if extra else [])
+    clone = early_rewards()
+    clone.restore(r.state())
+    clone.event(hook, m)
+    clone.event("end", m)
+    clone.event("end", m)
+    assert clone.drain() == (0, [])
+    assert clone.active is None
+
+
+@pytest.mark.parametrize(
+    "live_player,live_enemy,result", [(0, 0, 0), (20, 3, 0), (20, 0, 1), (20, 0, 2)]
+)
+def test_early_wild_reward_rejects_ambiguous_faint(live_player, live_enemy, result):
+    r, m = early_rewards(), battle()
+    m[0xD016], m[0xCFE7], m[0xCF0B] = live_player, live_enemy, result
+    r.event("start", m)
+    r.event("faint", m)
+    assert r.drain() == (0, [])
+
+
+def test_double_ko_uses_completed_outcome_not_stale_cached_hp():
+    r, m = early_rewards(), battle()
+    r.event("start", m)
+    r.event("faint", m)  # Active player is dead although cached HP still says 20.
+    assert r.drain() == (0, [])
+    m[0xD16D] = 0
+    r.event("end", m)
+    assert r.drain() == (0, [])
+    # A different encounter with a surviving reserve can still win at the end.
+    m[0xD163], m[0xD16D + 44] = 2, 10
+    r.event("start", m)
+    r.event("faint", m)
+    assert r.drain() == (0, [])
+    r.event("end", m)
+    assert r.drain()[0] == r.config.battle_win
+
+
+def test_trainer_faint_is_not_a_completed_encounter():
+    r, m = early_rewards(), battle(trainer=1)
+    m[0xD016] = 20
+    r.event("start", m)
+    r.event("faint", m)
+    assert r.drain() == (0, [])
+    r.event("trainer_win", m)
+    assert r.drain()[0] == r.config.battle_win
+
+
+@pytest.mark.parametrize("battle_type,link", [(1, 0), (0, 4)])
+@pytest.mark.parametrize("trainer", [0, 0x19])
+def test_early_outcomes_exclude_demo_and_link_battles(battle_type, link, trainer):
+    r, m = early_rewards(), battle(battle_type=battle_type, link=link, trainer=trainer)
+    m[0xD016], m[0xD11C] = 20, 42
+    r.event("start", m)
+    for hook in ("ball_done", "faint", "trainer_win", "end"):
+        r.event(hook, m)
+    assert r.drain() == (0, [])
+
+
+@pytest.mark.parametrize("party,battle_type", [(1, 0), (6, 0), (6, 2)])
+def test_early_capture_matches_normal_pc_and_safari_outcomes(party, battle_type):
+    r, m = early_rewards(), battle(battle_type=battle_type)
+    m[0xD163], m[0xD11C] = party, 42
+    r.event("start", m)
+    r.event("ball_done", m)
+    reward, events = r.drain()
+    assert reward == r.config.capture and events[0]["species"] == 42
+    m[0xD11C], m[0xCF0B] = 0, 2
+    r.event("ball_done", m)
+    r.event("end", m)
+    assert r.drain() == (0, [])
+
+
+def test_legacy_timing_never_pays_before_end_and_rejects_unknown_timing():
+    r, m = GeneralRewards(), battle(trainer=0x19)
+    r.event("start", m)
+    r.event("trainer_win", m)
+    assert r.drain() == (0, [])
+    assert "paid" not in r.active
+    r.event("end", m)
+    assert r.drain()[0] == r.config.battle_win + r.config.rival_win
+    with pytest.raises(ValueError, match="timing"):
+        RewardConfig(timing="guess")
+
+
+@pytest.mark.parametrize(
+    "count,active,other_alive", [(0, 0, False), (7, 0, False), (1, 1, False), (2, 0, True)]
+)
+def test_final_faint_rejects_invalid_party_and_surviving_other_enemy(count, active, other_alive):
+    r, m = GeneralRewards(RewardConfig(timing="last-faint-v3")), battle(trainer=1)
+    m[0xD016], m[0xD89C], m[0xCFE8] = 20, count, active
+    m[0xD8A6 + 44] = 10 if other_alive else 0
+    r.event("start", m)
+    r.event("faint", m)
+    assert r.drain() == (0, [])
+
+
+@pytest.mark.parametrize("count,active", [(1, 0), (3, 1), (6, 5)])
+def test_final_trainer_faint_uses_live_current_enemy_not_stale_cached_hp(count, active):
+    r, m = GeneralRewards(RewardConfig(timing="last-faint-v3")), battle(trainer=0x19)
+    m[0xD016], m[0xD89C], m[0xCFE8] = 20, count, active
+    m[0xD8A6 + 44 * active] = 10  # Not yet cleared at faint entry.
+    r.event("start", m)
+    r.event("faint", m)
+    assert [e["category"] for e in r.drain()[1]] == ["battle_win", "rival_win"]
+    clone = GeneralRewards(r.config)
+    clone.restore(r.state())
+    clone.event("trainer_win", m)
+    clone.event("end", m)
+    assert clone.drain() == (0, [])
+
+
+def test_final_trainer_double_ko_waits_for_confirmed_victory():
+    r, m = GeneralRewards(RewardConfig(timing="last-faint-v3")), battle(trainer=1)
+    m[0xD89C], m[0xD163], m[0xD16D + 44] = 1, 2, 20
+    r.event("start", m)
+    r.event("faint", m)
+    assert r.drain() == (0, [])
+    r.event("trainer_win", m)
+    assert r.drain()[0] == r.config.battle_win

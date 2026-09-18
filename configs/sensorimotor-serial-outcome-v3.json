@@ -1,0 +1,18 @@
+{
+  "rewards": {"timing": "last-faint-v3"},
+  "button_timing": "serial-v2",
+  "brain": {
+    "intrinsic_calibration": "fly-data/intrinsic-neutral-v1.npz",
+    "dynamics": {"profile": "hybrid-v1", "isolate_nonvisual_sensory": true},
+    "motor": {
+      "arbitration": "sustained-v3", "direction_trace_seconds": 1.0,
+      "start_cooldown_seconds": 5.0
+    },
+    "plasticity": {
+      "rule": "sensorimotor-rstdp-v1", "learning_rate": 0.02,
+      "activity_reference_hz": 1.0, "eligibility_seconds": 0.6,
+      "slow_eligibility_seconds": 30.0,
+      "minimum_factor": 0.75, "maximum_factor": 1.25
+    }
+  }
+}

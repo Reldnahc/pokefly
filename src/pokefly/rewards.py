@@ -44,9 +44,12 @@ class RewardConfig:
     capture: float = 1.0
     gym_win: float = 2.0
     rival_win: float = 2.0
+    timing: str = "encounter-end-v1"
 
     def __post_init__(self):
-        if any(not np.isfinite(v) or v < 0 for v in asdict(self).values()):
+        if self.timing not in ("encounter-end-v1", "confirmed-outcome-v2", "last-faint-v3"):
+            raise ValueError("Unknown reward timing")
+        if any(not np.isfinite(v) or v < 0 for k, v in asdict(self).items() if k != "timing"):
             raise ValueError("Reward magnitudes must be finite and nonnegative")
 
 
@@ -125,28 +128,90 @@ class GeneralRewards:
                 encounter["captured"] = int(memory[0xD11C])
         elif name == "end":
             self.active = None  # Consume exactly once even if the hook fires again.
-            if encounter["type"] == 1 or encounter["link"] or encounter["battle"] not in (1, 2):
+            if encounter.get("paid") or not self._allowed(encounter):
                 return  # Old-man demonstration, link battle, or invalid encounter.
             details = {"encounter": encounter["id"], "trainer": encounter["trainer"]}
             if encounter["captured"] and encounter["battle"] == 1:
                 self._emit("capture", species=encounter["captured"], **details)
                 return
-            count = min(6, max(0, int(memory[0xD163])))
-            alive = any(
-                memory[0xD16C + PARTY_STRIDE * i] or memory[0xD16D + PARTY_STRIDE * i]
-                for i in range(count)
-            )
             confirmed = (encounter["battle"] == 1 and encounter["fainted"]) or (
                 encounter["battle"] == 2 and encounter["trainer_won"]
             )
-            if int(memory[0xCF0B]) == 0 and alive and confirmed:
-                self._emit("battle_win", **details)
-                trainer = encounter["trainer"]
-                if encounter["battle"] == 2:
-                    if trainer in range(0x22, 0x29) or (trainer == 0x1D and encounter["gym"]):
-                        self._emit("gym_win", **details)
-                    if trainer in (0x19, 0x2A, 0x2B):
-                        self._emit("rival_win", **details)
+            if int(memory[0xCF0B]) == 0 and self._party_alive(memory) and confirmed:
+                self._win(encounter)
+        if self.config.timing != "encounter-end-v1" and name != "end":
+            self._confirmed_outcome(name, encounter, memory)
+
+    @staticmethod
+    def _allowed(encounter):
+        return encounter["type"] != 1 and not encounter["link"] and encounter["battle"] in (1, 2)
+
+    @staticmethod
+    def _party_alive(memory):
+        count = min(6, max(0, int(memory[0xD163])))
+        return any(
+            memory[0xD16C + PARTY_STRIDE * i] or memory[0xD16D + PARTY_STRIDE * i]
+            for i in range(count)
+        )
+
+    def _win(self, encounter):
+        details = {"encounter": encounter["id"], "trainer": encounter["trainer"]}
+        self._emit("battle_win", **details)
+        trainer = encounter["trainer"]
+        if encounter["battle"] == 2:
+            if trainer in range(0x22, 0x29) or (trainer == 0x1D and encounter["gym"]):
+                self._emit("gym_win", **details)
+            if trainer in (0x19, 0x2A, 0x2B):
+                self._emit("rival_win", **details)
+
+    def _confirmed_outcome(self, name, encounter, memory):
+        """Earlier delivery of the SAME outcome, never HP/progress shaping.
+
+        At FaintEnemyPokemon entry the cached party HP may still be stale.
+        Require a living ACTIVE player and fainted live enemy for a wild win.
+        Double-KOs and ambiguous cases retain the existing end-of-battle check.
+        V2 waits for TrainerBattleVictory. V3 may also confirm a final trainer
+        faint, checking live active HP and every OTHER cached enemy party HP.
+        """
+        if encounter.get("paid") or not self._allowed(encounter):
+            return
+        if name == "ball_done" and encounter["battle"] == 1 and encounter["captured"]:
+            self._emit(
+                "capture",
+                species=encounter["captured"],
+                encounter=encounter["id"],
+                trainer=encounter["trainer"],
+            )
+            encounter["paid"] = True
+            return
+        living_player_final_faint = (
+            name == "faint"
+            and (memory[0xD015] or memory[0xD016])  # wBattleMonHP, live player
+            and not (memory[0xCFE6] or memory[0xCFE7])  # wEnemyMonHP
+        )
+        wild = living_player_final_faint and encounter["battle"] == 1
+        trainer = name == "trainer_win" and encounter["battle"] == 2
+        if (
+            self.config.timing == "last-faint-v3"
+            and encounter["battle"] == 2
+            and living_player_final_faint
+        ):
+            count, active = int(memory[0xD89C]), int(memory[0xCFE8])
+            # FaintEnemyPokemon has not yet zeroed the active cached party HP.
+            # All remaining enemies must already be fainted; never guess from
+            # a single knockout or invalid/uninitialized party fields.
+            trainer = (
+                1 <= count <= 6
+                and 0 <= active < count
+                and not any(
+                    memory[0xD8A5 + PARTY_STRIDE * i] or memory[0xD8A6 + PARTY_STRIDE * i]
+                    for i in range(count)
+                    if i != active
+                )
+            )
+        if (wild or trainer) and int(memory[0xCF0B]) == 0 and self._party_alive(memory):
+            self._win(encounter)
+            encounter["paid"] = True
 
     def drain(self) -> tuple[float, list[dict]]:
         events, self.pending = self.pending, []
