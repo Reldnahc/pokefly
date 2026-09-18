@@ -19,7 +19,16 @@ from pokefly.runner import run_directory, write_json
 
 
 def episode(
-    c, frame, seed, count, *, target=None, schedule=None, enabled=False, preserve_feedback=False
+    c,
+    frame,
+    seed,
+    count,
+    *,
+    target=None,
+    schedule=None,
+    enabled=False,
+    preserve_feedback=False,
+    reward_delay=0,
 ):
     reward_mean = c.plasticity.reward_mean.copy() if preserve_feedback else None
     c.reset_dynamics(seed)
@@ -27,15 +36,20 @@ def episode(
         c.plasticity.reward_mean[...] = reward_mean
     for _ in range(8):
         c.observe(frame)
-    actions, rewards = [], []
+    actions, rewards, earned = [], [], []
     for index in range(count):
         action = c.choose(c.observe(frame))[0]
-        reward = (
+        # Delayed diagnostic phases include an explicitly unrewarded tail to
+        # deliver every earned pulse. No action is forced during this tail.
+        earned.append(
             float(target in pressed_buttons(action))
-            if schedule is None and target
-            else float(schedule[index])
-            if schedule is not None
+            if target and index < count - reward_delay
             else 0.0
+        )
+        reward = (
+            (earned[index - reward_delay] if index >= reward_delay else 0.0)
+            if schedule is None
+            else float(schedule[index])
         )
         if target or schedule is not None:
             c.reinforce(reward, enabled=enabled)
@@ -59,7 +73,15 @@ def main():
     p.add_argument("--training", type=int, default=512)
     p.add_argument("--initial-target", choices=("up", "down"), default="up")
     p.add_argument("--preserve-feedback", action="store_true")
+    p.add_argument(
+        "--reward-delay",
+        type=int,
+        default=0,
+        help="ROM-free diagnostic: delay feedback by this many decisions",
+    )
     args = p.parse_args()
+    if args.training < 1 or not 0 <= args.reward_delay <= 1000:
+        p.error("Positive training budget and delay between 0 and 1000 required")
     output = run_directory("operant-motor-probe")
     c = InternalBrain(device="cuda", config=load_config(args.config).brain)
     baseline, state = c.snapshot()
@@ -70,6 +92,8 @@ def main():
         "config": str(args.config),
         "seed": args.seed,
         "training_per_stage": args.training,
+        "reward_delay_decisions": args.reward_delay,
+        "training_tail_decisions": args.reward_delay,
         "initial_target": args.initial_target,
         "preserve_feedback_between_stages": args.preserve_feedback,
         "pre_rates": rates(pre),
@@ -90,11 +114,12 @@ def main():
                 c,
                 gray,
                 args.seed + stage * 1000,
-                args.training,
+                args.training + args.reward_delay,
                 target=target if arm == "paired" else None,
                 schedule=schedule,
                 enabled=arm != "frozen",
                 preserve_feedback=args.preserve_feedback,
+                reward_delay=args.reward_delay,
             )
             if arm == "paired":
                 schedules[stage] = train["rewards"]

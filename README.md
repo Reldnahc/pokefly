@@ -28,6 +28,12 @@ prove eventual game completion. Failed earlier
 experiments remain in [RESULTS.md](RESULTS.md), with the continuing protocol in
 [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
+The immediate-feedback motor result does not yet generalize to delayed rewards.
+An optional fixed serial-button timing candidate also fixes a confirmed naming-
+screen input-priority trap; whole-game controls remain in progress. Neither
+finding should be mistaken for learned navigation. See the dated follow-through
+report for current positive AND negative evidence.
+
 A running experiment connecting Pokemon Red in
 [PyBoy](https://github.com/Baekalfen/PyBoy) to the 166,700-neuron MaleCNS
 connectome simulation in [fly.ai](https://github.com/alextitonis/fly.ai).
@@ -61,6 +67,11 @@ Bare `python -m pokefly train` without a config still selects the baseline.
 Fresh runs use the corrected `parallel-v2` decoder: one direction plus one of
 A/B/Start, with the same fixed thresholds and explicit release. Old checkpoints
 retain `exclusive-v1` on resume; start a fresh run to use the corrected adapter.
+
+Optional ongoing transport experiment: `-Profile sensorimotor-serial-v1`.
+This delivers paired direction/function commands sequentially within the same
+time budget, preventing D-pad priority from masking Start/A/B in naming screens.
+It is not yet the default and does not silently alter saved checkpoints.
 
 Open [the local dashboard](http://127.0.0.1:8777). It shows the exact frame fed
 to the brain, retinal input, real firing activity, delivered neural button

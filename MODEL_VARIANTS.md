@@ -493,6 +493,50 @@ It explicitly reuses the completed sustained controls for seeds 1201/1202,
 6,000 decisions each, not counting them as new trials. The candidate is opt-in
 and not yet promoted. See FOLLOWTHROUGH_RESULTS for outcomes and limitations.
 
+## Optional fixed serial button delivery: sensorimotor-serial-v1
+
+Same brain/decoder/rewards as sustained-menu-v1; only `button_timing` changes
+from `simultaneous-v1` to `serial-v2`. A paired request uses half its fixed
+frame budget for direction and half for function, releasing after each pulse.
+At24 frames:11 direction,1 released,11 function,1 released. Single-channel
+requests are unchanged. Both selected buttons originate in the neural decoder;
+no input detector, forced command, action quota or reward enters this adapter.
+
+This addresses conflicting game input priorities, not learning. The
+[naming handler](https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/engine/menus/naming_screen.asm#L124-L187)
+prioritizes directions, whereas the overworld checks Start first. This can
+mask valid neural commands when combined. Frozen copied-state and whole-game
+comparisons are recorded in FOLLOWTHROUGH_RESULTS; it remains opt-in.
+
+Timing is checkpointed and replayed. Missing timing means the exact legacy
+simultaneous path, never an implicit migration. Stream input samples retain
+their same absolute frame offsets across phase boundaries. Logs record actual
+phase schedules; dashboard amber identifies commands within the interval,
+not a claim that serial buttons were held simultaneously.
+
+## Optional delayed-credit mechanism tests
+
+`sensorimotor-impulse-dual-v1` keeps the bounded0.6/30-second covariance model
+but tests fixed impulse-balanced trace mixing. For `r=tau_slow/tau_fast`,
+`E=(E_fast+r*E_slow)/sqrt(1+r+4*r/(1+r))`. This equalizes the immediate contribution
+of the same event, then preserves fast-kernel variance under a continuous
+shared-white-innovation approximation. Real neural innovations are correlated;
+this is not an exact noise normalization or a measured biological mechanism.
+
+An isolated extra-spike counterfactual exposed a negative aftereffect from the
+adaptive postsynaptic baseline: with identical future activity, the old mean
+tag can reverse sign before a delayed reward. `sensorimotor-noise-dual-v1`
+instead uses the existing perturb-v2 tag and known independent noise mean.
+`sensorimotor-event-dual-v1` tests a local pre-trace times actual-postspike tag,
+without adaptive postsynaptic subtraction. Both retain SAME internal reward
+mean/RPE centering, bounds0.75..1.25, timescales and learning rate. They alter
+only existing internal synapses and receive no action or stimulus labels.
+
+None passed the512-earning-decision,32-delayed-decision operant diagnostic.
+Preserving a local tag does not establish useful causal learning. They remain
+unpromoted; no synthetic diagnostic weights enter Pokemon. Checkpoints restore
+all traces and modulation; missing `trace_mixing` means exact old mean mixing.
+
 ## Display interpretation (kept out of the showcase layout)
 
 - In snapshot mode the game frame is the exact pre-action image the fly received;

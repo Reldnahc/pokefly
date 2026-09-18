@@ -53,7 +53,10 @@ def main():
         if int(checkpoint["experiment"]["sample"]) + 1 != rows[0]["sample"]:
             parser.error("Source checkpoint pointer moved; exact starting reward history required")
         rewards.restore(checkpoint["rewards"])
-    with RedEmulator(resolve_rom(None, Path.cwd())) as game:
+    with RedEmulator(
+        resolve_rom(None, Path.cwd()),
+        button_timing=config["config"].get("button_timing", "simultaneous-v1"),
+    ) as game:
         game.load(args.run / "start.state", advance=False)
         if not resume:
             rewards.baseline(game.state())

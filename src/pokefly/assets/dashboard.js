@@ -172,7 +172,9 @@ async function draw(packet) {
   setLabel("action-source", packet.action_source === "fly"
     ? (packet.action === "wait" ? "Fly chose Wait" : "Fly pulse · released")
     : packet.action_source === "human" ? "Human pulse · released" : "Idle · released",
-    "Amber marks the buttons delivered together after this input frame. Every pulse releases all buttons.");
+    state.button_timing === "serial-v2"
+      ? "Amber marks selected buttons delivered in sequence: direction, release, function, release. Same total frame budget; no game-state routing."
+      : "Amber marks the buttons delivered together after this input frame. Every pulse releases all buttons.");
   const delivered = new Set(packet.buttons ?? (packet.action === "wait" ? [] : packet.action.split("+")));
   for (const button of buttons) button.classList.toggle("delivered", delivered.has(button.dataset.action));
   const history = packet.recent_actions || [];

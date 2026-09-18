@@ -78,7 +78,10 @@ def main():
     clock = MenuClock()
     output = run_directory("recorded-menu-audit")
     bins = {}
-    with RedEmulator(resolve_rom(None, Path.cwd())) as game:
+    with RedEmulator(
+        resolve_rom(None, Path.cwd()),
+        button_timing=config["config"].get("button_timing", "simultaneous-v1"),
+    ) as game:
         game.load(args.run / "start.state", advance=False)
         clock.frame = game.pyboy.frame_count
         if not config["options"]["resume"]:

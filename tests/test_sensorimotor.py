@@ -240,3 +240,75 @@ def test_centered_covariance_credits_past_input_contrast_not_current_cofiring():
     assert p.eligibility[0] < 0
     p.reinforce(1)
     assert p.weights[0] < p.base[0]
+
+
+def test_impulse_balanced_mix_has_equal_event_gains_and_preserves_white_noise_variance():
+    from scipy.integrate import quad
+
+    fast, slow = 0.6, 30.0
+    ratio = slow / fast
+    scale = 1 / np.sqrt(1 + ratio + 4 * ratio / (1 + ratio))
+    assert 1 / fast == pytest.approx(ratio / slow)
+    variance, _ = quad(
+        lambda t: (scale * (np.exp(-t / fast) / fast + ratio * np.exp(-t / slow) / slow)) ** 2,
+        0,
+        np.inf,
+    )
+    assert variance == pytest.approx(1 / (2 * fast), rel=1e-9)
+    config = replace(
+        learner().config,
+        eligibility_seconds=fast,
+        slow_eligibility_seconds=slow,
+        trace_mixing="impulse-balanced-v2",
+    )
+    p = SensorimotorPlasticity(np.array([0]), np.array([1]), np.array([0.2]), 2, config)
+    p.eligibility[:] = np.exp(-7.68 / fast) / fast
+    p.slow_eligibility[:] = np.exp(-7.68 / slow) / slow
+    old_mix = 0.5 * (p.eligibility + p.slow_eligibility)
+    assert p.factor_eligibility()[0] > 10 * old_mix[0]
+    q = SensorimotorPlasticity(p.pre, p.post, p.base, 2, config)
+    q.restore(p.arrays(), p.metrics())
+    np.testing.assert_array_equal(p.factor_eligibility(), q.factor_eligibility())
+    for model in (p, q):
+        model.reinforce(1)
+    np.testing.assert_array_equal(p.weights, q.weights)
+
+
+def test_new_mix_requires_two_traces_and_legacy_mix_remains_exact():
+    with pytest.raises(ValueError, match="requires a slow"):
+        PlasticityConfig(trace_mixing="impulse-balanced-v2")
+    with pytest.raises(ValueError, match="Unknown eligibility"):
+        PlasticityConfig(trace_mixing="guess")
+    p = SensorimotorPlasticity(
+        np.array([0]),
+        np.array([1]),
+        np.array([0.2]),
+        2,
+        replace(learner().config, slow_eligibility_seconds=30),
+    )
+    p.eligibility[:] = 0.031234
+    p.slow_eligibility[:] = -0.391182
+    np.testing.assert_array_equal(
+        p.factor_eligibility(), 0.5 * (p.eligibility + p.slow_eligibility)
+    )
+
+
+def test_hebbian_event_tag_stays_positive_after_spiking_and_uses_reward_centering():
+    config = replace(
+        learner().config,
+        rule="sensorimotor-event-v1",
+        eligibility_seconds=0.6,
+        slow_eligibility_seconds=30,
+        trace_mixing="impulse-balanced-v2",
+    )
+    p = SensorimotorPlasticity(np.array([0]), np.array([1]), np.array([0.2]), 2, config)
+    p.observe(np.array([0, 1]), 0.02)
+    for _ in range(384):
+        p.observe(np.array([], dtype=int), 0.02)
+    assert p.eligibility[0] > 0 and p.slow_eligibility[0] > 0
+    p.reinforce(1)
+    assert p.weights[0] > p.base[0]
+    assert p.reward_mean > 0
+    p.reinforce(0)
+    assert p.prediction_error < 0  # Internal expectation, not a new game penalty.
+    assert "hebbian-event" in p.metrics()["rule"]

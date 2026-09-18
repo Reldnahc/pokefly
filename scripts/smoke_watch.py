@@ -21,6 +21,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from pokefly.emulator import button_phases
 from pokefly.rom import resolve_rom, validate_rom
 from pokefly.runtime import configure_runtime
 from pokefly.vision import RetinaMap
@@ -144,7 +145,16 @@ def main():
             assert delivered is not None, "No delivered pulse was observed"
             assert delivered["action_source"] == ("fly" if args.autonomous else "human")
             assert delivered["buttons_released"] is True
-            assert delivered["pulse_frames"] == (23 if args.autonomous else 11)
+            phases = button_phases(
+                delivered["action"],
+                metadata["emulator_frames_per_sample"],
+                metadata.get("button_timing", "simultaneous-v1"),
+            )
+            assert delivered["pulse_frames"] == sum(n for keys, n in phases if keys)
+            if metadata.get("button_timing") == "serial-v2":
+                assert delivered["button_phases"] == [
+                    {"buttons": list(keys), "frames": n} for keys, n in phases
+                ]
             if args.autonomous:
                 from pokefly.actions import pressed_buttons
 
@@ -211,6 +221,7 @@ def main():
         assert validate_rom(rom) == original_hash
         result = {
             "visual_timing": metadata.get("visual_timing", "snapshot-v1"),
+            "button_timing": metadata.get("button_timing", "simultaneous-v1"),
             "config": str(args.config) if args.config else "baseline",
             "graded_activity_separate_from_spikes": bool(metadata.get("graded_indices")),
             "sensory_isolation": metadata["sensory_isolation"],

@@ -28,7 +28,13 @@ def measure(path):
         "reward": summary["reward"],
         "reward_counts": summary["reward_counts"],
         "buttons": summary["button_counts"],
-        "first_starter": next((r["sample"] for r in rows if r["telemetry"]["party"]), None),
+        "first_party_count": next((r["sample"] for r in rows if r["telemetry"]["party"]), None),
+        # The game increments party count BEFORE completing the nickname screen
+        # and initializing the Pokemon. A zero-level entry is not a starter yet.
+        "first_starter": next(
+            (r["sample"] for r in rows if r["telemetry"]["party"] and r["telemetry"]["levels"]),
+            None,
+        ),
         "final_state": summary["final_state"],
         "town_samples": len(town),
         "town_lower_edge_fraction": sum(r["telemetry"]["y"] >= 16 for r in town) / len(town)

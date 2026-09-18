@@ -1,8 +1,9 @@
-"""Experimental plasticity on EXISTING KC -> MBON connections.
+"""Experimental plasticity on EXISTING internal connectome connections.
 
 The preserved centered rule has a global synthetic reward gate. The selective
 visual-KC variant uses shared DAN targets as a coarse modulation proxy. Neither
 is calibrated dopamine or a resolved compartment model; neither learns adapters.
+Optional sensorimotor rules select anatomical descending/motor inputs instead.
 """
 
 from __future__ import annotations
@@ -28,6 +29,7 @@ class PlasticityConfig:
     normalize_inputs: bool = False
     input_budget_fraction: float = 0.0
     slow_eligibility_seconds: float = 0.0
+    trace_mixing: str = "mean-v1"
 
     def __post_init__(self):
         if self.rule not in (
@@ -36,6 +38,7 @@ class PlasticityConfig:
             "compartment-ema-v1",
             "sensorimotor-rstdp-v1",
             "sensorimotor-rstdp-v2",
+            "sensorimotor-event-v1",
             "sensorimotor-perturb-v1",
             "sensorimotor-perturb-v2",
             "sensorimotor-perturb-v3",
@@ -46,7 +49,13 @@ class PlasticityConfig:
             raise ValueError("Unknown plasticity rule")
         if not isinstance(self.normalize_inputs, bool):
             raise ValueError("normalize_inputs must be boolean")
-        if not all(np.isfinite(v) for k, v in asdict(self).items() if k != "rule"):
+        if self.trace_mixing not in ("mean-v1", "impulse-balanced-v2"):
+            raise ValueError("Unknown eligibility trace mixing")
+        if self.trace_mixing != "mean-v1" and not self.slow_eligibility_seconds:
+            raise ValueError("Impulse-balanced mixing requires a slow eligibility trace")
+        if not all(
+            np.isfinite(v) for k, v in asdict(self).items() if k not in ("rule", "trace_mixing")
+        ):
             raise ValueError("Plasticity parameters must be finite")
         if not 0 <= self.learning_rate <= 1:
             raise ValueError("learning_rate must be in [0, 1]")
@@ -235,7 +244,9 @@ class SensorimotorPlasticity(EligibilityPlasticity):
             self.pre,
             self.post,
             incoming,
-            self.post_baseline,
+            np.zeros(self.n, np.float32)
+            if c.rule == "sensorimotor-event-v1"
+            else self.post_baseline,
             spike,
             self.eligibility,
             scale,
@@ -299,6 +310,16 @@ class SensorimotorPlasticity(EligibilityPlasticity):
         return self.metrics()
 
     def factor_eligibility(self):
+        if self.slow_eligibility is not None and self.config.trace_mixing == "impulse-balanced-v2":
+            # EMA traces dilute the same local event by their time constant.
+            # Equalize event amplitudes before combining, then normalize by the
+            # continuous-time variance for a shared white innovation signal:
+            # Var(E_fast + r E_slow)/Var(E_fast) = 1+r+4r/(1+r).
+            # Actual neural innovations are correlated, so this is a fixed
+            # engineering normalization, NOT an exact biological/noise claim.
+            ratio = self.config.slow_eligibility_seconds / self.config.eligibility_seconds
+            scale = float(1 / np.sqrt(1 + ratio + 4 * ratio / (1 + ratio)))
+            return scale * (self.eligibility + ratio * self.slow_eligibility)
         return (
             0.5 * (self.eligibility + self.slow_eligibility)
             if self.slow_eligibility is not None
@@ -309,7 +330,9 @@ class SensorimotorPlasticity(EligibilityPlasticity):
         return {
             **super().metrics(),
             "rule": (
-                "sensorimotor-pre-post-covariance-v2"
+                "sensorimotor-reward-centered-hebbian-event-v1"
+                if self.config.rule == "sensorimotor-event-v1"
+                else "sensorimotor-pre-post-covariance-v2"
                 if self.config.rule == "sensorimotor-rstdp-v2"
                 else "sensorimotor-reward-covariance-v1"
             ),
@@ -321,7 +344,11 @@ class SensorimotorPlasticity(EligibilityPlasticity):
                     "slow_eligibility_l1": float(
                         np.abs(self.slow_eligibility).sum(dtype=np.float64)
                     ),
-                    "eligibility_mix": "equal fast/slow local traces",
+                    "eligibility_mix": (
+                        "impulse-balanced fixed-variance local traces"
+                        if self.config.trace_mixing == "impulse-balanced-v2"
+                        else "equal fast/slow local traces"
+                    ),
                 }
                 if self.slow_eligibility is not None
                 else {}

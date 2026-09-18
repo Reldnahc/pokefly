@@ -8,11 +8,41 @@ from pokefly.actions import pressed_buttons
 from pokefly.red_state import RedState
 from pokefly.rom import validate_rom
 
+BUTTON_TIMINGS = ("simultaneous-v1", "serial-v2")
+
+
+def button_phases(action: str, frames: int, timing: str) -> list[tuple[tuple[str, ...], int]]:
+    """Fixed electrical delivery, not action selection or game-state logic.
+
+    Serial delivery gives each already-selected channel half of the same frame
+    budget, direction first. Both pulses have a released frame. This prevents
+    a game's input-priority rules from permanently masking either channel.
+    """
+    buttons = pressed_buttons(action)
+    if timing not in BUTTON_TIMINGS or frames < 2:
+        raise ValueError("Unknown button timing or insufficient pulse frames")
+    if timing == "serial-v2" and len(buttons) == 2:
+        if frames < 4:
+            raise ValueError("Two serial pulses require at least four frames")
+        first = frames // 2
+        return [((buttons[0],), first - 1), ((), 1), ((buttons[1],), frames - first - 1), ((), 1)]
+    return [(buttons, frames - 1), ((), 1)]
+
 
 class RedEmulator:
-    def __init__(self, rom: Path, *, headless: bool = True, speed: int = 0) -> None:
+    def __init__(
+        self,
+        rom: Path,
+        *,
+        headless: bool = True,
+        speed: int = 0,
+        button_timing: str = "simultaneous-v1",
+    ) -> None:
         from pyboy import PyBoy
 
+        if button_timing not in BUTTON_TIMINGS:
+            raise ValueError("Unknown button timing")
+        self.button_timing = button_timing
         self.rom_sha1 = validate_rom(rom)
         # File-like ROM avoids implicitly loading or writing adjacent battery saves.
         self._rom = io.BytesIO(rom.read_bytes())
@@ -25,6 +55,8 @@ class RedEmulator:
         return self.running
 
     def act(self, action: str, frames: int = 24) -> bool:
+        if getattr(self, "button_timing", "simultaneous-v1") == "serial-v2":
+            return self._act_phased(action, frames)
         buttons = pressed_buttons(action)
         if frames < 2:
             raise ValueError("An action needs at least two frames for press and release")
@@ -47,9 +79,11 @@ class RedEmulator:
         final released frame. The callback can integrate neurons but cannot alter
         the already selected buttons. No game memory is supplied to it.
         """
-        buttons = pressed_buttons(action)
         if frames < 2 or not 1 <= samples <= frames:
             raise ValueError("Require >=2 frames and 1..frames visual samples")
+        if getattr(self, "button_timing", "simultaneous-v1") == "serial-v2":
+            return self._act_phased(action, frames, samples=samples, observe=observe)
+        buttons = pressed_buttons(action)
         offsets = [(index + 1) * frames // samples for index in range(samples)]
         pressed, elapsed = [], 0
         try:
@@ -70,6 +104,34 @@ class RedEmulator:
                         return False
                     elapsed += 1
                 observe(self.screen(), offset)
+            return True
+        finally:
+            for button in pressed:
+                self.pyboy.button_release(button)
+
+    def _act_phased(self, action, frames, *, samples=0, observe=None):
+        phases = button_phases(action, frames, self.button_timing)
+        offsets = [(i + 1) * frames // samples for i in range(samples)] if samples else []
+        elapsed, sample_index, pressed = 0, 0, []
+        try:
+            for buttons, duration in phases:
+                for button in tuple(pressed):
+                    if button not in buttons:
+                        self.pyboy.button_release(button)
+                        pressed.remove(button)
+                for button in buttons:
+                    if button not in pressed:
+                        self.pyboy.button_press(button)
+                        pressed.append(button)
+                end = elapsed + duration
+                while elapsed < end:
+                    target = min(end, offsets[sample_index]) if sample_index < samples else end
+                    if not self.tick(target - elapsed):
+                        return False
+                    elapsed = target
+                    if sample_index < samples and elapsed == offsets[sample_index]:
+                        observe(self.screen(), elapsed)
+                        sample_index += 1
             return True
         finally:
             for button in pressed:

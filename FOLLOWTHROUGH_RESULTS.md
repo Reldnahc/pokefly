@@ -5,10 +5,75 @@ movement and basic motor learning, but does not claim Pokemon completion or
 established screen-specific gameplay learning. Full protocol and failed
 candidates remain in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
-## Latest evidence, 2026-09-18 08:18 UTC
+## Latest evidence, 2026-09-18 09:12 UTC
 
 Public source repository: https://github.com/Reldnahc/pokefly . ROM, model data,
 saves, checkpoints and raw runs remain local and Git-ignored.
+
+### Confirmed input-priority trap; serial-delivery test in progress
+
+The literal sustained/5-second-Start run remained in Bulbasaur's nickname
+screen for thousands of decisions. The game already reports party count 1 at
+this point, but the Pokemon's level is still zero. Measurements now separate
+`first_party_count` from `first_starter` (requires a positive initialized level).
+Earlier artifacts retain their original field; that timestamp may precede a
+completed starter and must not alone be cited as success.
+
+The pinned [naming-screen handler](https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/engine/menus/naming_screen.asm#L124-L187)
+gives directions priority over Start, A and B. The sustained decoder nearly
+always supplies a direction alongside a function button, masking that button.
+On four exact copies of the recorded screen, 16 repeated simultaneous
+direction+Start commands did not submit the name. The same commands delivered
+serially initialized the party by decision 3 in all four directions. This is
+a FORCED transport diagnostic, not autonomous play or learned behavior:
+`forced-button-delivery-probe-20260918T090315Z-892e4e`.
+
+Optional `sensorimotor-serial-v1` changes only delivery timing from the
+sustained/5-second-Start model: direction held 11 frames, release 1, function
+held 11, release 1. Same 24-frame budget, no added command, state detector,
+learned adapter or reward. Single-button commands retain their full pulse.
+Old checkpoints/default profiles retain simultaneous timing.
+
+Actual fresh-bedroom seed64 run `internal-learn-20260918T090356Z-7cfa7f` has
+already won the rival battle at decision 5,092 with original starting synapses
+and unchanged game rewards. Its full 24,000-decision outcome, two frozen
+Route-1 controls, and retained benefit are still pending. This is one interim
+autonomous success, not proof of general learned strategy. The same-seed
+simultaneous control eventually escaped the name screen too, after >11,500
+total decisions. Its delay was severe, not mathematically permanent.
+
+Initial serial trials were launched before a telemetry cleanup: their old
+`pulse_frames` field still says23 on paired commands, although delivery was
+11+1+11+1. The recorded configuration identifies the exact timing; original
+artifacts are not rewritten. New logs include phase schedules and correct
+22-frame total held duration. UI hover no longer calls serial buttons simultaneous.
+
+### Delayed-credit limitation remains open
+
+Exact playback measured one rival faint-to-reward delay of32 decisions
+(7.68 neural seconds) and two wild-battle delays of7/21 decisions (1.68/5.04 s).
+No game reward timing/category/magnitude changed. Artifacts:
+`recorded-outcome-latency-20260918T082827Z-7d13d1` / `...T082850Z-bfb366`.
+
+The constant-image operant diagnostic was repeated with32-decision delayed
+feedback,512 earning decisions per stage, plus32 delivery-only tail decisions.
+All arms have matched length and shuffled reward counts; weights never enter
+Pokemon. Before training: Up24.6%, Down22.7% on256 reward-free decisions.
+
+| Local learning model | Retained paired Up / reversed Down | Shuffled Up / Down |
+| --- | --- | --- |
+| Short0.6s covariance | 23.4% /19.1% | 27.0% /21.9% |
+| Original dual mean | 24.2% /23.8% | 23.0% /23.8% |
+| Impulse-balanced dual covariance | 22.7% /28.1% | 21.1% /22.3% |
+| Known-noise impulse dual | 25.0% /24.2% | 23.0% /30.9% |
+| Event/Hebbian impulse dual | 21.9% /21.9% | 26.6% /20.7% |
+
+None establishes acquisition plus reversal. Frozen controls reproduce the
+pretest. Immediate feedback results below therefore do NOT establish delayed
+causal credit. A4x-duration test of the unchanged noise-dual model is running;
+it is not an independent replication and does not supersede these failures.
+
+### Longer-game plateau and fixed control comparisons
 
 The dual-trace uninterrupted game now finishes at 40,000 decisions: 447
 cumulative sampled positions, a rival win and two wild-battle wins, level 7,
@@ -38,9 +103,13 @@ decisions per arm:
 No arm reached a town. One sustained arm won a wild battle; others did not.
 This demonstrates coherent movement, not learned navigation. Artifact:
 `movement-bout-comparison-20260918T072342Z-66b261`. The sustained-1201 control
-spent 37.22% of frames in Start menus. A predeclared one-factor test changes
-only Start's fixed cooldown from 1 to 5 neural seconds; its controls are reused
-explicitly, never counted as extra trials. No default is changed by these tests.
+spent 37.22% of frames in Start menus. The one-factor test changing only Start's
+fixed cooldown from1 to5 neural seconds is complete. Positions increased
+230->285 and225->303; menu-frame fraction fell37.22->14.07% and37.08->14.59%.
+Wild wins changed1->0 and0->2, so there is no clear battle conclusion. Neither
+reached a town. Its controls are reused explicitly, never counted as extra
+trials. Artifact `start-cadence-comparison-20260918T081715Z-0fbcce`.
+No default is changed by these tests.
 
 ### Partial visual learning and reversal
 
@@ -70,16 +139,23 @@ reuses the paired trial; it is not preregistered independent replication.
 In the new-noise test, paired reversed-cue accuracies were 63.6% and 54.1%,
 versus shuffled 67.3% and 32.4% (mostly one global button preference). Additional
 descriptive cue-preference contrast is now reported to expose that distinction;
-it does not retroactively change pass criteria. Independent training seed 601
-is still running. Samples within these time series are correlated; these small
-results are neither statistical significance nor Pokemon strategy proof.
+it does not retroactively change pass criteria. Independent training seed601
+finished at50.0% paired versus40.2% shuffled at16,384, after56.0% paired at8,192.
+Do not select only the best checkpoint: longer training lost the above-chance
+result. Exact-input-normalized seed501 reached50.0% paired versus41.7% shuffled
+at8,192, also not a robust two-cue solution. Samples within these time series
+are correlated; these small results are not significance or Pokemon strategy proof.
 
 Artifacts: acquisition `visual-learning-curve-20260918T063831Z-ffb363`,
 reversal `...T073714Z-d4ad41`, matched control
 `matched-visual-reversal-20260918T074442Z-fe16ab`, and independent retention
 `visual-retention-probe-20260918T073238Z-46f5ed` / `...T075234Z-4d9e13`.
 No diagnostic-trained synapses enter Pokemon. A fresh perturb-v3 MODEL, with
-original weights and unchanged game rewards, is now being tested in the app.
+original weights and unchanged game rewards, finished24,000 actual decisions:
+329 sampled positions, a level5 starter, no wins and no Route1 entry.
+`internal-learn-20260918T081006Z-8f3f52`. This does not justify promoting it for
+gameplay. Independent visual and normalization artifacts:
+`visual-learning-curve-20260918T074556Z-02eb83` / `...T082252Z-7ebdac`.
 
 ### Active whole-game training
 
@@ -97,11 +173,14 @@ The score-v1/v2/v3 and low-temperature escape candidates have not established
 robust visual acquisition in their 2,048-decision screens. They remain optional
 research models, not promoted replacements.
 
-Latest completed verification: 201 Python tests, 22 JavaScript tests, lint;
-the menu timer adds a separately passing unit test. Escape-model actual-ROM
-resume/frozen/no-reward checks pass, and the user's old checkpoint still
-reproduces the next 20 recorded decisions exactly after the signed-resource
-refactor (`legacy-resume-signed-20260918`). All ten protected hashes match.
+Latest completed verification:233 Python tests,23 JavaScript tests and lint
+(`verify-9c4ea62ca9f84543a0f89e2c1ad22746`). Optional impulse/noise/event-dual and
+serial models pass actual-ROM resume/frozen/no-reward checks. Serial live
+HTTP/SSE pixels, phase delivery and speed controls pass
+(`internal-learn-20260918T091204Z-6c4305/smoke.json`). A first smoke run correctly
+failed its outdated23-held-frame assertion; the test now checks the configured
+phase schedule. User's old checkpoint still reproduces its next20 recorded
+decisions exactly (`legacy-resume-serial-20260918`).
 Browser-rendered layout QA is still unavailable; emulator and HTTP/SSE checks
 are not described as browser QA.
 

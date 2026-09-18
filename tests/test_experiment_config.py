@@ -35,3 +35,14 @@ def test_legacy_checkpoint_does_not_silently_switch_arbitration():
     current = asdict(ExperimentConfig())
     assert ExperimentConfig.from_dict(current, checkpoint=True) == ExperimentConfig()
     assert "arbitration" not in raw["brain"]["motor"]
+
+
+def test_button_timing_is_versioned_not_silently_migrated():
+    raw = {"brain": {"motor": {"arbitration": "sustained-v3"}}}
+    assert ExperimentConfig.from_dict(raw, checkpoint=True).button_timing == "simultaneous-v1"
+    candidate = ExperimentConfig.from_dict({**raw, "button_timing": "serial-v2"})
+    assert ExperimentConfig.from_dict(asdict(candidate), checkpoint=True) == candidate
+    with pytest.raises(ValueError):
+        ExperimentConfig(button_timing="unknown")
+    with pytest.raises(ValueError):
+        ExperimentConfig(button_timing="serial-v2", frames=3)

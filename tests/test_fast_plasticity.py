@@ -49,3 +49,42 @@ def test_dual_trace_kernel_exactly_matches_two_independent_traces(clip):
         )
         np.testing.assert_array_equal(fast, joint_fast)
         np.testing.assert_array_equal(slow, joint_slow)
+
+
+def test_adaptive_post_baseline_can_reverse_a_delayed_tag_but_known_noise_does_not():
+    """Counterfactual local event, fixed incoming mean, identical future activity.
+
+    This tests the actual kernels' credit shape, not a trained fly or gameplay.
+    A moving firing baseline remembers the same event being credited; a known
+    independent-noise mean does not add that negative aftereffect.
+    """
+    differences = {}
+    for adaptive in (False, True):
+        branches = []
+        for extra in (False, True):
+            baseline = np.full(2, 0.024, np.float32)
+            fast, slow = np.zeros(1, np.float32), np.zeros(1, np.float32)
+            for step in range(385):  # 7.68 s after the event; 32 game decisions.
+                event = np.array([0, extra and step == 0], np.float32)
+                sensorimotor_eligibility(
+                    np.array([0]),
+                    np.array([1]),
+                    np.full(2, 0.02, np.float32),
+                    baseline,
+                    event,
+                    fast,
+                    0.02,
+                    np.exp(-0.02 / 0.6),
+                    adaptive,
+                    slow_eligibility=slow,
+                    slow_decay=np.exp(-0.02 / 30),
+                )
+                if adaptive:
+                    decay = np.exp(-0.02 / 10)
+                    baseline *= decay
+                    baseline += (1 - decay) * event
+            branches.append(np.array([fast[0], slow[0]]))
+        differences[adaptive] = branches[1] - branches[0]
+    assert np.mean(differences[True]) < -0.019
+    assert np.mean(differences[False]) > 0.012
+    assert (differences[False] > 0).all()

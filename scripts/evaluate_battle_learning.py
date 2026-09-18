@@ -182,6 +182,7 @@ def main():
         for record in (old_config, current_config):
             record["brain"]["plasticity"].pop("eligibility_seconds")
             record["brain"]["plasticity"].pop("slow_eligibility_seconds")
+            record["brain"]["plasticity"].pop("trace_mixing")
         if old_config != current_config or any(
             reference[key] != report[key]
             for key in ("state_sha256", "ledger_sha256", "eval_seeds", "maximum_decisions")

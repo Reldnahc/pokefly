@@ -17,7 +17,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 async function harness({manual = true, autonomous = false, mode = "learn", graded = false, isolated = false,
                         speedControl = autonomous, speedError = false, hz = 5,
                         visualTiming = "snapshot-v1", quiescent = false, intrinsic = false,
-                        motorArbitration = "parallel-v2"} = {}) {
+                        motorArbitration = "parallel-v2", buttonTiming = "simultaneous-v1"} = {}) {
   const elements = new Map(), requests = [], intervals = [], pendingImages = new Map();
   let stream, now = 10000, speedDelay = null;
   let pacing = {target_hz: hz, revision: 0};
@@ -59,6 +59,7 @@ async function harness({manual = true, autonomous = false, mode = "learn", grade
     graded_indices: graded ? [0, 2] : [], dynamics_profile: graded ? "hybrid-v1" : "baseline",
     visual_timing: visualTiming,
     motor_arbitration: motorArbitration,
+    button_timing: buttonTiming,
     intrinsic_calibration: intrinsic ? {rule: "uniform-neutral-rate-homeostasis-v1"} : null,
     sensory_isolation: {enabled: isolated, neurons: isolated ? 2 : 0,
                         mode: quiescent ? "nonvisual-quiescent-v1" : "nonvisual-incoming-v1"},
@@ -347,6 +348,13 @@ test("a combined neural pulse highlights every delivered button then clears on w
   assert.ok(ui.buttons.every(b => b.disabled));
   await ui.send({...ui.packet(2), buttons: []});
   assert.ok(ui.buttons.every(b => !b.classList.contains("delivered")));
+});
+
+test("serial delivery is not mislabeled as simultaneous button presses", async () => {
+  const ui = await harness({manual: false, autonomous: true, buttonTiming: "serial-v2"});
+  await ui.send({...ui.packet(), action: "up+a", buttons: ["up", "a"], action_source: "fly"});
+  assert.match(ui.elements.get("action-source").title, /delivered in sequence/);
+  assert.doesNotMatch(ui.elements.get("action-source").title, /delivered together/);
 });
 
 test("graded release uses blue intensity and separate units without inflating spikes", async () => {

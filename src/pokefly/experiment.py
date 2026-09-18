@@ -14,7 +14,7 @@ from pokefly.actions import count_buttons, pressed_buttons
 from pokefly.checkpoint import read_checkpoint, save_checkpoint, versions
 from pokefly.dashboard import BrainView, Dashboard, png_data
 from pokefly.dynamics import DynamicsConfig
-from pokefly.emulator import RedEmulator
+from pokefly.emulator import BUTTON_TIMINGS, RedEmulator, button_phases
 from pokefly.internal_brain import BrainConfig, InternalBrain
 from pokefly.motors import MOTOR_MAPPING_VERSION, MotorConfig
 from pokefly.pacing import RuntimePacing, SimulationRate
@@ -31,12 +31,17 @@ class ExperimentConfig:
     rewards: RewardConfig = field(default_factory=RewardConfig)
     frames: int = 24
     visual_timing: str = "snapshot-v1"
+    button_timing: str = "simultaneous-v1"
 
     def __post_init__(self):
         if not 2 <= self.frames <= 120:
             raise ValueError("frames must be in [2,120]")
         if self.visual_timing not in MODES:
             raise ValueError("Unknown visual timing")
+        if self.button_timing not in BUTTON_TIMINGS:
+            raise ValueError("Unknown button timing")
+        if self.button_timing == "serial-v2" and self.frames < 4:
+            raise ValueError("Serial button timing requires at least four frames")
         if self.visual_timing == "stream-v1" and self.brain.brain_steps > self.frames:
             raise ValueError("Stream mode needs at least one game frame per neural step")
 
@@ -153,7 +158,7 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
         spike_totals.update(progress["spike_totals"])
         visited_this_trial = {tuple(tile) for tile in progress["visited_this_trial"]}
         first_house_exit = progress["first_house_exit"]
-    with RedEmulator(options.rom) as game:
+    with RedEmulator(options.rom, button_timing=config.button_timing) as game:
         bootstrap_actions = 0
         if options.resume:
             game.load(Path(saved["directory"]) / "game.state", advance=False)
@@ -225,6 +230,7 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
                     "visual_timing": config.visual_timing,
                     "plastic_edges": len(controller.plasticity.base),
                     "motor_arbitration": config.brain.motor.arbitration,
+                    "button_timing": config.button_timing,
                 }
             )
         display = (
@@ -329,6 +335,16 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
                                 else {}
                             ),
                         }
+                        if config.button_timing != "simultaneous-v1":
+                            phases = button_phases(action, config.frames, config.button_timing)
+                            record.update(
+                                button_timing=config.button_timing,
+                                button_phases=[
+                                    {"buttons": list(keys), "frames": duration}
+                                    for keys, duration in phases
+                                ],
+                                pulse_frames=sum(duration for keys, duration in phases if keys),
+                            )
                         at_boundary = True
                         log.write(json.dumps(record, allow_nan=False) + "\n")
                         if dashboard:
@@ -390,6 +406,7 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
                         "dynamics_profile": config.brain.dynamics.profile,
                         "sensory_isolation": controller.sensory_isolation,
                         "motor_arbitration": config.brain.motor.arbitration,
+                        "button_timing": config.button_timing,
                         "button_coverage": sum(v > 0 for v in count_buttons(actions).values()),
                         "non_wait_fraction": 1 - actions.get("wait", 0) / max(1, completed),
                     }

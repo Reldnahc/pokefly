@@ -13,7 +13,9 @@ param(
         'sensorimotor-low-noise-v1', 'sensorimotor-delayed-v1', 'sensorimotor-dual-v1',
         'sensorimotor-centered-v1', 'sensorimotor-score-v1',
         'sensorimotor-score-v2', 'sensorimotor-score-v3', 'sensorimotor-escape-v1',
-        'sensorimotor-sustained-v1', 'sensorimotor-sustained-menu-v1')][string]$Profile = 'sensorimotor-bounded-v1',
+        'sensorimotor-sustained-v1', 'sensorimotor-sustained-menu-v1',
+        'sensorimotor-impulse-dual-v1', 'sensorimotor-noise-dual-v1',
+        'sensorimotor-event-dual-v1', 'sensorimotor-serial-v1')][string]$Profile = 'sensorimotor-bounded-v1',
     [string]$LoadState,
     [string]$Resume,
     [string]$Weights

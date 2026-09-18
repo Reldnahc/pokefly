@@ -102,10 +102,26 @@ may measure progress and produce the agreed reward signal, including feedback
 to a future learning mechanism. Such feedback must not provide action
 instructions or a hidden navigation policy.
 
-Completing the entire game, a deadline, a training budget, public hosting, and
-a particular visualization style have not been specified.
+The user subsequently requested a public GitHub repository using `gh`; it is
+now at https://github.com/Reldnahc/pokefly . ROM, model data, saves and run
+artifacts are excluded. They also requested continued independent experiments
+until there is credible evidence of meaningful progress and learning, not just
+a promising idea or a completed trial budget. This is not a request to literally
+complete the game or a claim that eventual completion has been demonstrated.
 
 ## Current implementation and evaluation
+
+The dated [FOLLOWTHROUGH_RESULTS.md](FOLLOWTHROUGH_RESULTS.md) supersedes the
+earlier implementation snapshots below. Current launcher default is
+`sensorimotor-bounded-v1`: preserved incoming sensory isolation, frozen
+neutral-image excitability calibration and bounded internal motor-input learning.
+Matched control tests fix the severe Up bias, immediate-feedback diagnostics
+show retained motor preference/reversal, and actual games have won rival/wild
+battles. Reliable visual strategy, delayed credit and further-game navigation
+remain open. Optional serial button delivery fixes a demonstrated naming-screen
+priority trap and is under whole-game comparison; it is not promoted by fiat.
+
+### Earlier implementation/evaluation snapshots (retained, not current defaults)
 
 The user authorized independent implementation and experiments after stopping
 their run, with a written plan first. [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md)

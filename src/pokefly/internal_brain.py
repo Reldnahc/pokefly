@@ -342,6 +342,7 @@ class InternalBrain(PixelBrain):
         stored["config"]["plasticity"].setdefault("normalize_inputs", False)
         stored["config"]["plasticity"].setdefault("input_budget_fraction", 0.0)
         stored["config"]["plasticity"].setdefault("slow_eligibility_seconds", 0.0)
+        stored["config"]["plasticity"].setdefault("trace_mixing", "mean-v1")
         if weights_only:
             # New seed/backend allowed for retention evaluation; circuit settings stay fixed.
             stored["device"] = identity["device"]

@@ -28,6 +28,120 @@ test proves eventual game completion.
 
 Latest checkpoint of work (older entries below are a chronological lab log):
 
+- 09:20 UTC: first serial frozen Route-1 comparison is mixed: positions285->337,
+  northernmost y20->24, no wins in either; no new town. Do not label increased
+  coverage a navigation solution. Fresh serial bedroom run independently wins
+  rival at5,092; exact replay validates all states/rewards through5,500
+  (`recorded-replay-proof-20260918T091426Z-1c786a`). Delayed noise-dual2048 paired
+  acquisition remains flat (23.8% Up vs24.6% before); remaining controls run.
+  Next causal-estimator check: EXISTING likelihood-score-v2 model, immediate
+  operant feedback,512/stage, seed501, paired/shuffled/frozen, reward-free test
+  and reversal. This model's score has an analytic conditional-zero-mean check,
+  unlike approximate Bernoulli-current perturbation credit. Require >5pp
+  acquisition/reversal advantage versus pre/shuffled before a delayed version;
+  do not invent a new optimizer or promote its failed visual screen.
+  All10 protected hashes rechecked unchanged at09:17 UTC.
+
+- 09:12 UTC: serial transport passes actual-ROM exact resume/frozen/no-reward
+  checks (`internal-smoke-20260918T090405Z-7e75ea`); user legacy checkpoint
+  reproduces next20 decisions (`legacy-resume-serial-20260918`). Running serial
+  bedroom/frozen tests were launched before logging cleanup: their inherited
+  `pulse_frames` reports23 for paired commands, although actual delivery is
+  correctly 11+release+11+release. Do not rewrite original evidence or treat
+  that legacy counter as held duration. New serial logs include explicit
+  phase schedules and22 held frames; UI hover describes sequential delivery.
+  This is telemetry only, no behavior change or need to discard ongoing trials.
+
+- 09:10 UTC: delayed-feedback duration control: preselect 2,048 earning decisions
+  per acquisition/reversal stage (4x the failed 512-decision screen) with the
+  UNCHANGED noise-dual model, seed501, delay32, all paired/shuffled/frozen arms.
+  No new rate/trace/bound/feedback parameters. This asks whether the existing
+  causally centered noise tag needs more samples; the shorter result remains
+  reported and this is NOT an independent seed replication. Require retained
+  gains versus both controls before proceeding to a fresh seed or actual-game
+  application; diagnostic synapses remain excluded from Pokemon.
+
+- 09:03 UTC: FOUND a concrete simultaneous-button trap. Literal sustained-menu
+  run has stayed in Bulbasaur's nickname screen from ~2,326 to >11,500 decisions.
+  Party count was already 1 but level was 0: first-party-count alone incorrectly
+  labeled a completed starter. Measurement now records both and requires a
+  positive initialized level for `first_starter`; old artifacts are not rewritten.
+  Pinned naming-screen assembly gives D-pad priority over Start/A/B. Sustained
+  directions make almost every function command a combination, so they are
+  masked. Optional `serial-v2` delivery splits the SAME 24-frame budget into two
+  11-held/1-released pulses, direction then function; no new buttons, RAM input,
+  reward or learned adapter. Legacy simultaneous/default paths stay unchanged.
+  Forced-input COPY diagnostic `forced-button-delivery-probe-20260918T090315Z-892e4e`:
+  all four direction+Start controls remain unfinished after 16 decisions; all
+  four serial counterparts initialize party by decision 3. This is transport
+  proof, NOT autonomous progress. 45 emulator/temporal tests pass.
+  Preselect actual fresh-bedroom seed64, 24,000 decisions, original synapses,
+  profile `sensorimotor-serial-v1` (same sustained-menu circuit, timing ONLY).
+  Compare full outcomes with ongoing same-seed simultaneous control. Also run
+  same original frozen Route-1 controls, seeds1201/1202, 6,000 each, timing ONLY;
+  reuse validated completed Start-5s controls explicitly. No waypoint training.
+
+- Delayed-credit 32-decision/512-earning assays finished: all four new/local
+  trace variants fail acquisition. Noise-dual paired Up25.0% vs pre24.6% and
+  shuffled23.0%; reversal Down24.2% vs shuffled30.9%. Event-dual Up21.9%
+  (shuffled26.6%), reversed Down21.9% (shuffled20.7%). Neither is promoted.
+  Long-trace presence and kernel amplitude are insufficient behavioral proof.
+
+- 08:50 UTC: parallel comparison for the same identified negative-aftereffect
+  mechanism: an event-based local Hebbian tag (pre-trace * actual post-spike),
+  with reward centered by the SAME internal reward mean. Remove only the
+  adaptive postsynaptic subtraction from eligibility; retain the recorded
+  baseline for checkpoint/state compatibility. Same bounded impulse-dual
+  constants and delay-32/512 assay, seed501. This tests actual spiking tags
+  versus known-noise perturbation tags without changing game feedback or
+  giving the learner an action label. Synthetic weights never enter Pokemon.
+
+- 08:46 UTC: kernel counterfactual confirms delayed-tag reversal. One extra
+  local event with fixed presynaptic mean, identical subsequent activity:
+  after 7.68 s covariance fast/slow differences -0.04935/+0.01029, so original
+  mean mixing is NEGATIVE (-0.01953). The adaptive firing baseline carries a
+  negative aftereffect from the same event. Known independent-noise centering
+  instead gives +0.0000044/+0.02580, both positive. Impulse scaling alone makes
+  covariance +0.06274 but did not improve first paired Up behavior (22.7%).
+  Test same bounded impulse-dual model with existing perturb-v2 credit ONLY:
+  actual known neural-noise innovations, no moving postsynaptic baseline in the
+  eligibility signal. Same delay-32/512 protocol and seed501. This is a concrete
+  delayed-credit mechanism, not a new reward, forced button, or biology claim.
+  `sensorimotor-noise-dual-v1` stays diagnostic until controlled behavior passes.
+- Fixed Start cadence completed both frozen controls: positions 230->285 and
+  225->303; menu time 37.22->14.07% and 37.08->14.59%; no town in either.
+  Wild wins 1->0 and 0->2, so no clear battle conclusion. Literal fresh bedroom
+  candidate now runs at port8780 (`internal-learn-20260918T084057Z-b50b15`).
+
+- 08:39 UTC: 32-decision delayed operant paired arms show no acquisition at
+  512 earning decisions: short Up 23.4%, dual Up 24.2% versus 24.6% before.
+  Shuffled/frozen controls are finishing; do not claim delayed credit works.
+  Specific internal hypothesis: averaging EMA eligibility traces gives a new
+  event ~50x smaller initial amplitude in the 30 s trace than the 0.6 s trace.
+  Add opt-in impulse-balanced mixing: E=(E_fast+r*E_slow)/sqrt(1+r+4r/(1+r)),
+  r=tau_slow/tau_fast. The denominator preserves the fast trace's variance in
+  a continuous shared-white-innovation approximation, NOT an exact neural
+  noise or physiology result. No time constants, learning rate, weight bounds,
+  connectivity, decoder or rewards change. Defaults/legacy mixing remain exact.
+  Preselect same delay-32 assay seed 501; demand acquisition/reversal versus
+  controls, immediate-credit retention, independent seed and real battles
+  before any promotion. This is a mechanism test, not an end-game claim.
+
+- 08:32 UTC: replay-only reward-latency audit verifies all states/rewards.
+  Rival: faint -> delivery 32 decisions (7.68 neural seconds), confirmed trainer
+  victory -> delivery 18 (4.32 s). Wild wins: faint -> delivery 7/21 decisions
+  (1.68/5.04 s). Artifacts `recorded-outcome-latency-20260918T082827Z-7d13d1`
+  and `...T082850Z-bfb366`. No outcome category/magnitude/timing is changed.
+  Preselect ROM-free constant-image operant test with 32-decision reward delay,
+  512 earning decisions plus an explicit 32-decision delivery-only tail per
+  phase, seed 501, short versus dual trace, acquisition/reversal and matched
+  shuffled/frozen controls. This tests delayed causal credit, not Pokemon play;
+  trained diagnostic weights remain excluded from the game.
+- First Start-cadence comparison: menu frames 37.22% -> 14.07%, sampled positions
+  230 -> 285, Route-1 minimum y 22 -> 20, wild wins 1 -> 0. No new town.
+  Second seed pending. Improvement in menu interruption does not establish
+  navigation or battle-learning success. Audit `recorded-menu-audit-20260918T082938Z-1354e9`.
+
 - 08:23 UTC: independently trained perturb-v3 seed 601 reached 56.0% at 8,192,
   then fell to 50.0% at 16,384; shuffled control still running. Do NOT select
   only the best checkpoint or call prolonged training a reliable solution.
