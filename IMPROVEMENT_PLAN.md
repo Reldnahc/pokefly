@@ -1,5 +1,93 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 03:26 UTC: CPU regression after v11 profile preparation passes
+501 Python/26JavaScript/lint, verify-a8f6084f249844d09cf27786265882dc.
+Only GPU jobs remain the two v10 curves16990/52362. All ten protected
+ROM/model/old-user-run hashes still match; no protected or generated artifact
+is tracked by Git. The v11 asset has not been generated or behavior tested.
+
+2026-09-19 03:24 UTC: prospective fallback v11 prepared, NOT RUN. Keep v10
+first, including its registered gameplay/retention if its memory gate passes.
+Only after a v10 gate failure, evaluate configs/visual-wide-score-v11.json.
+This combines the EXISTING score-v2 equations/rate0.002/temperature0.05 with
+the approved strong visual model and a separately frozen neutral calibration.
+Its earlier weak-vision failure is preserved; this new combination is a
+hypothesis, not a newly invented rule or evidence that credit is fixed.
+
+V11 calibration: original synapses, seed707, gray128,10k steps, uniform1Hz,
+wide[-.5,.5], no resets, reset probes301/302/303 for256 decisions. Use the
+exact command in MODEL_VARIANTS.md; never overwrite another asset. Before
+behavioral testing require finite reset-probe rates, each mapped anatomical
+motor group in[.1,10]Hz and KC/MBON means<10Hz. These are coarse engineering
+sanity checks, not a target button distribution or biological validation.
+Then actual-ROM exact-resume/frozen/no-reward smoke and full regression.
+
+V11 memory: paired/shuffled501/601 curves512/2048/8192, ALL final arms on
+9201..9204,128 neutral+128 decisions/cue, SAME balanced>=.60,each>=.55,
+advantages>=.05 vs original AND shuffled, BOTH training seeds. No assay
+weights enter Pokemon. Physical firing/calibration differ, so old original
+game controls cannot substitute; do not call this a one-factor physics test.
+
+If BOTH pass, two full-new-game18k learn/frozen pairs401 learn-first,402
+frozen-first. Carry BOTH final learned brains through another whole18k game
+4701/4702, without selecting a better intermediate checkpoint or using a
+battle reset. Unlike prior6k development screens, these18k budgets are fixed
+up front so each lineage has36k full-game learning before testing retention.
+No early-game success gate skips an unfavorable lineage. Then ALL final brains
+and shared original on frozen whole-new-game18k panels4801/4802. Reserve
+4803/4804 confirmation. Require no lost starter/completed-win/Route1 milestones
+against the matched original, at least one additional completed progression
+milestone, and >=10% earlier first-starter OR first-battle on BOTH held-out
+seeds for at least one SAME lineage before confirmation. Report every arm.
+This is a development threshold, not a significance test or endgame guarantee.
+No default promotion without independent confirmation and fresh safety checks.
+
+2026-09-19 03:18 UTC: v10 software/live smoke checks PASSED, not gameplay
+learning proof. Full CUDA regression510 Python/26JavaScript/lint:
+verify-1ec9bc8cf1c044668492f1e5edb7a24a. Actual-ROM smoke
+internal-smoke-20260919T030819Z-2b6041 verifies exact split/uninterrupted
+arrays, rewards and actions, with frozen/no-reward controls unchanged.
+Smoke37817 and regression85617 exited/drained.
+
+CURRENT ONLY TWO GPU JOBS: v10 paired/shuffled ROM-free curves, final8192.
+501 session16990, visual-learning-curve-20260919T031016Z-36197e;
+601 session52362, visual-learning-curve-20260919T031016Z-c436d2.
+Small paired2048 probes are59.34%/55.54% balanced; neither is the gate.
+Finish BOTH complete curves, then ALL final arms on9101..9104 with the
+previously registered thresholds. No synthetic weights enter Pokemon.
+If passed, use game401 learn-first and402 frozen-first for the registered
+6k whole-new-game comparisons. No battle-reset practice, no default promotion.
+
+2026-09-19 03:08 UTC: v9 independent memory gate COMPLETE, FAILED both seeds.
+Audit visual-retention-gate-20260919T030755Z-8f8eae; all final8192 weights,
+full four-seed controls, no cherry-picked checkpoint.501 paired54.37%,
+original41.50%, shuffled46.68%; cue accuracies70.31%/38.43%.601 paired60.95%,
+original41.50%, shuffled38.26%; cues69.19%/52.71%. Both miss each-cue>=55%;
+501 also misses balanced>=60%. Original raw choices reproduce exactly across
+the two panels and count once. Do NOT run v9 gameplay4301/4401 queue or promote.
+Panels visual-retention-probe-20260919T025755Z-58ec07 and ...T025756Z-3f54cf;
+sessions79422/89487 exited/drained.
+
+Read-only final-array check: fixed-reference mean-input residuals <5.24e-8
+relative for all four paired/shuffled brains. Paired501/601 have6780/5241 of
+495962 edges at the lower bound and106/91 at the upper bound. This verifies
+the constraint, NOT behavioral stability or a proven cause of poor recall.
+
+V10 fallback is triggered under its already registered protocol. CURRENT ONLY
+TWO GPU JOBS: real-ROM CUDA smoke37817, full CUDA-inclusive regression85617.
+No v10 learning-curve run or gameplay progress claim yet. After smoke succeeds,
+use freed slots for the two501/601 v10 paired/shuffled curves. All thresholds,
+reserved9101..9104 retention and later full-game rules remain unchanged.
+
+2026-09-19 02:58 UTC: v9 curves COMPLETE; sessions40118/20407 exited/drained.
+Final small-probe balanced paired/shuffled:50148.45%/45.07%,60166.77%/32.62%.
+Neither intermediate score is the independent gate; no checkpoint selection.
+CURRENT ONLY TWO GPU JOBS: full frozen9001..9004 retention panels79422 (501
+curvef4889e),89487 (601 curve297315). All original/paired/shuffled arms,
+neutral128 and128 cue decisions. Config/model/physical reference unchanged.
+Source-only ancestry/audit/conditional-v10 commitd292221 was pushed; no v10
+neural or game run yet. If v9 gate fails, execute the registered v10 fallback.
+
 2026-09-19 02:51 UTC: final CPU regression after ancestry/one-reference audit
 and conditional v10 profile passes500 Python/26JavaScript/lint:
 verify-b0f2a68d230e4ddaa7cb02c64be61167. Reference-factor baseline composition

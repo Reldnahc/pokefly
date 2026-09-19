@@ -128,6 +128,25 @@ def test_homeostatic_candidate_changes_only_internal_rule_and_does_not_migrate_c
     assert "$Profile = 'visual-release-wide-v3'" in Path("scripts/start.ps1").read_text()
 
 
+def test_visual_score_candidate_keeps_interface_and_old_score_equations():
+    candidate = load_config(Path('configs/visual-wide-score-v11.json'))
+    showcase = load_config(Path('configs/visual-release-wide-v3.json'))
+    score = load_config(Path('configs/sensorimotor-score-v2.json'))
+    assert candidate.brain.plasticity.rule == score.brain.plasticity.rule
+    assert candidate.brain.plasticity.learning_rate == score.brain.plasticity.learning_rate
+    assert candidate.brain.dynamics.spike_temperature == score.brain.dynamics.spike_temperature
+    assert candidate.brain.intrinsic_calibration == (
+        'fly-data/intrinsic-neutral-visual-wide-score-v11.npz'
+    )
+    old, new = asdict(showcase), asdict(candidate)
+    for name in ('rule', 'learning_rate'):
+        new['brain']['plasticity'][name] = old['brain']['plasticity'][name]
+    new['brain']['dynamics']['spike_temperature'] = 0.0
+    new['brain']['intrinsic_calibration'] = old['brain']['intrinsic_calibration']
+    assert new == old  # No new rewards, decoder, visual transfer or input scope.
+    assert ExperimentConfig.from_dict(asdict(candidate), checkpoint=True) == candidate
+
+
 def test_missing_learning_scope_retains_legacy_checkpoint_behavior():
     old = {
         "brain": {

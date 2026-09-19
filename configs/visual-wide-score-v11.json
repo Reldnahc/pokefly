@@ -1,0 +1,22 @@
+{
+  "brain": {
+    "intrinsic_calibration": "fly-data/intrinsic-neutral-visual-wide-score-v11.npz",
+    "dynamics": {
+      "profile": "hybrid-v1",
+      "isolate_nonvisual_sensory": true,
+      "visual_model": "calibrated-rate-v1",
+      "graded_release": 1.0,
+      "spike_temperature": 0.05
+    },
+    "motor": {"arbitration": "parallel-v2"},
+    "plasticity": {
+      "rule": "sensorimotor-score-v2",
+      "learning_rate": 0.002,
+      "activity_reference_hz": 1.0,
+      "eligibility_seconds": 0.6,
+      "input_budget_fraction": 0.25
+    }
+  },
+  "button_timing": "serial-v2",
+  "visual_timing": "stream-v1"
+}

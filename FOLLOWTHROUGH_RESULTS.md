@@ -1,5 +1,35 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Fixed-reference memory result, 2026-09-19 03:08 UTC
+
+V9 fails its predeclared independent two-cue memory screen. Every final8,192
+checkpoint was tested with learning disabled, after128 neutral warmup windows,
+on four reserved noise seeds9001..9004 and128 scored decisions per cue.
+
+| Training seed | Original balanced | Rewarded balanced | Shuffled balanced | Rewarded left/right cue |
+| --- | ---: | ---: | ---: | --- |
+|501|41.50%|54.37%|46.68%|70.31% /38.43%|
+|601|41.50%|60.95%|38.26%|69.19% /52.71%|
+
+The rewarded brains score above both controls, but both miss the required55%
+accuracy on EACH cue;501 also misses60% balanced. This is not a passed memory
+screen or evidence of Pokemon learning. The duplicated original reproduces
+exactly and counts once. No favorable earlier checkpoint substitutes for the
+final brain. Audit: visual-retention-gate-20260919T030755Z-8f8eae; panels
+visual-retention-probe-20260919T025755Z-58ec07 and ...T025756Z-3f54cf.
+No v9 full-game progression test or default promotion follows this result.
+
+Read-only final-array checks find the fixed-reference mean-input constraint
+satisfied to <5.24e-8 relative residual, despite weak recall. That is numerical
+correctness, not proof of physiological stability or the cause of failure.
+The prospectively registered v10 fallback keeps the same reference/physics
+and changes only the synaptic update rate0.2->0.02. Its software/live checks
+now pass:510 Python/26JavaScript/lint (verify-1ec9bc8cf1c044668492f1e5edb7a24a)
+and actual-ROM exact-resume/frozen/no-reward smoke
+internal-smoke-20260919T030819Z-2b6041. Two complete paired/shuffled curves
+are running (visual-learning-curve-20260919T031016Z-36197e and ...-c436d2).
+These checks establish software correctness, not memory or gameplay benefit.
+
 ## Whole-game ancestry guard, 2026-09-19 02:51 UTC
 
 Practice and retained-weight evaluation now reject a source brain if any

@@ -1013,7 +1013,7 @@ retention-priority gate was not met, so additional practice/retention was not
 triggered. Raw/control/checkpoint audits are derived-game-baseline-20260919T022738Z-51cd29
 and ...T022740Z-07a33c; these compose existing trials, not new replications.
 
-## Optional fixed-reference homeostasis (memory assays running; not promoted)
+## Optional fixed-reference homeostasis (memory screen failed; not promoted)
 
 `visual-wide-anchored-v9.json` keeps v8's physical model and learning parameters,
 but uses `sensorimotor-perturb-anchored-v6`. The same bounded constraint uses
@@ -1050,14 +1050,45 @@ Generic collection is complete: generic-release-reference-20260919T022608Z-c74a2
 16,384 measured neural steps, no reward/game/actions. The new asset SHA256 is
 b9c6c6718c6dd9cb3fa63df70dd5415ba5d7586638ff02ec297bebafc82717f6. Its real-ROM
 CUDA exact-resume/frozen/no-reward smoke passes (internal-smoke-20260919T022723Z-ddfd48),
-as does the unchanged default (...T022635Z-3a0bbb). Registered paired/shuffled
-memory curves501/601 are running, with final9001..9004 retention required.
-No association gate or gameplay progress is claimed yet. This profile remains
-opt-in; never migrate old brains or initialize Pokemon with assay-trained weights.
+as does the unchanged default (...T022635Z-3a0bbb). Final9001..9004 frozen
+retention is complete: paired54.37%/60.95% balanced versus41.50% original
+and46.68%/38.26% shuffled. Both fail the each-cue>=55% requirement
+(right38.43%/52.71%);501 also fails balanced>=60%. Audit
+visual-retention-gate-20260919T030755Z-8f8eae. No gameplay test or promotion
+follows this failed gate. Never initialize Pokemon with assay-trained weights.
 
 The conditional `visual-wide-anchored-slow-v10.json` fallback changes ONLY the
 synaptic learning rate from0.2 to the established0.02 rate, reusing the exact
-v9 reference. It is prepared, not behaviorally tested or promoted. Its full
-cue/control/whole-game protocol is registered in IMPROVEMENT_PLAN.md and does
-not displace the ongoing v9 test. It will not load a differently trained model's
-checkpoint or use a favorable intermediate assay snapshot.
+v9 reference. Its real-ROM exact-resume/frozen/no-reward smoke passes:
+internal-smoke-20260919T030819Z-2b6041. Its two paired/shuffled memory curves
+are now running after v9 failed; no memory gate or gameplay success is claimed.
+The full protocol is registered in IMPROVEMENT_PLAN.md. It never loads a
+differently trained model or uses a favorable intermediate assay checkpoint.
+
+## Conditional strong-vision likelihood candidate (v11; not run or promoted)
+
+`visual-wide-score-v11.json` combines the existing `sensorimotor-score-v2`
+local spike-likelihood rule with the current calibrated visual model. It keeps
+the old score rate0.002, temperature0.05, trace0.6s and positive-input budget
+25%; existing edges/signs only. Raw pixels, sensory isolation, serial buttons,
+streamed vision, anatomical decoder and general rewards are unchanged.
+The old weak-vision score-v2 negative results still stand. This combination is
+a new hypothesis, not a claim that the previous rule worked or that an exact
+local score guarantees useful long-horizon learning.
+
+Stochastic firing changes the physical model, so the fixed neutral calibration
+must be generated separately, without ROM/rewards/button labels:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/probe_intrinsic.py --device cuda --visual-model calibrated-rate-v1 --graded-release 1 --spike-temperature 0.05 --wide-bias --calibration-only --calibration-steps 10000 --reset-probe-decisions 256 --export fly-data/intrinsic-neutral-visual-wide-score-v11.npz
+```
+
+The calibration procedure uses the same wide-v3 uniform1Hz target and bounds,
+not per-button rate targets. No existing asset or old checkpoint is migrated.
+This is a changed neural-model package, NOT a pure learning-rule comparison
+against wide-v3. The likelihood inspiration is
+[Florian (2007)](https://florian.io/papers/2007_Florian_Modulated_STDP.pdf);
+our logistic hard-reset neurons and bounds differ from that paper's model.
+The plan predeclares generic sanity checks, both memory controls, and whole-game
+practice/retention; no battle-start practice and no synthetic game initialization.
+Only activate this queue after the preceding v10 gate fails.
