@@ -17,21 +17,34 @@ from evaluate_saved_gameplay import measure
 
 from pokefly.checkpoint import read_checkpoint, sha256
 from pokefly.experiment import TrainOptions, load_config, train
+from pokefly.release_reference import REFERENCE_PLASTICITY, verify_intrinsic_copy
 from pokefly.rom import resolve_rom
 from pokefly.runner import run_directory, write_json
 
 
 def validate_one_factor(original, candidate, factor="learning_rate"):
-    if factor not in ("learning_rate", "rule", "credit_timing"):
-        raise ValueError("Supported factors are internal learning_rate, rule or credit_timing")
+    if factor not in ("learning_rate", "rule", "credit_timing", "release_reference"):
+        raise ValueError(
+            "Supported factors are learning_rate, rule, credit_timing, release_reference"
+        )
     old, new = copy.deepcopy(original), copy.deepcopy(candidate)
     if factor == "credit_timing":
         old_value, new_value = old.pop(factor), new.pop(factor)
+    elif factor == "release_reference":
+        old_value = old["brain"]["plasticity"].pop("rule")
+        new_value = new["brain"]["plasticity"].pop("rule")
+        source, extended = (old["brain"].pop("intrinsic_calibration"),
+                            new["brain"].pop("intrinsic_calibration"))
+        if ((old_value, new_value) != ("sensorimotor-perturb-homeostatic-v5", REFERENCE_PLASTICITY)
+                or not source or not extended or source == extended):
+            raise ValueError("Reference test requires explicit moving-to-fixed reference profiles")
     else:
         old_value = old["brain"]["plasticity"].pop(factor)
         new_value = new["brain"]["plasticity"].pop(factor)
     if old != new or new_value == old_value:
         raise ValueError(f"Candidate must differ ONLY in internal {factor}")
+    if factor == "release_reference":
+        verify_intrinsic_copy(Path(source), Path(extended))
     return old_value, new_value
 
 
@@ -39,8 +52,10 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--baseline-report", type=Path, required=True)
     p.add_argument("--config", type=Path, default=Path("configs/visual-fast-learning-v2.json"))
-    p.add_argument("--factor", choices=("learning_rate", "rule", "credit_timing"),
-                   default="learning_rate")
+    p.add_argument(
+        "--factor", choices=("learning_rate", "rule", "credit_timing", "release_reference"),
+        default="learning_rate",
+    )
     p.add_argument("--port", type=int, required=True)
     args = p.parse_args()
     if not 0 <= args.port <= 65535:
@@ -69,6 +84,7 @@ def main():
     np.testing.assert_array_equal(arrays["weights"], arrays["base"])
     output = run_directory({"learning_rate": "visual-learning-rate-gameplay",
                             "rule": "visual-plasticity-rule-gameplay",
+                            "release_reference": "visual-release-reference-gameplay",
                             "credit_timing": "visual-credit-timing-gameplay"}[args.factor])
     config = output / "fixed-config.json"
     write_json(config, candidate)

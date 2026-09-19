@@ -23,6 +23,7 @@ from pokefly.plasticity import (
     SensorimotorPlasticity,
     dan_target_gates,
 )
+from pokefly.release_reference import REFERENCE_PLASTICITY, load_release_reference
 from pokefly.runtime import configure_runtime
 from pokefly.score_plasticity import LikelihoodPlasticity
 
@@ -57,6 +58,8 @@ class BrainConfig:
             and self.dynamics.profile != "hybrid-v1"
         ):
             raise ValueError("Neural-perturbation credit requires hybrid dynamics")
+        if self.plasticity.rule == REFERENCE_PLASTICITY and not self.intrinsic_calibration:
+            raise ValueError("Anchored plasticity requires an explicit reference calibration")
         if self.plasticity.rule.startswith("sensorimotor-score-") and (
             self.dynamics.spike_temperature <= 0 or self.plasticity.slow_eligibility_seconds
         ):
@@ -120,6 +123,13 @@ class InternalBrain(PixelBrain):
             pre = np.searchsorted(b.indptr, self.csc_offsets, side="right") - 1
         post = b.indices[self.csc_offsets]
         args = (np.asarray(pre), post, b.weights[self.csc_offsets], b.n, config.plasticity)
+        reference_options = {}
+        self.release_reference_info = None
+        if config.plasticity.rule == REFERENCE_PLASTICITY:
+            reference, self.release_reference_info = load_release_reference(
+                Path(config.intrinsic_calibration), self.body_ids, config,
+            )
+            reference_options["fixed_release_reference"] = reference
         if sensorimotor:
             rule = (
                 LikelihoodPlasticity
@@ -128,7 +138,7 @@ class InternalBrain(PixelBrain):
                 if config.plasticity.rule.startswith("sensorimotor-perturb-")
                 else SensorimotorPlasticity
             )
-            self.plasticity = rule(*args)
+            self.plasticity = rule(*args, **reference_options)
         elif config.plasticity.rule == "compartment-ema-v1":
             self.plasticity = CompartmentPlasticity(
                 *args, gates=compartment_gates(b, np.asarray(pre), post)
@@ -280,6 +290,8 @@ class InternalBrain(PixelBrain):
             "motor_body_ids": {k: self.body_ids[v].tolist() for k, v in self.motors.items()},
             "device": self.brain.device,
             "n": self.brain.n,
+            **({"release_reference": self.release_reference_info}
+               if self.release_reference_info is not None else {}),
             **(
                 {"visual_calibration": self.hybrid.visual_circuit.info}
                 if self.hybrid and self.hybrid.visual_circuit is not None else {}

@@ -1,7 +1,7 @@
 """Experimental local mean-input constraint on existing positive synapses.
 
 This is a modeling hypothesis, not calibrated fly physiology. Preserve the
-original-weight estimated input at the CURRENT local release means, rather
+original-weight estimated input at the supplied local release reference, rather
 than only projecting an incremental update before clipping. Nothing here
 receives pixels, reward, action labels, desired motor rates or game state.
 """

@@ -67,6 +67,22 @@ def test_constraint_is_idempotent_at_float_precision_and_keeps_original_weights(
     np.testing.assert_array_equal(constrain(np.ones(4), base, mean, post, 4), np.ones(4))
 
 
+def test_moving_context_constraint_can_erase_selectivity_unlike_a_fixed_reference():
+    # Capacity warning, NOT a fly learning experiment: these are hand-set toy
+    # factors. Repeatedly enforcing ORIGINAL mean input in each distinct
+    # context can remove a useful contrast while satisfying every numeric bound.
+    # A fixed mixed-context reference has a different feasible set. No such
+    # frozen reference has yet been calibrated or installed in a game model.
+    chosen = np.array([1.5, .5], np.float32)
+    moving, fixed = chosen.copy(), chosen.copy()
+    for _ in range(32):
+        for context in ([.8, .2], [.2, .8]):
+            moving = constrain(moving, [1., 1.], context, [0, 0], 1)
+            fixed = constrain(fixed, [1., 1.], [.5, .5], [0, 0], 1)
+    np.testing.assert_allclose(moving, np.ones(2), rtol=0, atol=1e-6)
+    np.testing.assert_array_equal(fixed, chosen)
+
+
 @pytest.mark.parametrize("tiny", [1e-20, 1e-35, 1e-45])
 def test_nearly_silent_release_means_do_not_corrupt_dual_bracketing(tiny):
     base = np.array([.1, .2, .4, .7], np.float32)
@@ -78,12 +94,104 @@ def test_nearly_silent_release_means_do_not_corrupt_dual_bracketing(tiny):
     np.testing.assert_allclose(actual, reference, rtol=1e-7, atol=0)
 
 
-def learner(rule="sensorimotor-perturb-homeostatic-v5"):
+def learner(rule="sensorimotor-perturb-homeostatic-v5", **options):
     return NeuralPerturbationPlasticity(
         np.array([0, 1, 0, 1]), np.array([2, 2, 3, 3]),
         np.array([.1, .2, .3, .4]), 4,
         PlasticityConfig(rule=rule, learning_rate=.2, input_budget_fraction=.25),
+        **options,
     )
+
+
+def anchored(reference=None):
+    return learner("sensorimotor-perturb-anchored-v6", fixed_release_reference=reference)
+
+
+@pytest.mark.parametrize("reference", [
+    None, [0., 0., 0., 0.], [.2, .3], [[.2], [.3], [.4], [.5]],
+    [.2, .3, np.nan, .5], [.2, .3, np.inf, .5], [-.1, .3, .4, .5], [1.1, .3, .4, .5],
+])
+def test_anchored_rule_requires_a_valid_physical_reference(reference):
+    with pytest.raises(ValueError, match="fixed release reference"):
+        anchored(reference)
+    with pytest.raises(ValueError, match="explicit anchored rule"):
+        learner(fixed_release_reference=np.ones(4))
+
+
+def test_fixed_reference_is_copied_readonly_and_independent_of_game_context():
+    reference = np.full(4, .5, np.float32)
+    model = anchored(reference)
+    reference[:] = 1
+    np.testing.assert_array_equal(model.fixed_release_reference, np.full(4, .5, np.float32))
+    with pytest.raises(ValueError, match="read-only"):
+        model.fixed_release_reference[0] = 1
+    arrays = model.arrays()
+    arrays["fixed_release_reference"][:] = 0
+    assert model.fixed_release_reference[0] == .5
+    chosen = np.array([1.5, .75, 1.4, .7], np.float32)
+    for context in ([.8, .2, 0, 0], [.2, .8, 1, 1]):
+        model.post_baseline[:] = context
+        np.testing.assert_allclose(model.constrain_factors(chosen), chosen, rtol=0, atol=1e-7)
+
+
+def test_anchored_rule_does_not_change_physical_credit_observation():
+    candidate, original = anchored(np.full(4, .5)), learner()
+    for model in (candidate, original):
+        for _ in range(4):
+            model.observe(np.array([3]), .02, perturbation=np.array([0, 1, 0, 1]),
+                          probability=.024, graded_release=(np.array([0, 1]), [.2, .8]))
+    for key, value in original.arrays().items():
+        np.testing.assert_array_equal(value, candidate.arrays()[key])
+    assert set(candidate.arrays()) - set(original.arrays()) == {"fixed_release_reference"}
+
+
+@pytest.mark.parametrize("reward,enabled", [(1., False), (0., True)])
+def test_anchored_reference_never_normalizes_frozen_or_zero_error_weights(reward, enabled):
+    model = anchored(np.full(4, .5))
+    model.weights *= np.array([.5, 1.8, 1.5, .7])
+    model.eligibility[:] = 10
+    before = model.weights.copy()
+    model.reinforce(reward, enabled=enabled)
+    np.testing.assert_array_equal(before, model.weights)
+
+
+def test_anchored_learning_and_checkpoint_resume_are_exact():
+    p, q = anchored([.02, .08, .04, .03]), anchored([.02, .08, .04, .03])
+    p.eligibility[:] = [-30, 8, 20, -20]
+    p.feedback_elapsed[...] = .24
+    p.reinforce(.5)
+    assert p.last_changed > 0
+    q.restore({k: v.copy() for k, v in p.arrays().items()}, p.metrics())
+    assert not q.fixed_release_reference.flags.writeable
+    for reward in (0., .05, 1., -.2):
+        for model in (p, q):
+            model.observe(np.array([0, 2]), .02,
+                          perturbation=np.array([0, 0, 1, 0]), probability=.024)
+            model.reinforce(reward)
+            means = model.fixed_release_reference[model.pre].astype(float)
+            actual = np.bincount(model.post, weights=model.weights.astype(float) * means,
+                                 minlength=model.n)
+            reference = np.bincount(model.post, weights=model.base.astype(float) * means,
+                                    minlength=model.n)
+            np.testing.assert_allclose(actual, reference, rtol=2e-7, atol=1e-10)
+        for key, value in p.arrays().items():
+            np.testing.assert_array_equal(value, q.arrays()[key])
+
+
+def test_checkpoint_cannot_replace_or_drop_the_frozen_reference():
+    model = anchored([.2, .3, .4, .5])
+    arrays = model.arrays()
+    arrays["weights"] *= 1.1
+    before = model.weights.copy()
+    with pytest.raises(ValueError, match="reference mismatch"):
+        learner().restore(arrays, model.metrics())
+    arrays["fixed_release_reference"][0] = .3
+    with pytest.raises(ValueError, match="reference mismatch"):
+        model.restore(arrays, model.metrics())
+    del arrays["fixed_release_reference"]
+    with pytest.raises(ValueError, match="reference mismatch"):
+        model.restore(arrays, model.metrics())
+    np.testing.assert_array_equal(before, model.weights)
 
 
 def test_internal_rule_preserves_physical_observation_and_frozen_weights():

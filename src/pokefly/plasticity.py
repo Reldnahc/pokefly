@@ -45,6 +45,7 @@ class PlasticityConfig:
             "sensorimotor-perturb-v3",
             "sensorimotor-perturb-projected-v4",
             "sensorimotor-perturb-homeostatic-v5",
+            "sensorimotor-perturb-anchored-v6",
             "sensorimotor-score-v1",
             "sensorimotor-score-v2",
             "sensorimotor-score-v3",
@@ -411,22 +412,38 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
     NOT their conductance model or a validated fly molecular mechanism.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, fixed_release_reference=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.config.rule == "sensorimotor-perturb-homeostatic-v5":
+        self.fixed_release_reference = None
+        anchored = self.config.rule == "sensorimotor-perturb-anchored-v6"
+        if anchored:
+            reference = np.asarray(fixed_release_reference, np.float32)
+            if (reference.shape != (self.n,) or not np.isfinite(reference).all()
+                    or (reference < 0).any() or (reference > 1).any()
+                    or not (reference > 0).any()):
+                raise ValueError("Anchored plasticity requires a valid fixed release reference")
+            self.fixed_release_reference = reference.copy()
+            self.fixed_release_reference.flags.writeable = False
+        elif fixed_release_reference is not None:
+            raise ValueError("Fixed release reference requires the explicit anchored rule")
+        if self.config.rule == "sensorimotor-perturb-homeostatic-v5" or anchored:
             from pokefly.synaptic_homeostasis import target_order
 
             self.mean_constraint_order = target_order(self.post, self.n)
 
     def constrain_factors(self, factor):
-        if self.config.rule != "sensorimotor-perturb-homeostatic-v5":
+        if self.config.rule not in (
+            "sensorimotor-perturb-homeostatic-v5", "sensorimotor-perturb-anchored-v6",
+        ):
             return super().constrain_factors(factor)
         from pokefly.synaptic_homeostasis import bounded_mean_factors
 
         c = self.config
         budget = 0.0 if c.normalize_inputs else c.input_budget_fraction or -1.0
+        reference = (self.fixed_release_reference if self.fixed_release_reference is not None
+                     else self.post_baseline)
         return bounded_mean_factors(
-            factor, self.base, self.post_baseline[self.pre], *self.mean_constraint_order,
+            factor, self.base, reference[self.pre], *self.mean_constraint_order,
             c.minimum_factor, c.maximum_factor, budget,
         )
 
@@ -455,9 +472,16 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
             **super().arrays(),
             **({"pending_neural_credit": self.pending_credit.copy()}
                if self.pending_credit is not None else {}),
+            **({"fixed_release_reference": self.fixed_release_reference.copy()}
+               if self.fixed_release_reference is not None else {}),
         }
 
     def restore(self, arrays, metadata):
+        reference = arrays.get("fixed_release_reference")
+        if ((reference is None) != (self.fixed_release_reference is None)
+                or (reference is not None
+                    and not np.array_equal(reference, self.fixed_release_reference))):
+            raise ValueError("Checkpoint fixed release reference mismatch")
         pending = arrays.get("pending_neural_credit")
         if pending is not None:
             pending = np.asarray(pending, np.float32)
@@ -501,6 +525,7 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         centered = c.rule in (
             "sensorimotor-perturb-v3", "sensorimotor-perturb-projected-v4",
             "sensorimotor-perturb-homeostatic-v5",
+            "sensorimotor-perturb-anchored-v6",
         )
         incoming = (
             self.pre_trace - np.float32(decay) * self.post_baseline if centered else self.pre_trace
@@ -545,6 +570,9 @@ class NeuralPerturbationPlasticity(SensorimotorPlasticity):
         return {
             **super().metrics(),
             "rule": (
+                "sensorimotor-fixed-reference-homeostasis-v6"
+                if self.config.rule == "sensorimotor-perturb-anchored-v6"
+                else
                 "sensorimotor-bounded-mean-input-homeostasis-v5"
                 if self.config.rule == "sensorimotor-perturb-homeostatic-v5"
                 else

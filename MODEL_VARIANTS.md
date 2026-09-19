@@ -993,3 +993,40 @@ Private-copy saved-brain audit `credit-update-audit-20260918T233346Z-d87f04`
 checks the numeric constraint without exports. Full neural/gameplay checks and
 retained behavioral evidence are still required. Do not load those diagnostic
 copies, migrate old brains to this rule, or promote it to the showcase default.
+
+## Optional fixed-reference homeostasis (implementation only; not calibrated/tested in-game)
+
+`visual-wide-anchored-v9.json` keeps v8's physical model and learning parameters,
+but uses `sensorimotor-perturb-anchored-v6`. The same bounded constraint uses
+one frozen generic-stimulus release reference instead of changing gameplay
+means. A two-input numerical counterexample shows why this distinction matters:
+constraining original input separately in alternating contexts can erase a
+hand-set contrast. This is a capacity warning, NOT a fly training result or
+evidence that v8 fails in-game. V8's registered gameplay test remains queued.
+
+The new reference is an engineering constraint, not measured fly physiology.
+It limits average learned input on its generic collection distribution; it
+cannot guarantee balanced buttons, stability on every game screen or learning.
+Local eligibility still observes the actual physical neural release/noise.
+There is no learned policy, new circuit, button target or RAM input.
+
+Generate the optional immutable asset separately (it is not yet collected):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/collect_release_reference.py --export fly-data/intrinsic-neutral-visual-release-wide-anchored-v9.npz
+```
+
+The collector uses original synapses and eight generic patterns, shuffled in
+balanced blocks, with fixed seed7201, four cycles, 128 warmup and512 scored
+neural steps per pattern. It calls neural steps directly, never the decoder,
+plasticity update, emulator or reward system. It copies the original wide-v3
+intrinsic bias/mask/neuron IDs/protocol exactly and records model/data hashes,
+including the retina and every pinned visual-calibration asset.
+The old calibration is never overwritten. The new rule refuses missing or
+mismatched references, stores the reference in checkpoints, and cannot mutate
+it through restored state. Old profiles keep their original identities/arrays.
+
+No collection, CUDA smoke, association gate or whole-game behavioral result is
+claimed yet. This profile must remain opt-in, with original-synapse named
+lineages and prospectively registered full-game tests. Never migrate old
+trained brains or use synthetic-assay weights as Pokemon initialization.

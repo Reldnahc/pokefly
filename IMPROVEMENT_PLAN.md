@@ -1,5 +1,93 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 01:40 UTC: final v9 source regression clean: 463 Python tests,
+26 JavaScript tests and lint, `verify-7b3dba6f197a45f7823bac8c3a299ffb`.
+CUDA/live tests and generic-reference collection remain queued, not passed.
+Default launcher unchanged. Both GPU panels are now on their third/final arms.
+
+2026-09-19 01:38 UTC: four of six v7 frozen arms complete. Retained4101 fails
+to acquire a starter on3801 (322 positions), acquires one at5106 on3802
+(359 positions), zero wins/Route1 in either. B fractions53.08%/59.97%; source
+weights stayed exactly frozen. Original3801 already had a starter and victory,
+so this lineage does not show a consistent retained benefit. Remaining third
+arms are retained4102/3801 `internal-frozen-20260919T013556Z-c16699` and
+original3802 `internal-frozen-20260919T013700Z-1dff5c`. Sessions64038/67732;
+no other GPU jobs. Complete/audit the full panel before any queue decision.
+
+Protected ROM/connectome/user-stopped-run manifest: all10 hashes still match
+at01:36UTC. Git has no tracked ROM, saves, neural assets or runs. No files were
+deleted. The v9 reference now also binds retina and all five pinned visual
+reference files, not only the connectome. CPU suite463 passed; last lint-only
+long line corrected, final wrapper rerun pending. No v9 calibration collected.
+
+2026-09-19 01:33 UTC: full CPU regression after v9 core/collector: 460 Python,
+26 JavaScript and lint pass (`verify-55a8cfae963f465899bc89165f73413b`). CUDA was
+explicitly skipped because both slots remain occupied. This is implementation
+verification only. Added an explicit `release_reference` one-factor comparison
+mode: moving v8 -> fixed v9 only, requires bit-exact original intrinsic payload
+and recorded original-file checksum; rejects changes in every other setting.
+It still requires a new exact frozen 64-decision prefix before actual training.
+
+Prospective v9 protocol (no collection/behavior seen yet): after the registered
+v7/v8 priority jobs, collect the generic reference once with fixed7201 defaults;
+run the real-ROM exact-resume/frozen/no-reward smoke and old-default regression.
+Then ROM-free paired/shuffled cue curves on501/601 at512/2048/8192, followed by
+ALL final-weight original/paired/shuffled retention on unused9001..9004 using
+the EXISTING gate (balanced>=.60, each cue>=.55, advantage>=.05 vs both controls,
+both training seeds). No best-checkpoint selection or synthetic-to-game weights.
+
+If both visual gates pass, compare v9 against completed v8 6k development games
+with the explicit reference factor, seeds401/402, same whole fresh game and
+original synapses. The same retention-priority criterion applies: both starters,
+OR a completed victory/Route1 without losing matched-original starter/win/Route1.
+If passed, both final brains get another6k fresh-game practice (4301/4302) and
+then frozen18k whole-game panels4401/4402, sharing one original per test seed.
+Reserve4403/4404 confirmation. Named new-model lineages persist across practice;
+normal user runs never discard weights silently. Whole-game progression,
+not cue success, numeric constraints or prettier button counts, is the target.
+
+2026-09-19 01:28 UTC: optional v9 implementation prepared, NOT calibrated or
+run on the GPU/game. New collector performs only generic-image neural steps
+on original weights, checks unchanged synapses/biases, and creates a new asset
+with the exact old intrinsic payload. The reference loader checks physical
+configuration, connectome hashes, neuron IDs, payload hash and no-game/reward/
+button provenance. Reference arrays are immutable and checked on restore.
+No new config fields/identity keys are added to legacy models.
+
+First CPU regression: 459 passed, one NEW test failed because its expected
+float32 values were accidentally promoted to float64. Corrected the expected
+value to the exact saved float32 array; no tolerance relaxed. Full rerun
+pending. This is not a behavioral result and no default is changed.
+GPU sessions64038/67732 continue their second arms; do not exceed two jobs.
+
+2026-09-19 01:13 UTC: first two frozen arms completed, NOT the full panel.
+3801 original: 370 positions, starter 7,759, one rival win, no Route 1.
+3802 retained_4102: 332 positions, starter 3,035, no wins/Route 1, level 5.
+Both next arms are retained_4101, still sessions 64038/67732, actual runs
+`internal-frozen-20260919T010647Z-72a217` (3801) and
+`internal-frozen-20260919T010649Z-3f4725` (3802). Finish all registered arms.
+
+CPU-only capacity warning for optional v8: a two-input counterexample shows
+that repeatedly constraining original mean input in two different contexts
+can erase a hand-set response contrast while satisfying every numeric bound.
+This is NOT observed fly behavior or a trained checkpoint. A fixed mixed-context
+reference preserves that toy contrast. Reproducible in
+test_moving_context_constraint_can_erase_selectivity_unlike_a_fixed_reference;
+all 19 pure numeric tests pass. V8 remains unpromoted and behaviorally untested.
+
+Prepare an OPTIONAL anchored-reference v9 alternative, not a mutation of v8:
+same existing synapses, bounds, rate and frozen physical model. Collect a fixed
+release mean with original synapses on generic visual patterns ONLY, no ROM,
+reward, button optimization or game images. Store it alongside an EXACT copy
+of the original intrinsic biases in a NEW versioned calibration artifact;
+never overwrite the old asset. The new rule constrains against this fixed
+reference, not the changing gameplay context. Preserve old identities and
+all old algorithms. No learned external readout/critic and no trained assay
+weights may enter gameplay. This alternative is not yet implemented, calibrated
+or behaviorally validated. Do not launch its collection or CUDA checks while
+the two frozen panels occupy both slots. Existing v7/v8 schedules remain;
+register any v9 behavioral comparison before seeing its outcomes.
+
 2026-09-19 00:55 UTC: final clean CPU-only regression passes 420 Python /
 26 JavaScript / lint, `verify-57f958c6c8eb4791a21fa5f5d120acc0`.
 No active child agents. Only GPU sessions 64038/67732 remain; first panel arms
