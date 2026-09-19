@@ -1,4 +1,4 @@
-"""Compose a verified matched baseline from an exactly recovered rule trial.
+"""Compose a verified matched baseline from a completed one-factor trial.
 
 No simulation or new evidence: join the completed candidate with its original
 shared frozen control, retaining the full provenance chain. This permits a
@@ -10,7 +10,9 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
+import numpy as np
 from continue_rule_gameplay import measure_complete, read_rows, stitch, validate_source
+from evaluate_saved_gameplay import measure
 from evaluate_visual_learning_rate import validate_one_factor
 
 from pokefly.checkpoint import read_checkpoint, sha256
@@ -22,10 +24,103 @@ def read(path):
     return json.loads(Path(path).read_text())
 
 
+def compose_fresh(path, candidate):
+    """A complete unsplit candidate plus its already verified shared control."""
+    base = Path(candidate["baseline_report"])
+    if sha256(base) != candidate["baseline_report_sha256"]:
+        raise ValueError("Original matched controls changed")
+    original = read(base)
+    if (original.get("status") != "completed" or original.get("continuation_source")
+            or len(original["rows"]) != 2
+            or {r["mode"] for r in original["rows"]} != {"learn", "frozen"}
+            or candidate["reused_controls_not_new_trials"] != original["rows"]
+            or candidate["seed"] != original["seed"] or candidate["steps"] != original["steps"]):
+        raise ValueError("Seed, budget or shared controls disagree")
+    for source in (candidate, original):
+        if sha256(Path(source["config"])) != source["config_sha256"]:
+            raise ValueError("Source model file changed")
+    fixed = asdict(load_config(Path(candidate["config"])))
+    factor = candidate["factor"]
+    old, new = validate_one_factor(asdict(load_config(Path(original["config"]))), fixed, factor)
+    if (candidate[f"old_{factor}"], candidate[f"new_{factor}"]) != (old, new):
+        raise ValueError("Reported factor values differ from the actual model settings")
+    prefix = candidate.get("prefix_verification", {})
+    if prefix.get("samples") != 64 or not prefix.get("all_fields_exact"):
+        raise ValueError("The complete 64-decision frozen prefix is required")
+    frozen = next(r for r in original["rows"] if r["mode"] == "frozen")
+    rows_by_arm, starts, roms, final = {}, set(), set(), None
+    for arm, row in (("frozen", frozen), ("learn", candidate["rows"][0])):
+        game = Path(row["run"])
+        stored, summary = read(game / "config.json"), read(game / "summary.json")
+        actual = measure(game)
+        if actual != {k: row[k] for k in actual}:
+            raise ValueError("Recorded outcome differs from raw gameplay")
+        options = stored["options"]
+        if (summary["reason"] != "step_limit" or actual["samples"] != candidate["steps"]
+                or options["steps"] != candidate["steps"] or options["seed"] != candidate["seed"]
+                or options["mode"] != arm or not options["intro"]
+                or any(options.get(k) for k in ("resume", "weights", "load_state"))):
+            raise ValueError("Fresh matched candidate/control protocol changed")
+        arrays, saved = read_checkpoint(game / "latest-checkpoint.json")
+        stored_fixed = asdict(ExperimentConfig.from_dict(stored["config"], checkpoint=True))
+        if (saved["experiment"]["mode"] != arm
+                or saved["experiment"]["sample"] != candidate["steps"]
+                or saved["rom_sha1"] != stored["rom_sha1"]
+                or asdict(ExperimentConfig.from_dict(
+                    saved["experiment"]["config"], checkpoint=True)) != stored_fixed):
+            raise ValueError("Final checkpoint does not match its game")
+        if arm == "learn":
+            if stored_fixed != fixed:
+                raise ValueError("Learning run used a different neural model")
+            final = Path(saved["directory"])
+        else:
+            np.testing.assert_array_equal(arrays["weights"], arrays["base"])
+            if actual["weight_updates_this_evaluation"]:
+                raise ValueError("Shared frozen control changed weights")
+            # A reused original may come from an earlier plasticity rule. Its
+            # frozen dynamics, not its unused eligibility state, must match.
+            current, reference = dict(stored_fixed), dict(fixed)
+            current["brain"], reference["brain"] = dict(current["brain"]), dict(reference["brain"])
+            current["brain"].pop("plasticity")
+            reference["brain"].pop("plasticity")
+            if current != reference:
+                raise ValueError("Shared control has different physical dynamics or rewards")
+        raw = read_rows(game)
+        if ([r["sample"] for r in raw] != list(range(1, candidate["steps"] + 1))
+                or any(r.get("action_source") != "fly" for r in raw)):
+            raise ValueError("Incomplete or externally controlled gameplay")
+        rows_by_arm[arm] = raw
+        starts.add(sha256(game / "start.state"))
+        roms.add(stored["rom_sha1"])
+    prefix_game = Path(prefix["run"])
+    prefix_rows = read_rows(prefix_game)
+    keys = ("action", "buttons", "spikes_total", "groups", "motor_rates_hz", "telemetry",
+            "reward", "reward_events", "input_window")
+    if (len(prefix_rows) != 64 or len(starts) != 1 or len(roms) != 1
+            or sha256(prefix_game / "start.state") not in starts
+            or [{k: r[k] for k in keys} for r in prefix_rows]
+            != [{k: r[k] for k in keys} for r in rows_by_arm["frozen"][:64]]):
+        raise ValueError("Matched initial game or recorded frozen prefix changed")
+    return {
+        "scope": __doc__, "status": "completed", "new_trials": False,
+        "seed": candidate["seed"], "steps": candidate["steps"],
+        "config": candidate["config"], "config_sha256": candidate["config_sha256"],
+        "rows": [frozen, {"mode": "learn", **candidate["rows"][0]}],
+        "provenance": [{"report": str(p), "sha256": sha256(p)} for p in (path, base)],
+        "candidate_final_checkpoint": str(final),
+        "candidate_final_brain_sha256": sha256(final / "brain.npz"),
+        "frozen_control_shared_not_independent": True,
+        "candidate_resume_segments_not_independent": False,
+        "raw_prefix_rechecked": True,
+    }
+
+
 def compose(path):
     report = read(path)
     if report.get("status") != "completed" or len(report.get("rows", [])) != 1:
-        raise ValueError("A completed recovered single-candidate trial is required")
+        raise ValueError("A completed single-candidate trial is required")
+    if "source_report" not in report:
+        return compose_fresh(path, report)
     parent = Path(report["source_report"])
     if sha256(parent) != report["source_report_sha256"]:
         raise ValueError("Original candidate protocol changed")

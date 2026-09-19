@@ -1,5 +1,39 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 00:30 UTC: queued v8 behavioral protocol, AFTER the already registered
+v7 practice/3801+3802 retained tests (and reserved confirmation if promising).
+Use the existing one-factor runner, factor=rule, 6,000 whole-game decisions on
+development seeds 401/402. Original synapses initialize this DIFFERENT model's
+named lineages; no v7 checkpoint migration or synthetic weights. Same fast-v6
+rate, visual model, physical dynamics, buttons and rewards. No battle starts.
+
+The failed fast-v6 parents and their original controls are explicitly shared,
+not new replications. New CPU provenance compositions:
+`derived-game-baseline-20260919T002854Z-427dea` (401) and
+`...T002855Z-663e36` (402). They recheck complete logs, actual original frozen
+weights, final candidate checkpoints, matching starts and the recorded 64-step
+frozen prefix. The runner must also reproduce a NEW candidate frozen prefix
+before training. No v8 behavioral trial has started yet.
+
+Retained-test priority gate, declared before v8 behavior: both development
+games acquire starters, OR at least one completes a victory/reaches Route 1
+without losing a starter/win/Route-1 outcome achieved by its matched original.
+Coverage or a more balanced button histogram alone does not pass. If it passes,
+continue BOTH final v8 brains through another 6,000-decision whole new game
+(noise 4201/4202), then freeze BOTH final lineages on held-out 3901/3902,
+18,000 decisions per arm with one shared original per seed. Those longer
+tests—not the development gate—judge useful retained gameplay learning.
+If the gate fails, keep the failure and diagnose before another variant;
+do not select an earlier checkpoint or silently replace the current default.
+
+CPU baseline-composition regression now passes 416 Python / 26 JavaScript /
+lint, artifact `verify-a64fb057c4994468a61837afc832c85c`. A test import-order
+lint error was corrected before this complete pass. No additional GPU job.
+Read-only mechanism investigation is recorded in [LEARNING_MECHANISMS.md](LEARNING_MECHANISMS.md):
+the active reward average is not a learned state-value predictor. Primary
+fly-memory studies motivate investigating internal feedback, not an external
+critic or another unvalidated circuit change during the registered tests.
+
 2026-09-19 00:23 UTC: both registered whole-game practice jobs remain active,
 near 10,000 of 18,000 decisions each. Do not select intermediate weights or
 replace either source. Source 401 is still moving but has stalled at 203
