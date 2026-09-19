@@ -1069,13 +1069,17 @@ are complete: BOTH learners acquired starters and won the rival battle within6k;
 neither matched original acquired a starter. No Route1/capture/badge yet. Audit
 full-game-pair-audit-20260919T042349Z-a5210f validates both completed encounters.
 The originals exactly reproduce historical shared controls, not replications.
-Longer whole-new-game practice with both final brains is underway, followed by
-held-out frozen tests. Retained gameplay benefit is NOT established; no default
-promotion. The first positive games do not replace that required comparison.
+Whole-new-game practice and held-out frozen tests are now COMPLETE at24k total
+training per brain. Retained4501 reaches starters >=10% earlier on both4601/4602
+and reaches Route1/wins a wild battle on4602, but loses4601's rival win versus
+the original. Retained4502 misses4601's starter and win. BOTH fail the registered
+preservation/progress gate; no default promotion or4603/4604 confirmation.
+Raw audit: game-retention-progress-screen-20260919T064322Z-3b8eec. This is mixed
+evidence at a finite training budget, not proof that longer training cannot help.
 The full protocol is registered in IMPROVEMENT_PLAN.md. It never loads a
 differently trained model or uses a favorable intermediate assay checkpoint.
 
-## Conditional strong-vision likelihood candidate (v11; not run or promoted)
+## Strong-vision likelihood candidate (v11; calibration running, not promoted)
 
 `visual-wide-score-v11.json` combines the existing `sensorimotor-score-v2`
 local spike-likelihood rule with the current calibrated visual model. It keeps
@@ -1101,4 +1105,6 @@ against wide-v3. The likelihood inspiration is
 our logistic hard-reset neurons and bounds differ from that paper's model.
 The plan predeclares generic sanity checks, both memory controls, and whole-game
 practice/retention; no battle-start practice and no synthetic game initialization.
-Only activate this queue after the preceding v10 gate fails.
+This queue was activated after the completed v10 gate failed on September19.
+Neutral calibration is running in intrinsic-probe-20260919T064348Z-ed09ca;
+no v11 behavioral result is available yet.

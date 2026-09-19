@@ -1,5 +1,38 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## V10 retained whole-game panel complete, 2026-09-19 06:44 UTC
+
+All six frozen18k fresh-game arms completed. Both learned lineages had24k total
+whole-game training (6k initial+18k practice). They use only their FINAL gameplay
+synapses, with identical opening-state hashes, unchanged rewards and zero test
+updates. The stronger whole-ancestry holdout guard also passes. Raw audit and
+predeclared screen: game-retention-progress-screen-20260919T064322Z-3b8eec.
+
+| Test seed | Brain | Positions | Starter | First battle | Completed rival / wild wins | Route1 |
+| --- | --- | ---: | ---: | ---: | --- | --- |
+|4601|original|379|3918|4001|1 / 0|no|
+|4601|retained4501|331|3462|4252|0 / 0|no|
+|4601|retained4502|364|not reached|not reached|0 / 0|no|
+|4602|original|360|not reached|not reached|0 / 0|no|
+|4602|retained4501|410|3559|3716|1 / 1|yes|
+|4602|retained4502|351|9115|9756|1 / 0|no|
+
+Neither retained lineage passes whole-game-progress-v1.4501 is >=10% faster
+to its starter on BOTH seeds (the4602 original is right-censored at18k), and
+adds Route1/wild success on4602. However, it loses a rival victory on4601.
+4502 also loses4601 starter/battle progress. These are genuinely mixed results,
+not no effect and not consistent retained improvement. No captures or badges.
+All unfavorable arms count; no additional4603/4604 confirmation is triggered.
+The24k-budget failure does not establish that more whole-game practice cannot
+help. No candidate or saved brain is promoted to the default.
+
+Both panel sessions53942/88470 exited. The next previously registered v11
+neutral calibration is running alone, intrinsic-probe-20260919T064348Z-ed09ca;
+its stability, software smoke and independent cue memory must pass before game
+training. Full CUDA-inclusive regression554Python/26JS/lint passes
+(verify-03cfe167d3be47e5b30cb66b7bd7afed). These software checks are not learning
+evidence. The browser remains unavailable; no rendered dashboard QA is claimed.
+
 ## Whole-game holdout safety, 2026-09-19 06:39 UTC
 
 Held-out-seed validation now checks every fresh-game launch in a trained brain's

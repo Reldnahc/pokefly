@@ -1,5 +1,26 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 06:44 UTC: BOTH v10 frozen18k panels COMPLETE;53942/88470
+exited/drained. Raw checkpoint/trajectory/ancestry audit and registered screen:
+game-retention-progress-screen-20260919T064322Z-3b8eec, BOTH lineages FAIL.
+4501 obtains starters >=10% sooner on BOTH seeds, and adds Route1/wild victory
+on4602, but loses4601 rival victory versus original.4502 misses4601 starter/win.
+No4603/4604 confirmation or default promotion is triggered. This rejects the
+candidate at24k training, not all longer training; keep every source/result.
+Final third arms:4601 retained4502=364 positions, no starter/win/Route1,
+step-00018000-affbbaf1;4602 original=360 positions, no starter/win/Route1,
+step-00018000-e21e1692. See completed six-arm table in FOLLOWTHROUGH_RESULTS.
+
+CURRENT ONLY GPU JOB: registered v11 neutral calibration99164,
+intrinsic-probe-20260919T064348Z-ed09ca, immutable export
+fly-data/intrinsic-neutral-visual-wide-score-v11.npz. No game/reward/button
+labels; original synapses. Apply the03:24 sanity thresholds BEFORE any behavior
+testing. Then actual-ROM smoke, paired/shuffled501/601 curves512/2048/8192,
+ALL final arms9201..9204 recall and same two-seed gate. Full CUDA regression
+already passes554Python/26JS/lint, verify-03cfe167d3be47e5b30cb66b7bd7afed;
+84650 exited/drained. Process audit06:44 shows only calibration worker+launcher.
+No prototype synapses enter the normal user's brain/history. Default wide-v3.
+
 2026-09-19 06:39 UTC: ONLY GPU panels53942/88470 continue, third/final arms
 around16k/18k. CPU-only ancestry guard now excludes test seeds used by ANY
 ancestral whole-game launch, not just the final practice. Exact resumes retain

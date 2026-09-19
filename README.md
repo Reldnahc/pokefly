@@ -32,7 +32,10 @@ follow-up FAILED (0/4 retained starters versus 1/2 original). Neither practiced
 brain is promoted as a reliably improved player. A separate earlier-reward
 model, after 36,000 whole-game training decisions per brain, also failed its
 held-out comparison: original controls won 2/2 rival battles, retained brains
-won 0/2 and 1/2. This model is not promoted. Older battle-reset studies
+won 0/2 and 1/2. This model is not promoted. A fixed-reference learning candidate
+at24k training gets starters faster on both held-out starts and reaches Route1
+on one, but regresses in the other rival fight; neither of its trained lineages
+passes the predeclared consistency screen. It is not promoted. Older battle-reset studies
 remain archived evidence, not the currently authorized training protocol.
 The stronger internally calibrated visual model passes a retained two-cue
 association test in two training seeds: about69%
