@@ -117,7 +117,9 @@ def test_provenance_audit_rejects_unregistered_weights(tmp_path, monkeypatch):
         m.audit_reports([path])
 
 
-@pytest.mark.parametrize("key,value", [("correct_reward", 0.05), ("incorrect_reward", -0.05)])
+@pytest.mark.parametrize('key,value', [
+    ('correct_reward', 0.05), ('incorrect_reward', -0.05), ('reward_delay_decisions', 8),
+])
 def test_different_assay_feedback_cannot_be_pooled(tmp_path, monkeypatch, key, value):
     m = module(monkeypatch)
     a, b = artifact(m, tmp_path, 501), artifact(m, tmp_path, 601)
@@ -134,11 +136,24 @@ def test_explicit_historical_assay_rewards_match_legacy_defaults(tmp_path, monke
     a, b = artifact(m, tmp_path, 501), artifact(m, tmp_path, 601)
     report = tmp_path / "curve-601" / "report.json"
     source = json.loads(report.read_text())
-    source.update(correct_reward=1.0, incorrect_reward=0.0)
+    source.update(correct_reward=1.0, incorrect_reward=0.0, reward_delay_decisions=0)
     report.write_text(json.dumps(source))
     result = m.audit_reports([a, b])
     assert result["passed"]
     assert result["assay_rewards"] == {"correct": 1.0, "incorrect": 0.0}
+    assert result['reward_delay_decisions'] == 0
+
+
+@pytest.mark.parametrize('delay', [-1, True, 1.5, 32, 1000])
+def test_audit_rejects_invalid_feedback_delay(tmp_path, monkeypatch, delay):
+    m = module(monkeypatch)
+    a = artifact(m, tmp_path, 501)
+    path = tmp_path / 'curve-501' / 'report.json'
+    source = json.loads(path.read_text())
+    source['reward_delay_decisions'] = delay
+    path.write_text(json.dumps(source))
+    with pytest.raises(ValueError, match='Feedback delay'):
+        m.audit_reports([a])
 
 
 @pytest.mark.parametrize("reward", [0.0, -0.05, float("nan"), float("inf")])

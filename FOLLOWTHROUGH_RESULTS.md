@@ -35,6 +35,23 @@ verification passes 575 Python tests, 26 JavaScript tests and lint
 (`verify-49fcff341c944c128408dbb22e713cc7`). Rendered dashboard verification is
 still unavailable because the in-app browser backend is unavailable.
 
+### Diagnostic preparation, 2026-09-19 07:59 UTC
+
+The game-free visual assay now supports explicitly delayed scalar feedback,
+with matched-control accounting and exact recovery of pending feedback. A
+recovery bug that substituted unit reward for saved reduced reward is fixed;
+no reduced-reward neural experiment has run, so no existing result is affected.
+Both zero-delay compatibility and delayed continuation have CPU-only tests.
+599 Python tests, 26 JavaScript tests and lint pass
+(`verify-cfd77e710d704809af5c378822176f81`). An unchanged read-only re-audit of
+the old v11 panels still gives 501 pass / 601 fail; it is not another trial.
+
+No delayed neural assay has run, and no gameplay code, reward or model changed.
+The ONLY two GPU jobs remain the whole-game series above. In each first added
+attempt, the fly obtained a starter and reached Route1, but neither has logged
+a battle victory at about12k decisions. These are ongoing observations, not a
+matched learning result. All four planned additional games per brain still run.
+
 ## V10 retained whole-game panel complete, 2026-09-19 06:44 UTC
 
 All six frozen18k fresh-game arms completed. Both learned lineages had24k total

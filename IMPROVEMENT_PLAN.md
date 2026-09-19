@@ -1,5 +1,25 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 07:59 UTC: CPU-only diagnostic preparation complete; no new GPU job.
+Added explicit ROM-free reward delay to probe_visual_curve.py, with shared
+assay_feedback.py timing/shuffling helpers and exact recovery. Pending feedback
+is preserved in raw history, never latched into neural eligibility or flushed
+into recall. Controls match originating cue AND delivery-checkpoint interval,
+including the pending tail. Default zero delay preserves old permutations.
+Fixed resume_visual_acquisition.py's hardcoded unit correct reward: it now
+restores the saved strength. No non-unit neural assay has run, so this bug did
+not invalidate an existing neural result. No delayed neural assay has run yet,
+and no new neural study is registered/queued ahead of the active whole-game work.
+599 CPU Python/26JS/lint pass, verify-cfd77e710d704809af5c378822176f81;
+83976 exited/drained. Prior standalone pytest hit Windows shared-temp/cache
+permissions; use scripts/test.ps1's unique project temp directories instead.
+Read-only re-audit of the old v11 panels still gives501 pass/601 fail; this is
+not new evidence. Current ONLY TWO GPU jobs remain90734/44677 below, both at
+about12k of their first additional18k game. Both reached Route1, neither has
+a logged battle victory yet. Finish ALL FOUR fresh games each, then the same
+registered five-arm parent/child frozen panel. Normal controller/defaults,
+game rewards, user history and original assets are unchanged.
+
 2026-09-19 07:31 UTC: v11 recall COMPLETE and raw-audited in
 visual-retention-gate-20260919T073022Z-acc0fd.501 PASSES: paired64.2579%,
 individual62.9268%/65.5889%, shuffle44.6062%.601 FAILS each-cue threshold:

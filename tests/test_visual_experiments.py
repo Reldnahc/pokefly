@@ -20,8 +20,9 @@ def write(path, value):
 
 
 @pytest.mark.parametrize("reward", [1.0, 0.05])
+@pytest.mark.parametrize('delay', [0, 3, 20])
 def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(
-    tmp_path, monkeypatch, reward,
+    tmp_path, monkeypatch, reward, delay,
 ):
     module = script(monkeypatch, "probe_visual_curve")
     source, output = tmp_path / "source", tmp_path / "output"
@@ -36,6 +37,7 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(
             "checkpoints": [32],
             "reverse_mapping": False,
             **({"correct_reward": reward} if reward != 1.0 else {}),
+            **({'reward_delay_decisions': delay} if delay else {}),
             "pretest": records,
             "status": "completed",
             "rows": [
@@ -47,13 +49,12 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(
     for arm, weight in (("paired", 2), ("unpaired_within_cue", 9)):
         np.savez(source / f"{arm}-32.npz", weights=np.array([weight]))
         write(source / f"{arm}-32.json", {"plasticity": {}})
-        write(
-            source / f"{arm}-training.json",
-            [
-                {"cue": ("left", "right")[(i // 16) % 2], "reward": float(i % 2), "action": "left"}
-                for i in range(32)
-            ],
-        )
+        history = []
+        for i in range(32):
+            history.append(module.feedback_row(
+                'left', ('left', 'right')[(i // 16) % 2], float(i % 2), history, delay,
+            ))
+        write(source / f'{arm}-training.json', history)
     restored = []
 
     class FakeBrain:
@@ -95,6 +96,8 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(
             "--reverse",
             "--correct-reward",
             str(reward),
+            '--reward-delay-decisions',
+            str(delay),
             "--checkpoints",
             "64",
         ],
@@ -104,6 +107,7 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(
     report = json.loads((output / "report.json").read_text())
     assert report["status"] == "completed"
     assert report["correct_reward"] == reward
+    assert report['reward_delay_decisions'] == delay
     assert report["same_acquired_start_for_both_reversal_arms"]
     assert (
         report["pre_reversal_scores"]["paired"]
@@ -112,12 +116,22 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(
     paired = json.loads((output / "paired-training.json").read_text())
     shuffled = json.loads((output / "unpaired_within_cue-training.json").read_text())
     assert paired[:32] == shuffled[:32]
-    assert {r["reward"] for r in paired[32:]} == {0.0, reward}
+    feedback_key = 'earned_reward' if delay else 'reward'
+    assert {r[feedback_key] for r in paired[32:]} == {0.0, reward}
+    if delay:
+        assert [r['reward'] for r in paired[32:32 + delay]] == [
+            r['earned_reward'] for r in paired[32 - delay:32]
+        ]
     for cue in ("left", "right"):
-        assert sorted(r["reward"] for r in paired[32:] if r["cue"] == cue) == sorted(
-            r["reward"] for r in shuffled[32:] if r["cue"] == cue
+        assert sorted(r[feedback_key] for r in paired[32:] if r["cue"] == cue) == sorted(
+            r[feedback_key] for r in shuffled[32:] if r["cue"] == cue
         )
     source_report = json.loads((source / "report.json").read_text())
+    source_report['reward_delay_decisions'] = delay + 1
+    write(source / 'report.json', source_report)
+    with pytest.raises(SystemExit):
+        module.main()
+    source_report['reward_delay_decisions'] = delay
     source_report["correct_reward"] = reward * 2
     write(source / "report.json", source_report)
     with pytest.raises(SystemExit):

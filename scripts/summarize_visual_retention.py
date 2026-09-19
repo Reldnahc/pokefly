@@ -11,6 +11,7 @@ import math
 from collections import Counter
 from pathlib import Path
 
+from assay_feedback import validate_delay
 from evaluate_learning_choices import score
 
 from pokefly.checkpoint import sha256
@@ -77,13 +78,16 @@ def audit_reports(paths):
         buttons = tuple(source.get("rewarded_button_pair", ["left", "right"]))
         correct_reward = source.get("correct_reward", 1.0)
         incorrect_reward = source.get("incorrect_reward", 0.0)
+        delay = validate_delay(source.get('reward_delay_decisions', 0))
+        if delay >= step:
+            raise ValueError('Feedback delay must be shorter than the training budget')
         if (not math.isfinite(correct_reward) or correct_reward <= 0
                 or not -1 <= incorrect_reward <= 0):
             raise ValueError("Invalid registered assay reward strengths")
         reversal = "pre_reversal_scores" in source
         protocol = (json.loads(Path(source["config"]).read_text()), seeds,
                     cues, buttons, source["reverse_mapping"], reversal,
-                    correct_reward, incorrect_reward)
+                    correct_reward, incorrect_reward, delay)
         if common_protocol is not None and protocol != common_protocol:
             raise ValueError("Cannot pool different circuits or retention protocols")
         common_protocol = protocol
@@ -127,6 +131,7 @@ def audit_reports(paths):
         "scope": __doc__, "status": "completed", "rows": results,
         "held_out_noise_seeds": common_protocol[1],
         "assay_rewards": {"correct": common_protocol[6], "incorrect": common_protocol[7]},
+        "reward_delay_decisions": common_protocol[8],
         "thresholds": {"balanced": 0.60, "each_cue": 0.55, "advantage_each_control": 0.05},
         "minimum_independent_training_seeds": 2,
         "passed": len(results) >= 2 and all(r["passed"] for r in results),

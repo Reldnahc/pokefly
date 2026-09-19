@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from assay_feedback import earned_feedback, feedback_row, shuffled_feedback, validate_history
 from evaluate_learning_choices import score, test_choices, warmup
 
 from pokefly.actions import pressed_buttons
@@ -52,6 +53,10 @@ def main():
         help="ROM-free assay only: optional feedback for the wrong competing direction",
     )
     p.add_argument(
+        "--reward-delay-decisions", type=int, default=0,
+        help="ROM-free only: delay feedback by this many decisions; no eligibility latching",
+    )
+    p.add_argument(
         "--continue-from",
         type=Path,
         help="Completed paired/shuffled curve; restore full training dynamics",
@@ -74,6 +79,9 @@ def main():
     checkpoints = sorted(set(args.checkpoints))
     if not checkpoints or checkpoints[0] < 32:
         p.error("Positive training checkpoints >=32 required")
+    if not 0 <= args.reward_delay_decisions < checkpoints[-1]:
+        p.error("Feedback delay must be nonnegative and shorter than the training budget")
+    delay = args.reward_delay_decisions
     if not np.isfinite(args.correct_reward) or args.correct_reward <= 0:
         p.error("Correct-choice feedback must be positive and finite")
     if not -1 <= args.incorrect_reward <= 0:
@@ -100,6 +108,7 @@ def main():
             or checkpoints[0] <= starting_step
             or previous_report.get("correct_reward", 1.0) != args.correct_reward
             or previous_report.get("incorrect_reward", 0.0) != args.incorrect_reward
+            or previous_report.get("reward_delay_decisions", 0) != delay
             or tuple(previous_report.get("cue_images", ["left", "right"])) != cues
             or tuple(previous_report.get("rewarded_button_pair", ["left", "right"])) != buttons
         ):
@@ -113,6 +122,10 @@ def main():
         "reverse_mapping": args.reverse,
         "correct_reward": args.correct_reward,
         "incorrect_reward": args.incorrect_reward,
+        "reward_delay_decisions": delay,
+        "feedback_timing": "Feedback matures during continued neural activity; pending tail "
+        "is saved, never flushed into a probe. Shuffling matches originating cue and "
+        "delivery checkpoint interval, including a separate pending tail.",
         "cue_images": cues,
         "rewarded_button_pair": buttons,
         "protocol": "Continuous training; probes branch off and restore full training state. "
@@ -146,11 +159,11 @@ def main():
                     suffix: sha256(label.with_suffix(suffix)) for suffix in (".npz", ".json")
                 }
     write_json(output / "report.json", report)
-    paired_rewards, paired_cues = [], []
+    paired_training = []
     if args.continue_from:
         old_training = json.loads((args.continue_from / "paired-training.json").read_text())
-        paired_rewards = [row["reward"] for row in old_training]
-        paired_cues = [row["cue"] for row in old_training]
+        validate_history(old_training, delay)
+        paired_training = old_training.copy()
         if len(old_training) != starting_step:
             raise ValueError("Incomplete source training history")
     for arm in ("paired", "unpaired_within_cue"):
@@ -165,29 +178,22 @@ def main():
             training = json.loads((args.continue_from / f"{source_arm}-training.json").read_text())
             if len(training) != starting_step:
                 raise ValueError("Incomplete source training history")
+            validate_history(training, delay)
         else:
             c.restore(initial, state, weights_only=True)
             warmup(c, args.seed + 1000)
         schedule = None
         if arm != "paired":
-            schedule = np.asarray(paired_rewards).copy()
-            cue_array = np.asarray(paired_cues)
-            rng = np.random.default_rng(args.seed + 712345)
-            # Preserve counts separately within each probe interval as well as
-            # cue, so early and late reward schedules are properly matched.
-            previous = starting_step
-            for end in checkpoints:
-                for cue in cues:
-                    indices = np.flatnonzero(cue_array[previous:end] == cue) + previous
-                    schedule[indices] = rng.permutation(schedule[indices])
-                previous = end
+            schedule = shuffled_feedback(
+                paired_training, checkpoints, cues, args.seed, delay, starting_step=starting_step,
+            )
         for index in range(starting_step, checkpoints[-1]):
             cue_index = (index // 16) % 2
             cue = cues[cue_index]
             target = buttons[cue_index ^ int(args.reverse)]
             action = c.choose(c.observe(patterns[cue]))[0]
             pressed = pressed_buttons(action)
-            reward = (
+            earned = (
                 (
                     args.correct_reward
                     if target in pressed
@@ -198,11 +204,11 @@ def main():
                 if schedule is None
                 else schedule[index]
             )
-            c.reinforce(reward)
-            training.append({"action": action, "cue": cue, "reward": float(reward)})
+            record = feedback_row(action, cue, earned, training, delay)
+            c.reinforce(record['reward'])
+            training.append(record)
             if arm == "paired":
-                paired_rewards.append(reward)
-                paired_cues.append(cue)
+                paired_training.append(record)
             count = index + 1
             if count in checkpoints:
                 learned, learned_state = c.snapshot()
@@ -213,6 +219,10 @@ def main():
                     "retention": retention,
                     "score": score(retention, args.reverse, buttons=buttons, cues=cues),
                     "learning": learned_state["plasticity"],
+                    "pending_feedback_count": min(delay, count),
+                    "pending_feedback_sum": sum(
+                        earned_feedback(r, delay) for r in training[-delay:]
+                    ) if delay else 0.0,
                 }
                 report["rows"].append(row)
                 write_json(output / "report.json", report)

@@ -11,6 +11,29 @@ attempts. Final retained tests will compare each child with its 24k parent and
 the original brain. This is a training-dose test, not a new circuit or proof
 that more experience will work; see `FOLLOWTHROUGH_RESULTS.md` for artifact IDs.
 
+### Delayed-feedback diagnostic infrastructure (software only)
+
+`probe_visual_curve.py --reward-delay-decisions N` can now deliver an assay
+choice's scalar feedback N decisions later, while the existing neural dynamics
+and eligibility continue normally. It does not latch credit, choose an action,
+change Pokemon rewards, or add a learned external component. Cue presentation
+remains the existing continuous 16-decision alternation, not a blank delay;
+this distinction matters when interpreting any future result.
+
+Raw histories distinguish feedback earned by a choice from feedback delivered
+now. A final pending tail is saved without an extra training flush; continuation
+and interrupted acquisition preserve it exactly. Shuffling matches originating
+cue and DELIVERY checkpoint interval, with the pending tail shuffled separately,
+so different feedback amounts cannot explain a paired/control difference.
+The retention auditor refuses to pool different delays. Zero delay preserves
+the historical permutation, and the saved non-unit correct-reward recovery bug
+is fixed. Synthetic assay synapses remain excluded from gameplay.
+
+This is tested infrastructure, NOT a neural learning result or a queued new
+study. CPU regression: 599 Python tests, 26 JavaScript tests and lint,
+`verify-cfd77e710d704809af5c378822176f81`. The current whole-game extension and
+its retained tests retain priority; no delayed neural assay has run.
+
 ## What the current fly learns
 
 The wide-v3 showcase and timing-only v7 candidate modify existing positive

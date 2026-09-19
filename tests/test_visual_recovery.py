@@ -13,7 +13,11 @@ def modules(monkeypatch):
             importlib.import_module("resume_visual_acquisition"))
 
 
-def test_interrupted_control_resumes_same_history_and_neural_arrays(tmp_path, monkeypatch):
+@pytest.mark.parametrize('reward,delay', [(1.0, 0), (0.05, 0), (1.0, 3), (0.05, 20)])
+@pytest.mark.parametrize('interrupted_arm', ['paired', 'unpaired_within_cue'])
+def test_interrupted_control_resumes_same_history_and_neural_arrays(
+    tmp_path, monkeypatch, reward, delay, interrupted_arm,
+):
     original, recovery = modules(monkeypatch)
     source, output = tmp_path / "source", tmp_path / "output"
     source.mkdir()
@@ -56,24 +60,32 @@ def test_interrupted_control_resumes_same_history_and_neural_arrays(tmp_path, mo
         monkeypatch.setattr(module, "test_choices", test_choices)
         monkeypatch.setattr(module, "run_directory", lambda name, value=directory: value)
     monkeypatch.setattr(sys, "argv", ["probe_visual_curve.py", "--config", str(config),
-                                     "--seed", "5", "--checkpoints", "32", "64"])
+                                     "--seed", "5", "--checkpoints", "32", "64",
+                                     '--correct-reward', str(reward),
+                                     '--reward-delay-decisions', str(delay)])
     original.main()
-    expected = json.loads((source / "unpaired_within_cue-training.json").read_text())
+    expected = {arm: json.loads((source / f'{arm}-training.json').read_text())
+                for arm in ('paired', 'unpaired_within_cue')}
     report = json.loads((source / "report.json").read_text())
     report["status"] = "running"
     report["rows"] = [r for r in report["rows"]
-                      if not (r["arm"] == "unpaired_within_cue" and r["training_decisions"] == 64)]
+                      if (r['arm'] == interrupted_arm and r['training_decisions'] == 32)
+                      or (interrupted_arm == 'unpaired_within_cue' and r['arm'] == 'paired')]
     (source / "report.json").write_text(json.dumps(report))
-    (source / "unpaired_within_cue-training.json").write_text(json.dumps(expected[:32]))
+    (source / f'{interrupted_arm}-training.json').write_text(
+        json.dumps(expected[interrupted_arm][:32]),
+    )
     monkeypatch.setattr(sys, "argv", ["resume_visual_acquisition.py", "--source", str(source)])
     recovery.main()
-    assert json.loads((output / "unpaired_within_cue-training.json").read_text()) == expected
     for arm in ("paired", "unpaired_within_cue"):
+        assert json.loads((output / f'{arm}-training.json').read_text()) == expected[arm]
         with np.load(source / f"{arm}-64.npz") as a, np.load(output / f"{arm}-64.npz") as b:
             for key in a.files:
                 np.testing.assert_array_equal(a[key], b[key])
     final = json.loads((output / "report.json").read_text())
     assert final["status"] == "completed"
+    assert final['correct_reward'] == reward
+    assert final['reward_delay_decisions'] == delay
     assert final["recovery"]["copied_stages_are_not_new_trials"]
     assert len(final["rows"]) == 4
     assert json.loads((source / "report.json").read_text()) == report
