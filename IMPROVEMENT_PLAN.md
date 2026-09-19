@@ -1,5 +1,61 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 04:17 UTC: EXPLICIT prospective v10 practice-budget amendment,
+BEFORE either4501/4502 practice or4601/4602 retention has started. After the
+registered initial6k pair screen/audit, BOTH saved learning brains will get
+18,000 decisions in one WHOLE fresh game4501/4502, not the earlier6,000 plan.
+Thus each retained lineage has24,000 total training decisions (6k+18k).
+All initial6k comparisons remain intact and complete. All later18k frozen
+evaluation budgets/seeds/controls/progress criteria are unchanged. This is
+an exploratory training-budget revision after observing the first opening-game
+win, NOT independent confirmation and not a claim that longer training works.
+
+Reason:6k is an opening-game screen, but full-game training needs time beyond
+the lab/rival; read-only logs also document much sparser/smaller reinforcement
+than the unit-reward cue assay. The signal totals do not prove a bottleneck.
+Keep BOTH lineages, final checkpoints only, no battle reset, no selected-stage
+continuation and no reward/parameter change. New practice still starts from the
+beginning with each fly's own existing synapses; exact own-game resume remains
+available only to recover interruptions. User informed of this explicit change.
+Use train_game_series.py --steps 18000 --training-seeds 4501 (or4502),
+--evaluation-steps 18000 --eval-seeds 4601 4602 --defer-evaluation,
+then the shared evaluate_game_retention_panel.py on ALL final practice brains.
+
+2026-09-19 04:11 UTC: v10 seed401 learning arm COMPLETE6000, saved unchanged:
+internal-learn-20260919T035428Z-c404bf.297 positions, starter3588, battle4246,
+one completed rival win, final level6, no Route1. Its process31236 now runs
+the separate matching original control internal-frozen-20260919T040951Z-2775e0.
+Seed402 learning remains active in34878, internal-learn-20260919T040756Z-1ff349.
+Only these two GPU jobs. The old59210 learning dashboard closed with its arm;
+the second learner is at59212. Seed402 original's18 common final neural arrays
+all reproduce historical data exactly; only fixed_release_reference is added.
+
+Before ANY retained whole-game test outcomes, explicitly use the already coded
+whole-game-progress-v1 screen for v10's4601/4602 panel too. Same lineage must
+preserve completed milestones, add progression, and reach the SAME starter OR
+battle endpoint at least10% earlier on BOTH seeds (censored originals use the
+budget lower bound). If triggered, confirmation4603/4604 must support the SAME
+lineage, not a different winner. ALL final brains remain included. This adds
+no game reward, intervention or policy input; no default promotion on the first
+positive6k run. Existing6k practice and18k evaluation budgets are unchanged.
+
+2026-09-19 04:08 UTC: v10 first learning arm is still running but has achieved
+starter3588, battle4246 and a rival victory, returned outside at level6 by5228.
+This is actual gameplay, NOT yet retained-learning proof or a completed paired
+comparison. Do not stop after this observation; finish BOTH registered pairs.
+The seed402 frozen arm completed6000:188 positions, no starter/win/Route1.
+ALL6000 actions/buttons/spikes/groups/motor rates/telemetry/rewards/input windows
+match historical internal-frozen-20260918T162143Z-74e099 exactly. Shared control,
+not new independent evidence. Its final checkpoint is step-00006000-88be37f0.
+
+CURRENT TWO GPU JOBS remain31236 (401 learning, then original frozen) and34878
+(402 NOW learning internal-learn-20260919T040756Z-1ff349, dashboard59212).
+After completion audit both reports with audit_game_pair.py, validate seed401's
+repeated original too, then apply the registered gate. If qualified carry BOTH
+final gameplay brains through6k fresh whole games4501/4502, followed by ALL
+final brains/shared original frozen18k4601/4602; no stage resets or assay weights.
+Latest source-only commit72e8b25 pushed. No v11 run or default promotion.
+
 2026-09-19 03:55 UTC: v10 independent memory gate PASSED BOTH training seeds.
 Audit visual-retention-gate-20260919T035407Z-fc016f, ALL final8192 arms on
 9101..9104. Original41.93%; paired50164.47%,60164.77%; shuffled36.60%/40.46%.

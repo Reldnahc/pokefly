@@ -75,6 +75,27 @@ weights from that model are deployed here.
 
 ## Constraints on a future investigation
 
+### Assay reward scale is not gameplay reward scale
+
+Read-only counts from v10's completed first401 game (6,000 decisions) find
+5,712 zero rewards,274 rewards of0.05,9 of0.1,4 of1.05 and one of3.0.
+Its raw positive sum is21.8; summing positive tanh(reward) gives18.7079.
+In contrast, the ROM-free paired501/601 assays each ran8,192 decisions and
+delivered2,035/2,161 positive unit rewards, with positive tanh sums1,549.8441
+and1,645.8050. Source artifacts are internal-learn-20260919T035428Z-c404bf and
+visual-learning-curve-20260919T031016Z-36197e / ...-c436d2.
+
+These are descriptive signal totals, NOT net synaptic updates, gradient
+signal-to-noise measurements or a demonstrated cause of poor game learning.
+The actual rule subtracts a reward baseline and multiplies local eligibility;
+game and assay trajectories/delays also differ. A cue-capacity pass therefore
+does not validate learning sensitivity at the game's reward scale/density.
+Likewise, a strong-unit-reward assay failure is not proof that every lower-dose
+task must fail. All older failures remain failures of their stated screens.
+No reward values, learning parameters or registered current tests were changed
+by this inspection. Any future reward-scale assay must be separately declared,
+retain shuffled controls, and never export synthetic weights to Pokemon.
+
 First finish the registered whole-game retained tests and the queued internal
 homeostatic candidate. The latter addresses accumulated mean-input bias, not
 long-horizon prediction. Its numerical success is not behavioral success.
