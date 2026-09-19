@@ -1,5 +1,67 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Reward delivery and evaluation checks, 2026-09-19 00:23 UTC
+
+A replay from the beginning of v7 learning 402 matches every recorded state
+and reward across all 18,000 decisions. Its victory reward is delivered at
+the final knockout (decision 12,523), 26 decisions before encounter closure.
+This verifies delivery timing, not move-selection credit or useful learning.
+It is playback of the existing victory, not a new win or a battle-start
+practice episode. Evidence: `recorded-outcome-latency-20260919T000938Z-c898dc`.
+
+The next retained-weight panel's audit includes time to first sampled battle
+and distinguishes paid from completed encounters. It excludes unfinished
+encounters from aggregate win counts and rejects non-fly actions or reward
+ledger mismatches. These measurements never enter the controller or rewards.
+The two ongoing whole-game practice runs and their frozen tests are not yet
+complete. Defaults remain unchanged.
+
+CPU verification passes 406 Python tests, 26 JavaScript tests and lint:
+`verify-6d09e3b1a6724df39d729b0af4608008`. CUDA tests were omitted to preserve
+the two-job compute limit; the earlier full CUDA-inclusive result is below.
+
+## Longer whole-game comparisons, 2026-09-19 00:02 UTC
+
+Both earlier-outcome v7 pairs completed18,000 decisions per arm. All begin
+with original synapses and the same explicit intro; no stage reset or trained
+adapter. Results are mixed, not a demonstrated consistent learning advantage:
+
+| Seed / mode | Positions | First starter | Completed rival wins | Route1 minimum y |
+| --- | --- | --- | --- | --- |
+|401 learning |346|3122|0|34|
+|401 original frozen |395|6284|0|26|
+|402 learning |413|10936|1 (decision12523)|not reached|
+|402 original frozen |313|7780|1 (decision8955)|not reached|
+
+The earlier starter in401 does not extend to farther exploration; the original
+reaches Route1 earlier and goes farther north.402 learning explores more and
+spends less of its town time at the lower edge (3.26% vs26.43%), but acquires
+its starter and victory later than its original control. Both learning and
+original controls therefore have2/2 starters and one rival win across two
+runs. No captures, badges, or paid-but-unfinished encounters. Progress and
+one actually delivered early training victory reward are real; reliable useful
+whole-game learning still requires retained tests. This does not isolate
+reward-timing improvement against late-timing learning at18k.
+
+Audit: `full-game-pair-audit-20260919T000100Z-980a15`, verifying complete raw
+trajectories, checkpoints, original control weights, configuration, ROM and
+matching start states. Pair reports `visual-model-gameplay-20260918T230017Z-c8f22a`
+and `...T230049Z-fade7a`. Each original6k development prefix exactly repeats
+its earlier records apart from wall timing/run ID; those are not new trials.
+
+Both final trained brains now continue through one more18k whole-game attempt,
+retaining learned synapses with unchanged v7 parameters (noise4101/4102).
+The registered subsequent frozen3801/3802 panels use both final brains and one
+shared original per seed,18k per arm. Training and evaluation are not complete
+yet. No stage-specific or battle-start episodes will be used.
+
+Software verification:408 Python/26JavaScript/lint pass
+(`verify-287e071c85d64e1b9cd0857b23a0b57c`). Optional homeostaticv8 and unchanged
+showcasewide-v3 both pass actual-ROM/CUDA exact-resume/frozen/no-reward smoke
+(`internal-smoke-20260919T000017Z-24f7dd`, `...T000050Z-6bd19f`). The new
+constraint remains experimental; it has numerical checks, NOT a behavioral
+learning result. No default promotion and no rendered browser QA are claimed.
+
 ## Learning-dose result and next full-game tests, 2026-09-18 23:19 UTC
 
 Both projected10x-rate trials completed6,000 decisions and FAILED the declared

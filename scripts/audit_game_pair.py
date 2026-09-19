@@ -41,6 +41,19 @@ def encounter_outcomes(rows, rewards):
             "paid_but_unfinished_encounter": dict(active) if pending else None}
 
 
+def progress_measurements(rows, rewards):
+    """Observer-only first sampled milestones; never inputs or extra rewards."""
+    return {
+        "first_battle": next((r["sample"] for r in rows if r["telemetry"]["battle"]), None),
+        "first_route1": next((r["sample"] for r in rows if r["telemetry"]["map"] == 12), None),
+        "first_victory_reward": next(
+            (r["sample"] for r in rows
+             if any(e["category"] == "battle_win" for e in r["reward_events"])), None,
+        ),
+        **encounter_outcomes(rows, rewards),
+    }
+
+
 def audit(paths):
     protocol, seeds, evidence, comparisons = None, set(), [], []
     for path in paths:
@@ -98,7 +111,7 @@ def audit(paths):
                     or (rom_hash is not None and rom_hash != stored["rom_sha1"])):
                 raise ValueError("Matched arms started from different games")
             start_hash, rom_hash = game_start, stored["rom_sha1"]
-            outcome = encounter_outcomes(raw, saved["rewards"])
+            outcome = progress_measurements(raw, saved["rewards"])
             if Counter(summary["reward_counts"]) != Counter(saved["rewards"]["counts"]):
                 raise ValueError("Summary and final checkpoint reward counts disagree")
             arms[row["mode"]] = {
@@ -107,8 +120,6 @@ def audit(paths):
                 "trajectory_sha256": sha256(game / "trajectory.jsonl"),
                 "positions": actual["tiles"], "maps": actual["maps"],
                 "first_starter": actual["first_starter"],
-                "first_route1": next((r["sample"] for r in raw
-                                      if r["telemetry"]["map"] == 12), None),
                 "final_state": actual["final_state"], **outcome,
             }
         comparisons.append({"seed": report["seed"], **arms})

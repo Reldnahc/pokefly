@@ -1,5 +1,59 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 00:23 UTC: both registered whole-game practice jobs remain active,
+near 10,000 of 18,000 decisions each. Do not select intermediate weights or
+replace either source. Source 401 is still moving but has stalled at 203
+positions, with B in 362/500 recent windows; source 402 has a level-6 starter
+and 327+ positions. These are interim observations in different contexts, not
+a retained-learning comparison. Frozen panels 3801/3802 remain pending.
+
+Before those panels begin, their observer-only audit now reports first sampled
+battle access, first victory-reward delivery and completed versus still-open
+paid encounters. Aggregate battle wins exclude unfinished encounters. No
+reward/model change; no timing bonus or battle reset. Missing/non-fly action
+provenance and inconsistent final reward ledgers are rejected.
+
+Full-game recorded replay `recorded-outcome-latency-20260919T000938Z-c898dc`
+verifies all 18,000 states/rewards from v7 learning 402. Its existing victory
+reward arrives at final faint, decision 12,523; encounter end is 26 decisions
+later. This measures outcome-hook to reward delivery, NOT move-selection
+credit latency, and is not another autonomous win or training episode.
+
+CPU-only regression: 406 Python / 26 JavaScript / lint pass,
+`verify-6d09e3b1a6724df39d729b0af4608008`. Ten CUDA tests deliberately omitted
+while both GPU slots are occupied. A direct pytest attempt hit the known
+Windows temp-directory permission issue; the isolated project test wrapper
+then passed. Use scripts/test.ps1, not the shared system pytest temp directory.
+
+2026-09-19 00:02 UTC: both18k v7 pairs COMPLETE and audited, mixed/negative
+for consistent improvement. Audit `full-game-pair-audit-20260919T000100Z-980a15`.
+401 learn/original:346/395 positions, starter3122/6284, no wins; Route1 first
+8913/7902 and minimum y34/26.402 learn/original:413/313 positions, starter
+10936/7780, one completed rival win each (12523/8955), neitherRoute1.
+No paid-but-unfinished encounter, capture or badge in any arm. Earlier-timing
+learning delivered an actual victory reward, but did not demonstrate a reliable
+whole-game advantage. These are not retained-transfer results or a comparison
+against late-reward learning at18k. All original6k prefixes are shared history.
+
+Full408 Python/26JS/lint pass, artifact
+`verify-287e071c85d64e1b9cd0857b23a0b57c`. Real-ROM/CUDA70/20-resume/frozen/
+no-reward smoke passes for optionalv8 (`internal-smoke-20260919T000017Z-24f7dd`)
+and unchanged showcasewide-v3 (`internal-smoke-20260919T000050Z-6bd19f`).
+Neither smoke is a gameplay-learning result. All old job sessions are exited.
+
+Registered whole-game continued training is NOW RUNNING, ONLY two GPU jobs:
+- source401 -> noise4101, session50606, series
+  `retained-game-series-20260919T000214Z-e85cd9`, actual run
+  `internal-learn-20260919T000217Z-c17cf7`, dashboard8784.
+- source402 -> noise4102, session39030, series
+  `retained-game-series-20260919T000216Z-e4554f`, actual run
+  `internal-learn-20260919T000218Z-e62826`, dashboard8785.
+Each loads its predecessor's FINAL18k synapses, same v7 settings,18k additional
+decisions in a whole fresh game. No battle reset, profile upgrade or selected
+intermediate weights. Both reserved3801/3802 frozen18k panels remain pending;
+run one shared original per seed after BOTH trained sources finish. No GPU
+assay or homeostatic behavioral trial should be launched alongside these jobs.
+
 23:53 UTC prospective next whole-game phase: learning402 has now won its
 rival at12523, level6; its matched original won earlier at8955. This is an
 actual early-timed training reward, not evidence of improvement yet. Finish

@@ -1,6 +1,7 @@
 """Fabricated tiny games validate evidence accounting, not fly performance."""
 
 import importlib
+import json
 from pathlib import Path
 
 import numpy as np
@@ -61,6 +62,9 @@ def test_combined_panel_counts_each_original_once(tmp_path, monkeypatch):
     for arm in ("retained_401", "retained_402"):
         assert result["aggregate"][arm]["trials"] == 2
         assert result["aggregate"][arm]["battle_wins"] == 2  # Not four from double-counting rivals.
+        assert result["aggregate"][arm]["first_battle_by_seed"] == [2, 2]
+        assert result["aggregate"][arm]["first_victory_reward_by_seed"] == [4, 4]
+    assert result["aggregate"]["original"]["first_battle_by_seed"] == [None, None]
     assert not result["new_trials"] and not result["statistical_significance_claimed"]
 
 
@@ -94,4 +98,40 @@ def test_combined_audit_checks_actual_frozen_weights(tmp_path, monkeypatch):
     game = Path(m.read(paths[0] / "report.json")["rows"][-1]["run"])
     snapshots[str(game / "latest-checkpoint.json")][0]["weights"] = np.array([99.0])
     with pytest.raises(AssertionError):
+        m.audit(paths)
+
+
+def test_paid_open_encounter_is_not_a_completed_retention_win(tmp_path, monkeypatch):
+    m, paths, snapshots, _ = panels(tmp_path, monkeypatch)
+    game = Path(m.read(paths[0] / "report.json")["rows"][-1]["run"])
+    snapshots[str(game / "latest-checkpoint.json")][1]["rewards"]["active"] = {
+        "id": 1, "paid": True,
+    }
+    result = m.audit(paths)
+    arm = result["aggregate"]["retained_402"]
+    assert arm["battle_wins"] == 1 and arm["trials_with_paid_unfinished_encounter"] == 1
+    retained = next(row["retained"] for row in result["comparisons"]
+                    if row["seed"] == 1601 and row["source_launch_seed"] == 402)
+    assert retained["awarded_outcomes"]["battle_win"] == 1
+    assert retained["completed_outcomes"]["battle_win"] == 0
+    assert retained["first_battle"] == 2 and retained["first_victory_reward"] == 4
+
+
+@pytest.mark.parametrize("action_source", [None, "human"])
+def test_retention_rejects_external_or_unknown_button_sources(tmp_path, monkeypatch, action_source):
+    m, paths, _, _ = panels(tmp_path, monkeypatch)
+    game = Path(m.read(paths[0] / "report.json")["rows"][-1]["run"])
+    trajectory = game / "trajectory.jsonl"
+    rows = [json.loads(line) for line in trajectory.read_text().splitlines()]
+    rows[0]["action_source"] = action_source
+    trajectory.write_text("\n".join(json.dumps(row) for row in rows))
+    with pytest.raises(ValueError, match="externally controlled"):
+        m.audit(paths)
+
+
+def test_retention_rejects_summary_ledger_mismatch(tmp_path, monkeypatch):
+    m, paths, snapshots, _ = panels(tmp_path, monkeypatch)
+    game = Path(m.read(paths[0] / "report.json")["rows"][-1]["run"])
+    snapshots[str(game / "latest-checkpoint.json")][1]["rewards"]["counts"] = {"battle_win": 3}
+    with pytest.raises(ValueError, match="reward counts disagree"):
         m.audit(paths)

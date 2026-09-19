@@ -6,10 +6,12 @@ registered arms are included; no checkpoint selection or significance claim.
 
 import argparse
 import json
+from collections import Counter
 from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
+from audit_game_pair import progress_measurements
 from evaluate_game_retention_panel import validate_sources
 from evaluate_saved_gameplay import measure
 from summarize_game_series import outcomes, read
@@ -86,13 +88,24 @@ def audit(paths):
                 raise ValueError("Final frozen checkpoint changed")
             lines = (game / "trajectory.jsonl").read_text().splitlines()
             raw = [json.loads(line) for line in lines]
-            if [r["sample"] for r in raw] != list(range(1, report["steps_per_arm"] + 1)):
-                raise ValueError("Incomplete raw trajectory")
+            if ([r["sample"] for r in raw] != list(range(1, report["steps_per_arm"] + 1))
+                    or any(r.get("action_source") != "fly" for r in raw)):
+                raise ValueError("Incomplete or externally controlled raw trajectory")
+            if Counter(summary["reward_counts"]) != Counter(saved["rewards"]["counts"]):
+                raise ValueError("Summary and final checkpoint reward counts disagree")
             start = sha256(game / "start.state")
             if start != row["start_state_sha256"] or starts.setdefault(seed, start) != start:
                 raise ValueError("Matched arms have different initial game states")
-            panels[key] = {"run": str(game), **outcomes(actual),
-                           "trajectory_sha256": sha256(game / "trajectory.jsonl")}
+            progress = progress_measurements(raw, saved["rewards"])
+            panels[key] = {
+                "run": str(game), **outcomes(actual), **progress,
+                # Early delivery can precede encounter completion. Aggregate
+                # only completed wins, keeping both ledgers visible below.
+                "battle_wins": progress["completed_outcomes"]["battle_win"],
+                "rival_wins": progress["completed_outcomes"]["rival_win"],
+                "first_house_exit": actual["first_house_exit"],
+                "trajectory_sha256": sha256(game / "trajectory.jsonl"),
+            }
         if found != declared:
             raise ValueError("A registered test arm is missing")
         evidence.append({"path": str(path), "sha256": sha256(report_file)})
@@ -110,11 +123,19 @@ def audit(paths):
             "trials_with_battle_win": sum(r["battle_wins"] > 0 for r in rows),
             "battle_wins": sum(r["battle_wins"] for r in rows),
             "trials_reaching_route1": sum(r["route1_visited"] for r in rows),
+            "first_starter_by_seed": [r["first_starter"] for r in rows],
+            "first_battle_by_seed": [r["first_battle"] for r in rows],
+            "first_victory_reward_by_seed": [r["first_victory_reward"] for r in rows],
+            "trials_with_paid_unfinished_encounter": sum(
+                r["paid_but_unfinished_encounter"] is not None for r in rows
+            ),
             "positions": [r["tiles"] for r in rows],
         }
     return {"scope": __doc__, "status": "completed", "evidence": evidence,
             "seeds": seeds, "sources": protocol[2], "comparisons": comparisons,
             "aggregate": aggregate, "new_trials": False,
+            "timing_measurement": "First sampled decisions; null means not observed in the budget",
+            "battle_win_definition": "Completed encounters, excluding paid but unfinished outcomes",
             "shared_original_controls": len(seeds), "statistical_significance_claimed": False}
 
 

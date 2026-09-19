@@ -63,14 +63,20 @@ def panels(tmp_path, monkeypatch):
                     },
                 })
                 (game / "start.state").write_bytes(b"same explicitly reset game")
-                rows = [{"run_id": str(game), "sample": i, "action": "up", "telemetry": telemetry,
+                rows = [{"run_id": str(game), "sample": i, "action": "up", "action_source": "fly",
+                         "telemetry": {**telemetry, "battle": int(retained and 2 <= i <= 4)},
+                         "reward_events": [
+                             {"category": "battle_win", "encounter": 1},
+                             {"category": "rival_win", "encounter": 1},
+                         ] if retained and i == 4 else [],
                          "learning": {"changed_this_reward": 0}, "compute_ms": source_seed}
                         for i in range(1, 9)]
                 (game / "trajectory.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
                 snapshots[str(game / "latest-checkpoint.json")] = ({
                     "base": np.array([1.0]),
                     "weights": trained_weights if retained else np.array([1.0]),
-                }, {"experiment": {"sample": 8, "mode": "frozen"}})
+                }, {"experiment": {"sample": 8, "mode": "frozen"},
+                    "rewards": {"counts": summary["reward_counts"], "active": None}})
                 report["rows"].append({"phase": arm, "seed": seed, **m.measure(game)})
         write(path / "report.json", report)
     monkeypatch.setattr(m, "read_checkpoint", lambda path: snapshots[str(path)])
