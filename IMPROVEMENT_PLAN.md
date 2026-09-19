@@ -1,7 +1,40 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 05:09 UTC: BOTH v10 WHOLE fresh-game practices COMPLETE18k;
+51191/41934 exited/drained. Both final lineages now24k total training (6k+18k).
+4501:340 positions, starter3020, battle3481, completed rival win/reward4387,
+final Pallet Town level6.4502:353 positions, starter9040, battle10315, no win,
+final Pallet Town level5. BOTH no Route1/capture/badge. Do not call different
+practice seeds a controlled before/after improvement. Raw samples1..18000,
+all-fly action sources, whole-game ancestry and completed encounters verified.
+4501 final step-00018000-cb010e60, brainSHA
+5c74c71c73e449ea35007f231308f4ae45fc362761f4b2a134712bf32ce5c443;
+trajectorySHA10f44a520343c4f7a3f81f9f97fba909ffe866009e6cad5e262658e7d37be015.
+4502 final step-00018000-8eddedc7, brainSHA
+c0f8acac73c777357b89f7117e798f0cdfcf874efcf8da4fb5faf9a45d0e9228;
+trajectorySHAe46ba2887d4750c3e8f62230d48a4df72e58a4291b648442777020d4da9b30fe.
+Both startsSHAffba33e31392541f192b608b461461e3821d54e3ebad480bd11b7ab81c3118e4.
+Full CUDA-inclusive verification540Python/26JS/lint passes,
+verify-44596fe3472241c5af558a01a67d38fd;37638 exited/drained.
+
+CURRENT ONLY TWO GPU JOBS: frozen18k WHOLE-new-game retained panels.
+4601 session53942, game-retention-panel-20260919T050807Z-df5abf;
+order original -> retained4501 -> retained4502, first actual original
+internal-frozen-20260919T050809Z-e685e2.
+4602 session88470, game-retention-panel-20260919T050829Z-32a439;
+order retained4502 -> retained4501 -> original, first actual retained4502
+internal-frozen-20260919T050832Z-80a208.
+Both source-runs are internal-learn-20260919T042416Z-ad59e3 and
+internal-learn-20260919T042415Z-c28307, ALL final practice brains, no selection.
+After BOTH complete run screen_game_retention.py --reports on BOTH paneldirs;
+apply the04:11 whole-game-progress-v1 gate. Reserve4603/4604 confirmation
+only if triggered, for the SAME lineage, with all arms still included.
+V11 remains unrun; normal default remains wide-v3. No small-reward assay run.
+At04:59 all10 protected hashes match; no protected assets tracked by Git.
+Browser retries04:46 still report unavailable; no rendered UI verification.
+
 2026-09-19 04:39 UTC: WHOLE-game practice continues ONLY51191/41934;
-~6,100/18,000 each, no resets.4501 has starter3012, battle3481 and completed
+~6,100/18,000 each, no resets.4501 has starter3020, battle3481 and completed
 rival win, back outside level6.4502 still no starter. No Route1 yet. These
 different-seed practice observations do NOT establish improvement against
 their initial attempts. Finish both, then unchanged4601/4602 held-out panels.
@@ -9,6 +42,9 @@ Added an assay-only --correct-reward option and reward-dose provenance checks;
 default1.0 and all registered current/fallback tests UNCHANGED. No small-dose
 neural assay run. CPU verification530Python/26JS/lint passes;36437 exited.
 Re-audit of existing v10 cue data still passes, ...T043929Z-b1c63b; not new data.
+At04:44 corrected the provisional starter note3012->3020:3012 was the party
+counter before completed initialization. The registered measure() already uses
+party AND nonzero levels; no raw data or evaluation measurement code changed.
 
 2026-09-19 04:24 UTC: v10 initial6k matched pairs COMPLETE and audited,
 full-game-pair-audit-20260919T042349Z-a5210f. Learners BOTH starters and

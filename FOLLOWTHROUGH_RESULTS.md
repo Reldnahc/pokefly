@@ -1,5 +1,41 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Whole-game practice complete; retained comparison running, 2026-09-19 05:09 UTC
+
+Both v10 lineages carried their final6k synapses into a fresh18k-decision game,
+with ordinary intro, unchanged raw-pixel input, fixed button mapping and general
+rewards. Both again obtained starters and reached the rival battle. One won;
+the other recorded no victory. Neither reached Route1, captured a Pokemon or
+earned a badge. This is24k total training per brain, not24k in one game.
+
+| Practice seed | Positions | First initialized starter | First battle | Completed rival wins |
+| --- | ---: | ---: | ---: | ---: |
+|4501, from401|340|3,020|3,481|1|
+|4502, from402|353|9,040|10,315|0|
+
+The first win was rewarded at4,387 and the encounter completed. There were no
+paid-but-unfinished outcomes. Both ended outside in Pallet Town, levels6/5.
+The practice seeds differ from their initial training games: these timings are
+NOT a matched before/after learning comparison. A plateau after the opening
+remains a real limitation. Every raw decision is fly-generated and both sources
+pass the whole-game ancestry guard. Final brains are pinned in
+internal-learn-20260919T042416Z-ad59e3/step-00018000-cb010e60 and
+internal-learn-20260919T042415Z-c28307/step-00018000-8eddedc7 (under checkpoints/).
+
+The registered frozen18k shared-control panels on4601/4602 are now running:
+game-retention-panel-20260919T050807Z-df5abf and ...T050829Z-32a439. Each tests
+the original and BOTH final retained brains from identical fresh intro states,
+with no learning, battle reset or synthetic-assay weights. No retained-gameplay
+result or default promotion is claimed yet. The prospectively recorded progress
+screen and same-lineage4603/4604 confirmation requirement remain unchanged.
+
+Full CUDA-inclusive regression540Python/26JavaScript/lint passes
+(verify-44596fe3472241c5af558a01a67d38fd). The assay-only reward-strength option
+is verified but no non-unit-reward assay has run. All10 protected hashes still
+match as of04:59. Both completed practice processes exited; only the two frozen
+panels use GPU now. Browser retries still report unavailable, so visual QA
+of the actual desktop layout remains pending despite the passing UI tests.
+
 ## Two initial full-game rival wins, 2026-09-19 04:24 UTC
 
 The slower fixed-reference v10 candidate completes both registered6,000-decision
