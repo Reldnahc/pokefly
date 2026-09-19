@@ -284,7 +284,10 @@ def test_series_initial_source_must_be_a_final_actual_game_checkpoint(tmp_path, 
     checkpoint = tmp_path / "checkpoint"
     checkpoint.mkdir()
     (checkpoint / "brain.npz").write_bytes(b"fake checkpoint data for protocol test")
-    write(tmp_path / "config.json", {"options": {"mode": "learn", "seed": 401}})
+    write(tmp_path / "config.json", {
+        "options": {"mode": "learn", "seed": 401},
+        "config": {"brain": {}}, "rom_sha1": "not-a-real-rom",
+    })
     write(tmp_path / "summary.json", {"reason": "step_limit", "samples": 6000})
     saved = {
         "directory": str(checkpoint),

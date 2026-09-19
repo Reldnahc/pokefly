@@ -1,5 +1,53 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 02:51 UTC: final CPU regression after ancestry/one-reference audit
+and conditional v10 profile passes500 Python/26JavaScript/lint:
+verify-b0f2a68d230e4ddaa7cb02c64be61167. Reference-factor baseline composition
+now verifies the exact copied intrinsic payload before accepting a shared
+original control with a different asset filename; other physical settings
+still must match. No live neural dynamics changed. Two v9 shuffled controls
+continue; no other GPU jobs. Browser skill reread and connection retried after
+the earlier pause, but bootstrap still times out. No tab or rendered UI claim.
+
+2026-09-19 02:48 UTC: v9 BOTH paired8192 arms finished, shuffled controls
+still running in the same ONLY TWO GPU sessions40118/20407. Small paired
+probes are48.45%/66.77% balanced on501/601. These are NOT the held-out gate;
+finish all controls and final9001..9004 retention. Never pick501's better2048
+checkpoint. No v9 gameplay or final memory conclusion yet.
+
+Register conditional one-rate fallback v10 BEFORE its behavior: if v9 fails
+its memory or later registered gameplay/retention gate, test
+configs/visual-wide-anchored-slow-v10.json. It changes ONLY rate0.2->0.02,
+the established wide-v3/projected-v4 rate, with the SAME frozen reference and
+all other parameters. Motivation: possible overwriting/high-variance updates;
+the interim decline does not prove this cause. This is exploratory model
+development, not an independent confirmation or a fitted best checkpoint.
+
+V10 queue: CUDA exact-resume/frozen/no-reward smoke, then two paired/shuffled
+ROM-free curves501/601 at512/2048/8192. ALL final arms test9101..9104 with
+neutral128 and128 decisions/cue, existing balanced>=.60/each>=.55/advantages
+>=.05 against original AND shuffled, both training seeds. No synthetic game
+initialization. If passed, two full-new-game learn/frozen6k pairs401/402 using
+evaluate_visual_gameplay.py (counterbalance arm order). Repeated originals
+must reproduce historical physical trajectories and count as SHARED controls,
+not extra independent trials. This tests v10 learning against its own frozen
+model; it is NOT a v9-v10 gameplay dose comparison if v9 never enters gameplay.
+
+Use the same retention-priority gate: both starters OR completed victory/Route1
+without losing a matched original's starter/win/Route1. If passed, BOTH final
+brains get another6k WHOLE new game4501/4502, then frozen18k panels4601/4602
+with shared originals and ALL final brains. Reserve4603/4604 confirmation.
+Keep the current v9 queue first; no third GPU job, no default promotion.
+
+Whole-game source guard implemented: practice/retention checks original run
+ancestry through checksummed parent checkpoints. Rejects stage resets anywhere
+in the chain, cycles, ambiguous sources, ROM/model mismatches or lost provenance;
+allows fresh power-on, explicit intro and exact own-game resume. Four actual
+v7/v8 source lineages verify unchanged. CPU regression496 Python/26JS/lint
+passes, verify-8697b1c7e8554d5caee2086e91ac5ccd. The preceding fixture-only
+failure and then lint-only failure are preserved; checks were not weakened.
+No neural runtime math or user checkpoint was changed by this guard.
+
 2026-09-19 02:29 UTC: v8 6k development games COMPLETE, criterion FAILED.
 401:239 positions, no starter/battle/Route1.402:208 positions, starter2333,
 no victory/Route1. Neither matches the registered both-starters OR completed

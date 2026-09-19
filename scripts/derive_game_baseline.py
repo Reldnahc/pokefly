@@ -17,6 +17,7 @@ from evaluate_visual_learning_rate import validate_one_factor
 
 from pokefly.checkpoint import read_checkpoint, sha256
 from pokefly.experiment import ExperimentConfig, load_config
+from pokefly.release_reference import verify_intrinsic_copy
 from pokefly.runner import run_directory, write_json
 
 
@@ -83,6 +84,14 @@ def compose_fresh(path, candidate):
             current["brain"], reference["brain"] = dict(current["brain"]), dict(reference["brain"])
             current["brain"].pop("plasticity")
             reference["brain"].pop("plasticity")
+            if factor == 'release_reference':
+                # The new file adds an immutable learning-only reference, not
+                # different intrinsic neural biases. Verify, do not just ignore
+                # a different calibration path when sharing original controls.
+                old_asset = current['brain']['intrinsic_calibration']
+                new_asset = reference['brain']['intrinsic_calibration']
+                verify_intrinsic_copy(Path(old_asset), Path(new_asset))
+                current['brain']['intrinsic_calibration'] = new_asset
             if current != reference:
                 raise ValueError("Shared control has different physical dynamics or rewards")
         raw = read_rows(game)

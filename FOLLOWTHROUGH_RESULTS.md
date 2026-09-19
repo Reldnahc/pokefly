@@ -1,5 +1,21 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Whole-game ancestry guard, 2026-09-19 02:51 UTC
+
+Practice and retained-weight evaluation now reject a source brain if any
+recorded ancestor began from a stage-specific state. Checksummed parent
+checkpoints, original run metadata, ROM/model identities and source cycles
+are checked before simulation; legitimate whole-game practice and exact
+own-game resumes remain allowed. Four completed v7/v8 sources verify under
+the stricter check, with no source files edited.
+
+The reference-only comparison audit also verifies copied intrinsic payloads
+before accepting a shared original control with a different calibration-file
+name. CPU verification500 Python/26JavaScript/lint passes
+(verify-b0f2a68d230e4ddaa7cb02c64be61167). These are protocol checks, not
+improved-gameplay evidence. Current v9 memory controls are still running;
+the conditional slower-rate v10 profile is prepared but not run or promoted.
+
 ## Retained whole-game result and persistence, 2026-09-19 02:29 UTC
 
 The completed v7 held-out tests do NOT show a consistent learning benefit.

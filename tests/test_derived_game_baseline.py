@@ -108,6 +108,14 @@ def test_projected_dose_candidate_changes_only_internal_learning_rate(monkeypatc
         m.validate_one_factor(base, candidate, "learning_rate")
 
 
+def test_fixed_reference_slow_candidate_only_changes_update_rate(monkeypatch):
+    m = script(monkeypatch)
+    base = asdict(m.load_config(Path('configs/visual-wide-anchored-v9.json')))
+    candidate = asdict(m.load_config(Path('configs/visual-wide-anchored-slow-v10.json')))
+    assert m.validate_one_factor(base, candidate, 'learning_rate') == (.2, .02)
+    assert candidate['brain']['intrinsic_calibration'] == base['brain']['intrinsic_calibration']
+
+
 def fresh_fixtures(monkeypatch):
     m = script(monkeypatch)
     old_config = "configs/visual-wide-projected-v4.json"
@@ -165,6 +173,51 @@ def test_completed_candidate_can_supply_next_one_factor_baseline(monkeypatch):
     assert result["raw_prefix_rechecked"] and result["frozen_control_shared_not_independent"]
     assert not result["new_trials"] and not result["candidate_resume_segments_not_independent"]
     assert result["candidate_final_checkpoint"] == str(Path("candidate/final"))
+
+
+def anchored_fixtures(monkeypatch):
+    m, data, snapshots, trajectories = fresh_fixtures(monkeypatch)
+    old = 'configs/visual-wide-homeostatic-v8.json'
+    new = 'configs/visual-wide-anchored-v9.json'
+    data['base.json']['config'] = old
+    data['fresh.json'].update(config=new, factor='release_reference',
+                             old_release_reference='sensorimotor-perturb-homeostatic-v5',
+                             new_release_reference='sensorimotor-perturb-anchored-v6')
+    model = asdict(m.load_config(Path(new)))
+    data['candidate/config.json']['config'] = model
+    snapshots['candidate/latest-checkpoint.json'][1]['experiment']['config'] = model
+    copies = []
+
+    def verify(source, extended):
+        copies.append((source, extended))
+
+    checker = importlib.import_module('evaluate_visual_learning_rate')
+    monkeypatch.setattr(checker, 'verify_intrinsic_copy', verify)
+    monkeypatch.setattr(m, 'verify_intrinsic_copy', verify)
+    return m, data, snapshots, copies
+
+
+def test_reference_composition_requires_verified_unchanged_intrinsic_payload(monkeypatch):
+    m, _, _, copies = anchored_fixtures(monkeypatch)
+    result = m.compose(Path('fresh.json'))
+    assert not result['new_trials'] and result['raw_prefix_rechecked']
+    expected = (Path('fly-data/intrinsic-neutral-visual-release-wide-v3.npz'),
+                Path('fly-data/intrinsic-neutral-visual-release-wide-anchored-v9.npz'))
+    assert copies == [expected, expected]
+
+
+@pytest.mark.parametrize('changed', ['physical', 'intrinsic'])
+def test_reference_composition_does_not_ignore_changed_original_dynamics(monkeypatch, changed):
+    m, data, _, _ = anchored_fixtures(monkeypatch)
+    if changed == 'physical':
+        data['control/config.json']['config']['frames'] += 1
+    else:
+        def reject_copy(*args):
+            raise ValueError('Original intrinsic payload changed')
+
+        monkeypatch.setattr(m, 'verify_intrinsic_copy', reject_copy)
+    with pytest.raises(ValueError):
+        m.compose(Path('fresh.json'))
 
 
 @pytest.mark.parametrize("change", ["partial", "factor", "weights", "resume", "prefix",

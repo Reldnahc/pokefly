@@ -1054,3 +1054,10 @@ as does the unchanged default (...T022635Z-3a0bbb). Registered paired/shuffled
 memory curves501/601 are running, with final9001..9004 retention required.
 No association gate or gameplay progress is claimed yet. This profile remains
 opt-in; never migrate old brains or initialize Pokemon with assay-trained weights.
+
+The conditional `visual-wide-anchored-slow-v10.json` fallback changes ONLY the
+synaptic learning rate from0.2 to the established0.02 rate, reusing the exact
+v9 reference. It is prepared, not behaviorally tested or promoted. Its full
+cue/control/whole-game protocol is registered in IMPROVEMENT_PLAN.md and does
+not displace the ongoing v9 test. It will not load a differently trained model's
+checkpoint or use a favorable intermediate assay snapshot.

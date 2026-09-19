@@ -16,9 +16,52 @@ from pathlib import Path
 from evaluate_saved_gameplay import measure
 
 from pokefly.checkpoint import read_checkpoint, sha256
-from pokefly.experiment import TrainOptions, load_config, train
+from pokefly.experiment import ExperimentConfig, TrainOptions, load_config, train
 from pokefly.rom import resolve_rom
 from pokefly.runner import run_directory, write_json
+
+
+def verify_whole_game_lineage(path):
+    '''Reject stage-reset ancestry, while allowing exact own-game continuations.
+
+    Reads original run metadata and checksummed parent checkpoints only. No
+    state is loaded into an emulator and no synapses or old reports are edited.
+    A copied checkpoint without its provenance is deliberately insufficient.
+    '''
+    visited, expected, rom = set(), None, None
+    while True:
+        path = Path(path).resolve()
+        if path in visited:
+            raise ValueError('Cyclic whole-game training provenance')
+        visited.add(path)
+        stored = json.loads((path / 'config.json').read_text())
+        options = stored['options']
+        model = ExperimentConfig.from_dict(stored['config'], checkpoint=True)
+        if rom is None:
+            rom = stored['rom_sha1']
+        if stored['rom_sha1'] != rom:
+            raise ValueError('Whole-game lineage uses different ROMs')
+        if expected is not None and (
+            expected['rom_sha1'] != rom
+            or expected['experiment']['mode'] != options['mode']
+            or ExperimentConfig.from_dict(expected['experiment']['config'], checkpoint=True)
+            != model
+        ):
+            raise ValueError('Parent checkpoint does not match its original run metadata')
+        if options.get('load_state'):
+            raise ValueError('Stage-specific ancestry is not allowed in whole-game practice')
+        parents = [options.get(key) for key in ('resume', 'weights') if options.get(key)]
+        if len(parents) > 1:
+            raise ValueError('Ambiguous whole-game training ancestry')
+        if not parents:
+            return
+        _, expected = read_checkpoint(Path(parents[0]))
+        if ExperimentConfig.from_dict(expected['experiment']['config'], checkpoint=True) != model:
+            raise ValueError('Whole-game lineage cannot silently convert a saved brain model')
+        directory = Path(expected['directory']).resolve()
+        if directory.parent.name != 'checkpoints':
+            raise ValueError('Parent checkpoint is missing its original run provenance')
+        path = directory.parent.parent
 
 
 def completed_game_source(path):
@@ -27,10 +70,14 @@ def completed_game_source(path):
     summary = json.loads((path / "summary.json").read_text())
     if stored["options"]["mode"] != "learn" or summary["reason"] != "step_limit":
         raise ValueError("Initial source must be a completed actual-game learning run")
+    verify_whole_game_lineage(path)
     _, saved = read_checkpoint(path / "latest-checkpoint.json")
     if (
         saved["experiment"]["mode"] != "learn"
         or saved["experiment"]["sample"] != summary["samples"]
+        or saved['rom_sha1'] != stored['rom_sha1']
+        or ExperimentConfig.from_dict(saved['experiment']['config'], checkpoint=True)
+        != ExperimentConfig.from_dict(stored['config'], checkpoint=True)
     ):
         raise ValueError("Source must use its final completed learning checkpoint")
     checkpoint = Path(saved["directory"])
