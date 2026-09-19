@@ -1,5 +1,23 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 05:41 UTC: first arms in BOTH frozen panels COMPLETE18k, panels
+still running ONLY53942/88470.4601 original:379 positions, starter3918,
+battle4001, completed rival win1, no Route1/capture/badge; final
+internal-frozen-20260919T050809Z-e685e2/step-00018000-26e50153.
+4602 retained4502:351 positions, starter9115, battle9756, rival win1,
+no Route1/capture/badge; final
+internal-frozen-20260919T050832Z-80a208/step-00018000-3455b0a7.
+Do NOT compare these different seeds as a matched pair or claim a panel pass.
+Auto checks verify zero updates, exact assigned weights and identical starts.
+CURRENT SECOND ARMS: retained4501 on BOTH held-out seeds:
+4601 actual internal-frozen-20260919T053942Z-b279af (53942);
+4602 actual internal-frozen-20260919T054013Z-14b076 (88470).
+Then automatically retained4502 on4601 and original on4602. Complete ALL before
+screen_game_retention.py on the two registered paneldirs below. No new GPU job,
+no default promotion, no protocol change; v11 still conditional/unrun.
+Process audit05:36: ONLY these2 project Python workers plus their venv launchers;
+no CPU audit/test leftovers, no agents. Latest implementation commit a86bf4c pushed.
+
 2026-09-19 05:20 UTC: ONLY GPU panels53942/88470 continue from05:09 below.
 Observer-only end-state audit added;534 CPU tests/26JS/lint passes,51674 exited.
 CPU whole-opening recorded-button playbacks both verified18k exact states and
