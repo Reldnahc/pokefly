@@ -115,7 +115,8 @@ def load_config(path: Path | None) -> ExperimentConfig:
         raise ValueError(f"Invalid experiment configuration: {exc}") from exc
 
 
-def train(options: TrainOptions, *, config_override: ExperimentConfig | None = None) -> Path:
+def train(options: TrainOptions, *, config_override: ExperimentConfig | None = None,
+          on_checkpoint=None) -> Path:
     if options.steps < 0 or options.checkpoint_every < 0:
         raise ValueError("steps and checkpoint-every cannot be negative")
     if options.mode not in ("learn", "frozen", "no-reward"):
@@ -254,7 +255,7 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
             print(f"Run: {output}\nCtrl+C checkpoints and stops.", flush=True)
 
             def snapshot():
-                return save_checkpoint(
+                generation = save_checkpoint(
                     output,
                     controller,
                     game,
@@ -274,6 +275,9 @@ def train(options: TrainOptions, *, config_override: ExperimentConfig | None = N
                         **({"temporal": temporal.state()} if temporal.state() else {}),
                     },
                 )
+                if on_checkpoint is not None:
+                    on_checkpoint(generation)
+                return generation
 
             with (output / "trajectory.jsonl").open("w", encoding="utf-8", buffering=1) as log:
                 at_boundary = True

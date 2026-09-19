@@ -1,5 +1,6 @@
 param(
     [switch]$Intro,
+    [switch]$FreshBrain,
     [ValidateRange(0, 2147483647)][int]$Steps = 0,
     [ValidateRange(0, 3000)][double]$Hz = 5,
     [ValidateSet('auto', 'cpu', 'cuda')][string]$Device = 'auto',
@@ -37,10 +38,13 @@ if (-not (Test-Path -LiteralPath $projectPython)) {
 if ($Intro -and $Resume) { throw 'Choose Intro or Resume, not both.' }
 if ($LoadState -and ($Intro -or $Resume)) { throw 'LoadState cannot combine with Intro or Resume.' }
 if ($Resume -and $Weights) { throw 'Choose Resume or Weights, not both.' }
+if ($FreshBrain -and ($Resume -or $Weights)) { throw 'FreshBrain cannot combine with Resume or Weights.' }
+if ($LoadState) { throw 'Normal play uses whole new games or exact Resume, not stage-specific LoadState.' }
 $launchArgs = @('-m', 'pokefly', 'train', '--device', $Device, '--mode', $Mode,
-                '--steps', $Steps, '--port', $Port, '--hz', $Hz.ToString([cultureinfo]::InvariantCulture))
+                '--steps', $Steps, '--port', $Port, '--hz', $Hz.ToString([cultureinfo]::InvariantCulture),
+                '--remember')
+if ($FreshBrain) { $launchArgs += '--fresh-brain' }
 if ($Intro) { $launchArgs += '--intro' }
-if ($LoadState) { $launchArgs += @('--load-state', (Resolve-Path -LiteralPath $LoadState).Path) }
 if ($Resume) { $launchArgs += @('--resume', (Resolve-Path -LiteralPath $Resume).Path) }
 if ($Weights) { $launchArgs += @('--weights', (Resolve-Path -LiteralPath $Weights).Path) }
 if (-not $Resume -and -not $Weights -and $Profile -ne 'baseline') {
@@ -57,14 +61,8 @@ try {
     } else {
         Write-Host "Model: $Profile"
     }
-    if ($Resume) {
-        Write-Host 'Learning history: continuing the saved brain AND its saved game.'
-    } elseif ($Weights) {
-        Write-Host 'Learning history: retaining learned synapses for this new game attempt.'
-    } else {
-        Write-Host 'Learning history: NEW brain, original weights. Earlier checkpoints are not loaded.'
-        Write-Host 'Use -Resume to continue a saved game, or -Weights <checkpoint> -Intro for a new game with prior learning.'
-    }
+    Write-Host 'Normal-run history is automatic and separate from research trials.'
+    Write-Host 'Intro starts a new game retaining learning; omit Intro to resume. FreshBrain explicitly resets weights.'
     Write-Host 'Ctrl+C completes the current decision and saves a checkpoint.'
     & $projectPython @launchArgs
     if ($LASTEXITCODE -ne 0) { throw "Pokefly stopped with exit code $LASTEXITCODE." }

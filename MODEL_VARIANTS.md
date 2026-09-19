@@ -16,8 +16,11 @@ The launcher defaults to `visual-release-wide-v3`, also selectable with
 showcase selection includes the stronger frozen visual calibration, streaming
 raw frames, perturbation-based internal synaptic learning, sensory isolation,
 and verified serial button delivery. It passed the retained two-cue association
-screen; useful learned Pokemon progression is still unestablished. It starts
-from original synapses, never synthetic assay weights. The unfinished
+screen; useful learned Pokemon progression is still unestablished. A model's
+first normal session starts from original synapses, then the launcher remembers
+its own checkpoints. `-Intro` repeats the whole game with retained synapses;
+omit it to resume brain and game, or use `-FreshBrain` for an explicit reset.
+Research/synthetic assay weights are never adopted automatically. The unfinished
 `visual-wide-projected-v4` remains opt-in, not the default.
 Use `-Profile sensorimotor-bounded-serial-v2` for the preserved prior default;
 its brain/rewards are identical to the earlier `sensorimotor-bounded-v1`.
@@ -59,7 +62,8 @@ in [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 | `compartment-reset-v2` | Partial KC/MBON rule with reset-conditioned calibration. |
 | `sensorimotor-low-noise-v1` | Perturbation-v3 with smaller noise and separately refitted calibration. |
 
-Use `-Profile NAME` for a **new** experiment. `-Resume` and `-Weights` restore
+Use `-Profile NAME` to select that model's separate normal history, adding
+`-FreshBrain` only for an explicit original-weight restart. `-Resume` and `-Weights` restore
 the saved profile; neither silently converts a saved brain into another model.
 
 ## Neutral intrinsic calibration and internal sensorimotor learning
@@ -928,7 +932,7 @@ is selected, and3601/3602 are not spent on this negative candidate. Reports
 `visual-learning-rate-gameplay-20260918T224350Z-e6e62f` and
 `visual-learning-rate-gameplay-20260918T224450Z-a47070`.
 
-## Wide-vision earlier-outcome test (running; not promoted)
+## Wide-vision earlier-outcome test (retained evaluation negative; not promoted)
 
 `visual-wide-outcome-v7.json` combines the unchanged showcase wide-v3 brain
 with the EXISTING `last-faint-v3` reward delivery hook. This changes only when
@@ -955,7 +959,15 @@ Future practice starts at the beginning of the game with learned synapses
 retained, or exactly continues the fly's own saved game. Getting back to a
 battle is part of what must be learned; no stage-specific starts are allowed.
 
-## Optional accumulated-input homeostasis (prepared, not behaviorally tested)
+The completed 36k-practice retained panel did not show a consistent advantage:
+two shared original controls acquired starters and won both rival battles;
+retained4101 acquired one starter and won neither, retained4102 acquired both
+and won one. No arm reached Route 1 in this 18k-per-arm panel. Source 4102 reached
+its first battle slightly earlier on 3801 but later on 3802; one favorable timing
+is not general improvement. Full raw/checkpoint audit:
+game-retention-panel-audit-20260919T020815Z-04563f. No model/brain promotion.
+
+## Optional accumulated-input homeostasis (whole-game tests running; not promoted)
 
 `visual-wide-homeostatic-v8.json` differs from the failed fast projected-v6
 ONLY in its internal plasticity rule, `sensorimotor-perturb-homeostatic-v5`.

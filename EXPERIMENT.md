@@ -156,8 +156,9 @@ Gym Giovanni is distinguished from non-gym Giovanni through the game's gym flag.
 PyBoy implements execution hooks with temporary in-memory debug opcodes. No
 ROM file is modified; hooks are removed while saving and restored afterward.
 Unit fixtures cover these outcome branches and the real-ROM tests verify hook
-signatures/execution during navigation. Natural end-to-end battle/capture runs
-remain unverified: current autonomous trials have not reached those events.
+signatures/execution during navigation. Later whole-game autonomous runs reached
+and replay-verified battle victories; captures remain unestablished. See the
+dated results and improvement plan; reaching an outcome alone is not learning.
 
 ## Persistence and evaluation
 
@@ -168,11 +169,17 @@ without pickle. A checksummed completion manifest is written last; old generatio
 are retained. Ctrl+C is deferred to a completed decision boundary. An exception
 mid-decision does not create a falsely resumable partial checkpoint.
 
-Saving does not automatically load the previous fly. A fresh `--intro` launch
-starts original weights and fresh state; `--resume CHECKPOINT` restores the
-whole saved fly/game. The original files and previous run directories remain
-unchanged. Each continuation writes a new directory, whose latest checkpoint
-should be selected for the next continuation. Checkpoints are saved every 500
+The normal launcher enables `--remember`: it tracks only normal learning
+sessions, separately for each exact model configuration and ROM. Without intro
+it resumes its saved fly/game; `--intro` carries the saved synapses into a whole
+new game. `--fresh-brain` explicitly resets to original weights. Old untracked
+runs are adopted only with explicit `--resume` or `--weights`, never by scanning
+experimental runs for a newest/best checkpoint. Research `train` calls without
+`--remember` retain explicit initialization. The original files and previous
+run directories remain unchanged. A normal-history pointer advances only after
+a completed checksummed learning checkpoint; frozen/no-reward controls do not
+advance it. A session lock prevents concurrent writers; missing or damaged
+history fails closed instead of silently forgetting. Checkpoints are saved every 500
 decisions by default and on clean stop. Wall-clock speed is a launch/runtime
 setting, not inherited from a checkpoint and not an experiment-model change.
 

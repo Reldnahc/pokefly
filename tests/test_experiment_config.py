@@ -92,11 +92,14 @@ def test_setup_prepares_showcase_dependencies_without_overwriting_existing_calib
     assert "--export fly-data/intrinsic-neutral-visual-release-wide-v3.npz" in setup
 
 
-def test_launcher_makes_new_brain_and_retained_learning_explicit():
+def test_launcher_retains_normal_history_and_makes_deliberate_new_brains_explicit():
     launcher = Path("scripts/start.ps1").read_text()
-    assert "continuing the saved brain AND its saved game" in launcher
-    assert "retaining learned synapses for this new game attempt" in launcher
-    assert "NEW brain, original weights. Earlier checkpoints are not loaded" in launcher
+    assert "'--remember'" in launcher
+    assert "[switch]$FreshBrain" in launcher
+    assert "Intro starts a new game retaining learning; omit Intro to resume" in launcher
+    assert "FreshBrain explicitly resets weights" in launcher
+    assert not _parser().parse_args(["train"]).remember  # Research trials remain explicit.
+    assert _parser().parse_args(["train", "--remember", "--fresh-brain"]).fresh_brain
 
 
 def test_missing_reward_timing_retains_legacy_checkpoint_behavior():

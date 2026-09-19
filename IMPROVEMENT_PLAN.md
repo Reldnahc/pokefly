@@ -1,5 +1,84 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 02:15 UTC: CURRENT TWO GPU JOBS, registered v8 full-new-game6k
+rule tests.401 session55468, report visual-plasticity-rule-gameplay-20260919T021258Z-d86466,
+actual internal-learn-20260919T021311Z-beeb25, dashboard127.0.0.1:59200.
+402 session78633, report visual-plasticity-rule-gameplay-20260919T021258Z-dd13aa,
+actual internal-learn-20260919T021311Z-7004f6, dashboard127.0.0.1:59202.
+BOTH fresh64-step frozen prefixes exactly matched original controls, including
+actions/neural activity/rewards/telemetry/start state. Same predeclared gate and
+queue; do not start a third GPU job. V9 collection/behavior still NOT started.
+
+The v7 36k-trained held-out whole-game panels are COMPLETE and audited:
+game-retention-panel-audit-20260919T020815Z-04563f. Originals2/2 starters and
+2/2 completed rival wins; retained4101 1/2 starters,0 wins; retained4102 2/2
+starters,1 win. No Route1/captures/badges/paid-unfinished outcomes in any arm.
+Original positions370/404; retained4101 322/359; retained4102 351/332.4102
+reached battle slightly earlier on3801 and later on3802. No consistent retained
+advantage; no promotion or3803/3804 confirmation priority. Preserve negatives.
+Panels64038/67732 and audit62215 finished/drained.
+
+Normal-history CUDA application smoke PASSED:
+normal-history-smoke-20260919T020700Z-1ef1bb;86434 exited/drained. Exact
+auto-resume vs uninterrupted and retained whole-new-game learning vs explicit
+weights, ALL arrays/rewards/actions matched. Actual user history unchanged.
+Full CUDA regression491 Python/26 JavaScript/lint passed:
+verify-e593caaceda54b2489b6e84f95bf5170;80222 exited. CPU and CUDA persistence
+are verified, not a claim of improved gameplay. Source-only commit pending.
+
+Tool recovery: standard apply_patch stalled twice before writing/launching;
+waited, then terminated orchestration cells396/398.02:11 process check found
+NO Python jobs, so only the two intended v8 launches were retried. Native
+installed apply_patch helper works through approved elevated command calls;
+use that for scoped edits while the standard sandbox launcher is stalled.
+Do not terminate unrelated Codex/security services. Browser connection remains
+unavailable after a waited retry; no real-browser layout verification claimed.
+
+2026-09-19 02:06 UTC: panel3801 COMPLETE; session64038 exited/drained.
+Retained4102:351 positions, starter6923, one completed-looking rival win
+(final battle0, level6), no Route1; exact full audit awaits3802. Original3801
+also won; retained4101 had no starter. Panel3802's final original arm is at17k.
+One free GPU slot is now used for the full CUDA-inclusive regression, then
+private-history CUDA smoke. CPU history smoke is finished; no third GPU job.
+Browser skill read; bootstrap timed out, a simple connection retry after30s
+also timed out. No DOM/layout claim, no alternate browser bypass or open tab.
+
+2026-09-19 01:59 UTC: normal-history real CPU application smoke PASSED,
+`normal-history-smoke-20260919T015516Z-b17e44`; session79864 exited/drained.
+Auto-resume70->90 exactly matches a90-step uninterrupted run, and automatic
+retained whole-new-game learning exactly matches an explicit weights-loaded
+new game. All neural arrays, reward state and action logs compared; starts
+match; frozen control preserves source weights and does not advance history.
+Previous sources and the actual user's normal-history directory are unchanged.
+This is persistence proof, NOT learned gameplay. CUDA confirmation queued in
+the first freed GPU slot; currently only sessions64038/67732 on GPU.
+
+Full CPU regression481 Python /26 JavaScript/lint clean, artifact
+`verify-a02bce6a259d434b882278e65752db69`; PowerShell launcher syntax valid.
+Optional v9 source-only commit f7cfd2f was pushed. Normal-history changes are
+not yet committed; complete CUDA confirmation before its source-only push.
+
+2026-09-19 01:52 UTC: found and fixing NORMAL launcher persistence gap. The
+registered practice experiments retain synapses, but start.ps1 -Intro still
+needed explicit -Weights. New opt-in CLI --remember (enabled by start.ps1)
+tracks only its own model/ROM history, never the newest research directory.
+Bare launcher resumes brain+game; -Intro retains weights into a whole new game;
+-FreshBrain deliberately starts original weights. Old runs require explicit
+Resume/Weights adoption because their user/research origin is not identifiable.
+Frozen/no-reward runs do not advance this history. Corrupt/missing history
+fails closed; an OS-owned lock prevents concurrent same-model normal sessions.
+Checkpoint callbacks update only after a complete checksummed generation.
+Existing research train() calls, model identities, rewards and neural math stay
+unchanged. The normal launcher rejects stage-specific LoadState.
+
+478 CPU Python tests passed before additional malformed/CLI cases; lint-only
+formatting was fixed. Added private-history real-ROM smoke (NOT launched yet),
+which compares auto-resume with uninterrupted gameplay and auto-retained new
+game with explicit -Weights, including ALL saved neural arrays/reward state.
+It must not create/adopt a brain in runs/user-history for the user. Run this
+short check in a free GPU slot after the v7 panel; v8 paired trials follow.
+No third GPU job, no battle reset, no promotion based on persistence plumbing.
+
 2026-09-19 01:40 UTC: final v9 source regression clean: 463 Python tests,
 26 JavaScript tests and lint, `verify-7b3dba6f197a45f7823bac8c3a299ffb`.
 CUDA/live tests and generic-reference collection remain queued, not passed.

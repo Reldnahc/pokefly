@@ -16,6 +16,15 @@ learn to reach it again, including navigation and interaction along the way.
 Exact resume continues its own saved game; original-weight/frozen runs are
 separately labeled experimental controls, not a requirement to discard learning.
 
+Normal-run persistence implementation, September18 evening: the launcher now
+tracks its own checkpoints independently of research trials. Omit `-Intro` to
+resume its saved brain/game; use `-Intro` to replay the whole game retaining
+synapses. `-FreshBrain` is an explicit reset. Older untracked runs require an
+explicit `-Resume`/`-Weights` choice; experimental brains are never imported
+automatically. Full regression and real-application persistence verification
+passed on CPU and CUDA. This bookkeeping change does not demonstrate useful
+gameplay learning.
+
 Connect an open-source simulation based on a fruit fly's reconstructed brain
 wiring to Pokemon Red, investigate how it perceives, acts, and learns while playing,
 and watch its neural activity while it plays.

@@ -2,10 +2,11 @@
 
 Training protocol: the same fly keeps its learned internal synapses across
 whole-game attempts. Do not train from battle-start or other stage-specific
-resets; learning to reach those situations is part of the task. Use `-Resume`
-to continue its saved game, or `-Weights <checkpoint> -Intro` for a new game
-with its learned brain. Plain `-Intro` starts original weights; it does not
-automatically load prior learning. Original-weight/frozen runs are controls.
+resets; learning to reach those situations is part of the task. Normal launcher
+runs now remember their own checkpoints: omit `-Intro` to resume the saved game,
+or use `-Intro` for a whole new game retaining learned synapses. `-FreshBrain`
+explicitly resets weights. Research trials never enter this history automatically.
+Use `-Resume` or `-Weights <checkpoint> -Intro` to adopt an older chosen run.
 
 Project goals, proposed features, and open decisions are recorded in
 [PROJECT_BRIEF.md](PROJECT_BRIEF.md).
@@ -28,7 +29,10 @@ outcomes alone do not establish learning. With the current wide-vision model,
 repeated whole-game practice first produced a promising retained result
 (3/4 starters and one rival win versus 0/2 original starters); the independent
 follow-up FAILED (0/4 retained starters versus 1/2 original). Neither practiced
-brain is promoted as a reliably improved player. Older battle-reset studies
+brain is promoted as a reliably improved player. A separate earlier-reward
+model, after 36,000 whole-game training decisions per brain, also failed its
+held-out comparison: original controls won 2/2 rival battles, retained brains
+won 0/2 and 1/2. This model is not promoted. Older battle-reset studies
 remain archived evidence, not the currently authorized training protocol.
 The stronger internally calibrated visual model passes a retained two-cue
 association test in two training seeds: about69%
@@ -72,7 +76,7 @@ installed locally. The user's ROM at the project root is discovered automaticall
 Launch the autonomous experimental controller with its live display:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pokefly train --device cuda --intro `
+.\.venv\Scripts\python.exe -m pokefly train --device cuda --intro --remember `
   --config configs/visual-release-wide-v3.json
 ```
 
@@ -82,8 +86,9 @@ The launcher defaults to `visual-release-wide-v3`: frozen calibrated visual
 neurons, fresh raw frames during actions, internal perturbation-based synaptic
 learning, and verified serial button delivery. This is the tested two-cue
 association model, not a proven general Pokemon player. The unfinished
-projected-update candidate is NOT the default. Fresh runs still start from
-original synapses, never synthetic-test-trained or selected successful weights.
+projected-update candidate is NOT the default. A model's first normal session
+starts from original synapses. Subsequent normal sessions retain its own learning,
+never synthetic-test-trained or selected successful experimental weights.
 Use `-Profile sensorimotor-bounded-serial-v2` for the previous default,
 `-Profile intrinsic-v1`
 for calibrated dynamics with the earlier KC rule, `-Profile sensory-isolated-v1`
@@ -135,22 +140,31 @@ Ctrl+C finishes the current decision and saves. `--steps 0` runs until stopped;
 under `runs/internal-.../` with configuration, trajectory, summary, images, and
 checksummed checkpoint generations. The ROM and original connectome are untouched.
 
-**Saving is automatic; loading is explicit.** Each fresh launch (including
-`-Intro`) starts a new fly from the original model, not from the last run.
-It does not delete earlier learning. Checkpoints save every 500 decisions and
+**The normal launcher now remembers learning automatically.** Each model/ROM
+has separate history under `runs/user-history/`. Bare `start.ps1` resumes its
+last saved brain and game; `start.ps1 -Intro` starts a new game carrying those
+synapses. `-FreshBrain` is an explicit original-weight restart, not the default.
+Before the first tracked session, adopt an older run with `-Resume` or `-Weights`;
+the launcher cannot reliably distinguish old user runs from research trials.
+It does not scan for the newest experiment or delete earlier learning.
+Checkpoints update this history every 500 decisions and
 on a clean stop. A crash can lose work since the last completed checkpoint.
 Completed checkpoints and logs are retained; long unlimited runs use increasing disk space.
+Corrupt/missing registered checkpoints fail closed instead of forgetting; only
+one normal session may own a model's history. Frozen/no-reward controls never
+advance it. Bare Python `train` remains explicit research behavior unless
+`--remember` is supplied; all existing experiment scripts remain isolated.
 
 Use **resume** to continue the entire saved experiment: game, learned internal
 weights, neural activity, random stream, decoder traces, and reward history.
 Each resumed session writes its own run directory; use that session's checkpoint
-for the next continuation:
+for an explicit continuation (normal automatic history also follows it):
 
 ```powershell
 .\scripts\start.ps1 -Resume .\runs\YOUR_RUN\latest-checkpoint.json
 ```
 
-For a new retention trial, use `--weights CHECKPOINT --mode frozen --load-state STATE`.
+For a whole-game retention trial, use `--weights CHECKPOINT --mode frozen --intro`.
 `--weights` keeps learned connections but starts fresh neural dynamics and reward
 novelty; it is not a continuation. To keep training the same fly/game, use `--resume`.
 The launcher now supports the same distinction:
@@ -162,7 +176,8 @@ The launcher now supports the same distinction:
 ```
 
 `-Weights` and `-Resume` are mutually exclusive and restore their saved profile.
-Do not combine either with `-Profile`. `-Intro` alone still starts original weights.
+Do not combine either with `-Profile`. `-Intro` alone retains normal-run learning;
+add `-FreshBrain` only when an original-weight restart is intended.
 Wall-clock pacing is independent of the saved brain: each launch uses its `-Hz`
 or `--hz` setting (default 5), which the live selector can then change.
 `--mode no-reward` runs a zero-reinforcement control; `--mode frozen` retains
@@ -170,8 +185,8 @@ measured rewards but forbids weight changes. Configurable experimental parameter
 are accepted with `--config PATH.json` and saved in every run. Checkpoint modes
 and configuration cannot silently change during an exact resume.
 Old checkpoints retain their original isolation, calibration and learning rule.
-Start a fresh trial using its config and `--load-state` (launcher: `-LoadState`)
-to reuse the game's starting state. No silent
+Start a whole new game using its config and `--intro`; normal play rejects
+stage-specific `-LoadState`. No silent
 conversion of old learned weights or full checkpoints is performed.
 
 Opt-in research profiles use `-Profile stream-v1`, `endpoint-v1`, `quiescent-v1`,
@@ -192,8 +207,9 @@ anatomical limitations and checkpoint semantics are in
 Evaluation compares learning, frozen, and absent-reward trials with matching
 seeds; add `--checkpoint PATH` to compare retained weights frozen as well.
 House exit is measured, never given a special reward. General battle/capture
-detectors are implemented, but autonomous live battle/capture outcomes have not
-yet been reached. Sensory isolation increases Up to 45/48/43 pulses per 1,000
+detectors are implemented. Later autonomous whole-game runs reached battle wins;
+captures remain unestablished. In the early isolation-only tests, Up increased
+to 45/48/43 pulses per 1,000
 decisions in matched frozen trials (unisolated: 2/3/4). Pixel sensitivity remains,
 but visual-memory-cell activity is lower. There is no validated learning-to-play claim.
 

@@ -164,6 +164,12 @@ def _parser() -> argparse.ArgumentParser:
     train.add_argument("--intro", action="store_true", help="explicit scripted intro intervention")
     train.add_argument("--resume", type=Path, help="checkpoint directory or latest-checkpoint.json")
     train.add_argument("--weights", type=Path, help="retained weights only, fresh neural dynamics")
+    train.add_argument("--remember", action="store_true",
+                       help="resume normal-run history; with --intro retain weights in a new game")
+    train.add_argument(
+        "--fresh-brain", action="store_true",
+        help="explicit original-weight restart of normal history (requires --remember)",
+    )
     train.add_argument("--no-dashboard", dest="dashboard", action="store_false")
     train.add_argument("--port", type=int, default=8777)
     train.add_argument("--hz", type=float, default=5, help="decision rate cap; 0 = unthrottled")
@@ -247,7 +253,19 @@ def main(argv: list[str] | None = None) -> int:
             from pokefly.experiment import TrainOptions, train
 
             options = {k: v for k, v in vars(args).items() if k not in ("command", "rom")}
-            print(f"Saved internal experiment: {train(TrainOptions(rom=rom, **options))}")
+            remember, fresh = options.pop("remember"), options.pop("fresh_brain")
+            if fresh and not remember:
+                raise ValueError(
+                    "--fresh-brain requires --remember; ordinary research train is explicit"
+                )
+            prepared = TrainOptions(rom=rom, **options)
+            if remember:
+                from pokefly.history import launch_with_history
+
+                output = launch_with_history(prepared, fresh_brain=fresh)
+            else:
+                output = train(prepared)
+            print(f"Saved internal experiment: {output}")
             return 0
         if args.command == "evaluate":
             from pokefly.experiment import evaluate
