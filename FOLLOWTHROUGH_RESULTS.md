@@ -1,5 +1,36 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Second additional whole-game attempts complete, September 19
+
+Each history now has 60,000 completed training decisions across FOUR full games.
+The results remain mixed; different training seeds are not matched evidence
+that additional practice improved or worsened the brain.
+
+| Added attempt | Positions | Starter | First battle | Rival wins | Route1 |
+| --- | ---: | ---: | ---: | ---: | --- |
+|61002|244|not reached|not reached|0|no|
+|62002|394|6999|7115|1|no|
+
+62002's completed rival win at decision 7929 is verified by replaying the
+ENTIRE recorded game opening: all 18,000 states/rewards match, the opponent
+fainted, the player survived with 10 HP, and trainer-victory/end hooks agree.
+Artifact: `recorded-outcome-latency-20260919T085517Z-e3ac04`; trajectory SHA256
+`94c6d7edc27b41fceb8035d0158af712ea9ce46cf35654b9608ade0a9c71ff36`.
+The replay is an audit, not another autonomous victory or training episode.
+
+The last accepted move at 7878 precedes reward by 51 decisions / 12.24 neural
+seconds. An isolated 0.6-second eligibility contribution would decay to
+1.38e-9. This is passive decay, NOT measured net eligibility, proof that the
+last move caused victory, or a demonstrated fix. The earlier timing-only
+candidate's negative results still stand. No battle reward was missing.
+
+Both series automatically started their THIRD additional whole fresh game,
+seeds 61003/62003, retaining their own preceding final synapses. Current runs:
+`internal-learn-20260919T085309Z-b5d8b1` and
+`internal-learn-20260919T085324Z-a917a0`. They must finish these and then the
+fourth additional games before the unchanged final parent/child comparison.
+No intermediate checkpoint is selected and no candidate is promoted.
+
 ## First additional whole-game attempts complete, 2026-09-19 08:20 UTC
 
 Both first added attempts completed 18,000 decisions, bringing each training

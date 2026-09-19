@@ -1,5 +1,43 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 08:58 UTC: second additional attempts COMPLETE; each history now
+has60k training decisions/four whole games. CURRENT ONLY TWO GPU JOBS are still
+series90734/44677, automatically on THIRD additional attempts:
+61003 internal-learn-20260919T085309Z-b5d8b1 (port59320),
+62003 internal-learn-20260919T085324Z-a917a0 (port59322).
+Both configs confirm own preceding final weights, intro=true/load_state=null.
+Let BOTH current games and then61004/62004 finish. Final96k/SIX-game source
+comparison remains ALL four checkpoints (24k parents4501/4502 and final96k
+children61004/62004) plus shared original on63001/63002; same-child63003/63004
+confirmation only if registered extension gate passes. No middle-checkpoint
+selection, stage/battle starts, new game rewards, or default promotion.
+
+Completed61002 internal-learn-20260919T081132Z-a1bc26:244 positions, no starter,
+battle or Route1. Final step-00018000-c05632f2, brain SHA256
+9e934a42a735b492d12afe46f7ee47f28153f853417b10131d58aef4dd4ed416.
+Completed62002 internal-learn-20260919T081134Z-b2e06a:394 positions, starter6999,
+first battle7115, rival WIN7929, level6; no Route1/capture/badge. Final
+step-00018000-0fcf69e0, brain SHA256
+7cbc8b837c69ca41a8378ff90a0cafb198892e9680fab1e90769f9b06b556eb0.
+Different seeds and ongoing training: NOT controlled retained-learning proof.
+
+62002 whole-opening CPU replay COMPLETE, all18k sampled states/rewards exact:
+recorded-outcome-latency-20260919T085517Z-e3ac04, trajectory SHA256
+94c6d7edc27b41fceb8035d0158af712ea9ce46cf35654b9608ade0a9c71ff36.
+Win7929 rawresult0, player10/enemy0, surviving party plus faint/trainer hooks.
+Last accepted move7878 -> reward51 decisions/12.24 neural seconds; isolated
+0.6s contribution would decay to1.38163e-9, NOT measured net neural eligibility
+or proof of causality. Eight slot0 moves(id33), five slot1(id45). Replay is an
+audit, not another autonomous win or a training run.53056 exited/drained.
+
+Read-only CPU timing08:47: fixed retina6006 outputs, ~0.299ms/encode, ~3.59ms
+for12 encodes. No cache/performance/model change made; no extra GPU job.
+Historical A/B memory failures inspected are OLD weak-vision models, not a
+strong-v10 A/B result. Current v10 association pass is left/right only. This
+is an evidence gap, not a queued new model or an assertion of menu incapacity.
+Latest source-only push7ef734e records first attempts; this new note uncommitted.
+Latest CPU suite599Python/26JS/lint; last full CUDA575 predates34 assay-only tests.
+
 2026-09-19 08:15 UTC: first additional WHOLE-game attempts COMPLETE; both
 series automatically started their second, retaining their own final synapses.
 CURRENT ONLY TWO GPU JOBS remain90734/44677. Current61002 is
