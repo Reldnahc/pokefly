@@ -1,5 +1,56 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 07:17 UTC: conditional extension observer IMPLEMENTED/CPU-verified,
+not run as a neural study. scripts/screen_training_extension.py re-audits ALL
+five-arm panels, scores only the assigned children for extension success,
+requires original AND own-parent comparisons, and verifies exact ancestry to
+the pinned parent brain. Use --reports <both completed paneldirs> --families
+4501:61004 4502:62004. These are2 related families, not4 independent replicas.
+21 new fixture cases pass; real existing401->4501 and402->4502 checksum links
+pass, and the deliberately wrong cross-family relation is rejected (read-only,
+not a new training result).565 CPU Python/26JS/lint passes,
+verify-6127db69ebcb48dfa01d467f5c21ac7c;95550 exited. Prior60003 exited after
+565Python passed but lint found2 formatting issues, which are now corrected.
+Latest FULL CUDA suite remains554Python before these21 observer-only tests;
+rerun full suite when a GPU slot is available. No gameplay/controller changes.
+
+CURRENT ONLY TWO GPU JOBS remain v11 curves65056(seed501)/24345(seed601),
+both now SHUFFLED arms; paired8192 short balanced probes54.83%/57.54%.
+Do NOT use those small probes to replace the registered final9201..9204 recall.
+Paths are the06:50 entry below. No extended v10 game or v11 game study started.
+
+2026-09-19 07:09 UTC: prospective FALLBACK after a v11 gate failure, NOT RUN.
+Keep v11's existing priority and complete all its registered arms first. If it
+fails, test MORE whole-game experience in the unchanged, memory-capable v10
+model instead of discarding its two saved gameplay histories. Carry BOTH final
+24k sources4501/4502 through FOUR additional whole fresh18k games each:
+4501 (internal-learn-20260919T042416Z-ad59e3) ->61001,61002,61003,61004;
+4502 (internal-learn-20260919T042415Z-c28307) ->62001,62002,62003,62004.
+Final total96k training per brain (6k+18k+4*18k), SIX whole-game attempts.
+Use train_game_series.py --initial-game-run <parent> --training-seeds <four>
+--steps 18000 --evaluation-steps 18000 --eval-seeds 63001 63002
+--defer-evaluation, two separate ports, maximum TWO GPU jobs. No model, reward,
+mapping, stage reset or original-source overwrite. No intermediate selection.
+
+Dose test: ALL FOUR source brains (24k parents4501/4502 and FINAL96k children
+61004/62004) plus ONE shared original per seed, whole fresh/frozen18k63001/63002.
+These are TWO related training families, NOT four independent lineages. Each
+child must pass the existing original-comparison whole-game-progress-v1 gate;
+also preserve every matched parent's starter/Route1/completed battle/rival/
+capture/gym milestone on both seeds, and EITHER add parent-relative progression
+OR reach the SAME starter/battle endpoint >=10% earlier on BOTH seeds relative
+to that parent. Include every parent and child, never let a parent-only pass
+qualify the extension. Verify the actual checkpoint ancestry from child to
+assigned parent. The observer-only extension screen will be unit-tested before
+these games launch. If triggered, repeat ALL five arms on63003/63004; the SAME
+child family must pass confirmation. This is a conservative development gate,
+not significance or an endgame guarantee. Current v10 failed result stands.
+
+Motivation is the user's whole-game learning requirement and v10's mixed
+two-attempt result, including faster starters for4501. More practice is not
+assumed to fix the missing long-horizon predictor. No extension result exists;
+the currently running v11 cue curves65056/24345 are UNCHANGED.
+
 2026-09-19 06:59 UTC: EXPLICIT PROSPECTIVE v11 practice-budget amendment.
 Its70-decision software smoke has completed, but NO full-game training study
 has begun. The TWO current ROM-free curves65056/24345 and ALL their registered
