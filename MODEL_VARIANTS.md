@@ -967,7 +967,7 @@ its first battle slightly earlier on 3801 but later on 3802; one favorable timin
 is not general improvement. Full raw/checkpoint audit:
 game-retention-panel-audit-20260919T020815Z-04563f. No model/brain promotion.
 
-## Optional accumulated-input homeostasis (whole-game tests running; not promoted)
+## Optional accumulated-input homeostasis (gameplay screen failed; not promoted)
 
 `visual-wide-homeostatic-v8.json` differs from the failed fast projected-v6
 ONLY in its internal plasticity rule, `sensorimotor-perturb-homeostatic-v5`.
@@ -1006,7 +1006,14 @@ checks the numeric constraint without exports. Full neural/gameplay checks and
 retained behavioral evidence are still required. Do not load those diagnostic
 copies, migrate old brains to this rule, or promote it to the showcase default.
 
-## Optional fixed-reference homeostasis (implementation only; not calibrated/tested in-game)
+The registered v8 6k full-game screen is now COMPLETE and FAILED:401 explored
+239 positions without a starter;402 explored208 and acquired a starter at2333.
+Neither won a battle or reached Route1. The both-starters OR victory/Route1
+retention-priority gate was not met, so additional practice/retention was not
+triggered. Raw/control/checkpoint audits are derived-game-baseline-20260919T022738Z-51cd29
+and ...T022740Z-07a33c; these compose existing trials, not new replications.
+
+## Optional fixed-reference homeostasis (memory assays running; not promoted)
 
 `visual-wide-anchored-v9.json` keeps v8's physical model and learning parameters,
 but uses `sensorimotor-perturb-anchored-v6`. The same bounded constraint uses
@@ -1014,7 +1021,8 @@ one frozen generic-stimulus release reference instead of changing gameplay
 means. A two-input numerical counterexample shows why this distinction matters:
 constraining original input separately in alternating contexts can erase a
 hand-set contrast. This is a capacity warning, NOT a fly training result or
-evidence that v8 fails in-game. V8's registered gameplay test remains queued.
+evidence that v8 fails in-game. Its separate registered gameplay screen did
+subsequently fail, as documented above; the toy example alone is not its cause.
 
 The new reference is an engineering constraint, not measured fly physiology.
 It limits average learned input on its generic collection distribution; it
@@ -1022,7 +1030,7 @@ cannot guarantee balanced buttons, stability on every game screen or learning.
 Local eligibility still observes the actual physical neural release/noise.
 There is no learned policy, new circuit, button target or RAM input.
 
-Generate the optional immutable asset separately (it is not yet collected):
+Generate the optional immutable asset separately (refuses to overwrite a file):
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/collect_release_reference.py --export fly-data/intrinsic-neutral-visual-release-wide-anchored-v9.npz
@@ -1038,7 +1046,11 @@ The old calibration is never overwritten. The new rule refuses missing or
 mismatched references, stores the reference in checkpoints, and cannot mutate
 it through restored state. Old profiles keep their original identities/arrays.
 
-No collection, CUDA smoke, association gate or whole-game behavioral result is
-claimed yet. This profile must remain opt-in, with original-synapse named
-lineages and prospectively registered full-game tests. Never migrate old
-trained brains or use synthetic-assay weights as Pokemon initialization.
+Generic collection is complete: generic-release-reference-20260919T022608Z-c74a2a,
+16,384 measured neural steps, no reward/game/actions. The new asset SHA256 is
+b9c6c6718c6dd9cb3fa63df70dd5415ba5d7586638ff02ec297bebafc82717f6. Its real-ROM
+CUDA exact-resume/frozen/no-reward smoke passes (internal-smoke-20260919T022723Z-ddfd48),
+as does the unchanged default (...T022635Z-3a0bbb). Registered paired/shuffled
+memory curves501/601 are running, with final9001..9004 retention required.
+No association gate or gameplay progress is claimed yet. This profile remains
+opt-in; never migrate old brains or initialize Pokemon with assay-trained weights.

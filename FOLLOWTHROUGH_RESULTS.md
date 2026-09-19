@@ -1,5 +1,52 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Retained whole-game result and persistence, 2026-09-19 02:29 UTC
+
+The completed v7 held-out tests do NOT show a consistent learning benefit.
+Both trained lineages had 36,000 whole-game training decisions. Each final
+brain then played two full fresh games for18,000 decisions with frozen
+weights, alongside a shared original-weight control for each noise seed.
+
+| Brain | Starters / two games | Completed rival wins | Positions on3801 /3802 |
+| --- | ---: | ---: | --- |
+| Original |2|2|370 /404|
+| Retained401 then4101 |1|0|322 /359|
+| Retained402 then4102 |2|1|351 /332|
+
+None reached Route1, caught a Pokemon, or earned a badge in these held-out
+games. One retained brain reached a battle slightly faster on one seed and
+slower on the other; that is not a repeatable benefit. The full audit checks
+raw actions, completed outcomes, matching starts, model identities and
+unchanged frozen weights: game-retention-panel-audit-20260919T020815Z-04563f.
+No promotion or additional confirmation is justified by this negative panel.
+
+The moving-reference homeostatic v8 candidate also failed its predeclared
+6,000-decision gameplay screen:239/208 positions, no starter on401 and a
+starter at2333 on402, no wins or Route1. Original controls are explicitly
+shared, not new independent trials. Source reports are
+visual-plasticity-rule-gameplay-20260919T021258Z-d86466 and
+...T021258Z-dd13aa. Raw-evidence audits/derived baselines are
+derived-game-baseline-20260919T022738Z-51cd29 and ...T022740Z-07a33c.
+More balanced buttons did not establish useful progression.
+
+The normal launcher now remembers its OWN model/ROM history: a bare launch
+resumes brain and game; -Intro repeats the whole game retaining its synapses;
+-FreshBrain is an explicit reset. It never selects the newest research brain.
+CPU and CUDA application tests prove automatic resume equals uninterrupted
+gameplay, and automatic retained new-game learning equals explicit weight
+loading. Actual user history and prior source checkpoints remain unchanged.
+Evidence: normal-history-smoke-20260919T015516Z-b17e44 and
+...T020700Z-1ef1bb; full verification491 Python/26 JavaScript/lint passes
+(verify-e593caaceda54b2489b6e84f95bf5170). This fixes persistence, not learning
+quality. The showcase physical-model default remains visual-release-wide-v3.
+
+The optional v9 fixed-reference model is now calibrated using ONLY generic
+images, with exact original intrinsic biases and synapses preserved. Its
+live-ROM exact-resume/frozen/no-reward smoke passes, as does the unchanged
+default. The registered two-seed paired/shuffled visual-memory assays are
+RUNNING; no v9 memory or gameplay success is claimed. Assay-trained synapses
+will never be used in Pokemon. Browser-rendered layout QA remains unavailable.
+
 ## Whole-game practice completed; retained tests running, 2026-09-19 00:49 UTC
 
 Both v7 flies completed a second 18,000-decision fresh game with their own

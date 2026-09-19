@@ -1,5 +1,35 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 02:29 UTC: v8 6k development games COMPLETE, criterion FAILED.
+401:239 positions, no starter/battle/Route1.402:208 positions, starter2333,
+no victory/Route1. Neither matches the registered both-starters OR completed
+victory/Route1 gate. Do not spend4201/4202 practice or3901/3902 retention on
+this failed screen. No promotion or best-checkpoint selection. Raw starts,
+all-fly actions, configurations, final checkpoints and original-control
+prefixes revalidated by derived-game-baseline-20260919T022738Z-51cd29 (401)
+and ...T022740Z-07a33c (402); these are audited compositions, not new trials.
+Final brain hashes07b959a9a6ce49bd41b9b184ea2d0fccded014b8e3f739900ecd2faf709ad2ea
+and6a597e0a4326d9f90835f2529032ba0b9ced82f93d02987cfaff4cdec6eadefc.
+Both GPU sessions55468/78633 exited and were drained.
+
+V9 generic collection COMPLETE, exactly the registered7201 protocol:
+generic-release-reference-20260919T022608Z-c74a2a.16,384 measured neural steps,
+no game/reward/buttons, original synapses and exact intrinsic payload unchanged.
+New asset SHA256 b9c6c6718c6dd9cb3fa63df70dd5415ba5d7586638ff02ec297bebafc82717f6.
+Real-ROM CUDA smoke PASSED for v9 (internal-smoke-20260919T022723Z-ddfd48)
+and unchanged default (...T022635Z-3a0bbb), exact resume and both no-learning
+controls included. Collection24079 and smoke40776/83506 exited/drained.
+
+CURRENT ONLY TWO GPU JOBS: registered ROM-free v9 paired/shuffled curves.
+501 session40118, visual-learning-curve-20260919T022816Z-f4889e;
+601 session20407, visual-learning-curve-20260919T022817Z-297315.
+Checkpoints512/2048/8192; all final arms subsequently held-out9001..9004,
+same existing two-seed gate. Synthetic learned weights NEVER enter gameplay.
+If passed, use the two newly derived v8 baselines for the registered v9
+one-reference-factor full-game tests; all later4301/4302 and4401/4402 rules
+remain unchanged. No third GPU job. Normal-history source is committed and
+pushed as826c1ef; no user checkpoint/history was adopted by verification.
+
 2026-09-19 02:15 UTC: CURRENT TWO GPU JOBS, registered v8 full-new-game6k
 rule tests.401 session55468, report visual-plasticity-rule-gameplay-20260919T021258Z-d86466,
 actual internal-learn-20260919T021311Z-beeb25, dashboard127.0.0.1:59200.

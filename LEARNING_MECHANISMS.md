@@ -59,6 +59,20 @@ Our inference: internal predictive memory may ultimately be needed for more
 reliable delayed credit. That is not evidence that it explains the current
 failures; motor bias, visual representation and credit noise are alternatives.
 
+The Bennett model is specifically not a ready-made temporally extended critic:
+its Discussion distinguishes its trial-level Rescorla-Wagner model from a
+future time-resolved TD extension. Copying its cue-choice procedure would also
+not demonstrate control through this project's unchanged motor neurons.
+[Bennett et al., Discussion, Prediction 1](https://pmc.ncbi.nlm.nih.gov/articles/PMC8105414/).
+
+An additional reduced incentive-circuit model provides type-level memory-loop
+identities and source code, but explicitly includes inferred connections and
+behavioral readout assumptions. Its anatomical tables are useful for checking
+which existing cells/edges can support a hypothesis, not a license to relabel
+MBONs as Pokemon buttons or add a separate action selector. No code or learned
+weights from that model are deployed here.
+[Gkanias et al., 2022](https://elifesciences.org/articles/75611).
+
 ## Constraints on a future investigation
 
 First finish the registered whole-game retained tests and the queued internal
