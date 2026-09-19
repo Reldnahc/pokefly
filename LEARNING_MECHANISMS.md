@@ -96,6 +96,20 @@ No reward values, learning parameters or registered current tests were changed
 by this inspection. Any future reward-scale assay must be separately declared,
 retain shuffled controls, and never export synthetic weights to Pokemon.
 
+The ROM-free `probe_visual_curve.py` now accepts `--correct-reward` (positive,
+finite, default1.0). For example,0.05 tests the existing tile-reward amplitude,
+but still does NOT reproduce the game's sparse, delayed reward schedule.
+Continuation cannot silently change that amplitude. The retention auditor
+also refuses to pool different correct/incorrect feedback strengths; old
+reports without these fields retain their original1.0/0.0 semantics.
+This is measurement infrastructure only. No non-unit assay has been run,
+no synthetic weights enter gameplay, and both the active v10 protocol and
+conditional v11 protocol still use their previously registered unit reward.
+CPU-only regression530 Python/26JavaScript/lint passes
+(verify-9e4dc6bdd8b94ac8a71814f8aaf4ec3c). Re-auditing the SAME completed v10
+memory panels still passes, visual-retention-gate-20260919T043929Z-b1c63b;
+this is not a new neural trial or independent replication.
+
 First finish the registered whole-game retained tests and the queued internal
 homeostatic candidate. The latter addresses accumulated mean-input bias, not
 long-horizon prediction. Its numerical success is not behavioral success.

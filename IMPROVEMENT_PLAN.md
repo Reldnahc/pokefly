@@ -1,5 +1,15 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 04:39 UTC: WHOLE-game practice continues ONLY51191/41934;
+~6,100/18,000 each, no resets.4501 has starter3012, battle3481 and completed
+rival win, back outside level6.4502 still no starter. No Route1 yet. These
+different-seed practice observations do NOT establish improvement against
+their initial attempts. Finish both, then unchanged4601/4602 held-out panels.
+Added an assay-only --correct-reward option and reward-dose provenance checks;
+default1.0 and all registered current/fallback tests UNCHANGED. No small-dose
+neural assay run. CPU verification530Python/26JS/lint passes;36437 exited.
+Re-audit of existing v10 cue data still passes, ...T043929Z-b1c63b; not new data.
+
 2026-09-19 04:24 UTC: v10 initial6k matched pairs COMPLETE and audited,
 full-game-pair-audit-20260919T042349Z-a5210f. Learners BOTH starters and
 completed rival wins; originals BOTH no starter/win. No Route1/capture/badge.

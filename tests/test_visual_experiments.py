@@ -19,7 +19,10 @@ def write(path, value):
     path.write_text(json.dumps(value))
 
 
-def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(tmp_path, monkeypatch):
+@pytest.mark.parametrize("reward", [1.0, 0.05])
+def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(
+    tmp_path, monkeypatch, reward,
+):
     module = script(monkeypatch, "probe_visual_curve")
     source, output = tmp_path / "source", tmp_path / "output"
     output.mkdir()
@@ -32,6 +35,7 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(tmp_pa
             "seed": 5,
             "checkpoints": [32],
             "reverse_mapping": False,
+            **({"correct_reward": reward} if reward != 1.0 else {}),
             "pretest": records,
             "status": "completed",
             "rows": [
@@ -89,6 +93,8 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(tmp_pa
             "--allow-reversal",
             "--same-start-reversal",
             "--reverse",
+            "--correct-reward",
+            str(reward),
             "--checkpoints",
             "64",
         ],
@@ -97,6 +103,7 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(tmp_pa
     assert restored[0] == restored[2] == 2  # Both arms, not control's old weight 9.
     report = json.loads((output / "report.json").read_text())
     assert report["status"] == "completed"
+    assert report["correct_reward"] == reward
     assert report["same_acquired_start_for_both_reversal_arms"]
     assert (
         report["pre_reversal_scores"]["paired"]
@@ -105,10 +112,27 @@ def test_same_start_reversal_restores_acquired_paired_state_for_both_arms(tmp_pa
     paired = json.loads((output / "paired-training.json").read_text())
     shuffled = json.loads((output / "unpaired_within_cue-training.json").read_text())
     assert paired[:32] == shuffled[:32]
+    assert {r["reward"] for r in paired[32:]} == {0.0, reward}
     for cue in ("left", "right"):
         assert sorted(r["reward"] for r in paired[32:] if r["cue"] == cue) == sorted(
             r["reward"] for r in shuffled[32:] if r["cue"] == cue
         )
+    source_report = json.loads((source / "report.json").read_text())
+    source_report["correct_reward"] = reward * 2
+    write(source / "report.json", source_report)
+    with pytest.raises(SystemExit):
+        module.main()
+
+
+@pytest.mark.parametrize("reward", ["0", "-0.05", "nan", "inf", "-inf"])
+def test_invalid_assay_reward_rejected_before_creating_brain(monkeypatch, reward):
+    module = script(monkeypatch, "probe_visual_curve")
+    monkeypatch.setattr(
+        module, "InternalBrain", lambda **kw: pytest.fail("Invalid reward started a brain")
+    )
+    monkeypatch.setattr(sys, "argv", ["probe_visual_curve.py", f"--correct-reward={reward}"])
+    with pytest.raises(SystemExit):
+        module.main()
 
 
 def test_game_continuation_restores_both_final_modes_without_intro(tmp_path, monkeypatch):

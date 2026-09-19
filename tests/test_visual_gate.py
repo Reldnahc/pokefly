@@ -115,3 +115,39 @@ def test_provenance_audit_rejects_unregistered_weights(tmp_path, monkeypatch):
     (path / "report.json").write_text(json.dumps(report))
     with pytest.raises(ValueError, match="registered final neural state"):
         m.audit_reports([path])
+
+
+@pytest.mark.parametrize("key,value", [("correct_reward", 0.05), ("incorrect_reward", -0.05)])
+def test_different_assay_feedback_cannot_be_pooled(tmp_path, monkeypatch, key, value):
+    m = module(monkeypatch)
+    a, b = artifact(m, tmp_path, 501), artifact(m, tmp_path, 601)
+    report = tmp_path / "curve-601" / "report.json"
+    source = json.loads(report.read_text())
+    source[key] = value
+    report.write_text(json.dumps(source))
+    with pytest.raises(ValueError, match="different circuits or retention protocols"):
+        m.audit_reports([a, b])
+
+
+def test_explicit_historical_assay_rewards_match_legacy_defaults(tmp_path, monkeypatch):
+    m = module(monkeypatch)
+    a, b = artifact(m, tmp_path, 501), artifact(m, tmp_path, 601)
+    report = tmp_path / "curve-601" / "report.json"
+    source = json.loads(report.read_text())
+    source.update(correct_reward=1.0, incorrect_reward=0.0)
+    report.write_text(json.dumps(source))
+    result = m.audit_reports([a, b])
+    assert result["passed"]
+    assert result["assay_rewards"] == {"correct": 1.0, "incorrect": 0.0}
+
+
+@pytest.mark.parametrize("reward", [0.0, -0.05, float("nan"), float("inf")])
+def test_audit_rejects_invalid_correct_reward(tmp_path, monkeypatch, reward):
+    m = module(monkeypatch)
+    a = artifact(m, tmp_path, 501)
+    report = tmp_path / "curve-501" / "report.json"
+    source = json.loads(report.read_text())
+    source["correct_reward"] = reward
+    report.write_text(json.dumps(source))
+    with pytest.raises(ValueError, match="assay reward strengths"):
+        m.audit_reports([a])

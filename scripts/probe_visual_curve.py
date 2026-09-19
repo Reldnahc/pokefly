@@ -40,6 +40,12 @@ def main():
     )
     p.add_argument("--cues", nargs=2, default=["left", "right"], choices=tuple(test_patterns()))
     p.add_argument(
+        "--correct-reward",
+        type=float,
+        default=1.0,
+        help="ROM-free assay only: positive feedback strength; does not change game rewards",
+    )
+    p.add_argument(
         "--incorrect-reward",
         type=float,
         default=0.0,
@@ -68,6 +74,8 @@ def main():
     checkpoints = sorted(set(args.checkpoints))
     if not checkpoints or checkpoints[0] < 32:
         p.error("Positive training checkpoints >=32 required")
+    if not np.isfinite(args.correct_reward) or args.correct_reward <= 0:
+        p.error("Correct-choice feedback must be positive and finite")
     if not -1 <= args.incorrect_reward <= 0:
         p.error("Incorrect-choice feedback must be between -1 and 0")
     output = run_directory("visual-learning-curve")
@@ -90,6 +98,7 @@ def main():
             previous_report["seed"] != args.seed
             or (previous_report["reverse_mapping"] != args.reverse and not args.allow_reversal)
             or checkpoints[0] <= starting_step
+            or previous_report.get("correct_reward", 1.0) != args.correct_reward
             or previous_report.get("incorrect_reward", 0.0) != args.incorrect_reward
             or tuple(previous_report.get("cue_images", ["left", "right"])) != cues
             or tuple(previous_report.get("rewarded_button_pair", ["left", "right"])) != buttons
@@ -102,6 +111,7 @@ def main():
         "config": str(args.config),
         "seed": args.seed,
         "reverse_mapping": args.reverse,
+        "correct_reward": args.correct_reward,
         "incorrect_reward": args.incorrect_reward,
         "cue_images": cues,
         "rewarded_button_pair": buttons,
@@ -179,7 +189,7 @@ def main():
             pressed = pressed_buttons(action)
             reward = (
                 (
-                    1.0
+                    args.correct_reward
                     if target in pressed
                     else args.incorrect_reward
                     if set(buttons) & set(pressed)
