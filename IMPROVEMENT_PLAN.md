@@ -1,5 +1,36 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 03:55 UTC: v10 independent memory gate PASSED BOTH training seeds.
+Audit visual-retention-gate-20260919T035407Z-fc016f, ALL final8192 arms on
+9101..9104. Original41.93%; paired50164.47%,60164.77%; shuffled36.60%/40.46%.
+Paired cue accuracies65.22%/63.72% and65.91%/63.64%; all preset thresholds met.
+This establishes generic retained association, NOT Pokemon learning. Retention
+sessions38475/26864 exited/drained. Full CUDA regression527 Python/26JS/lint
+passes (verify-007236faea4e4bc6bd7130f2d263d1f2),46583 exited/drained.
+
+CURRENT ONLY TWO GPU JOBS: registered v10 full-new-game6k learn/frozen pairs.
+401 learn-first session31236, visual-model-gameplay-20260919T035425Z-9d7a07;
+actual learning internal-learn-20260919T035428Z-c404bf, dashboard59210.
+402 frozen-first session34878, visual-model-gameplay-20260919T035447Z-db11a0;
+first original control internal-frozen-20260919T035450Z-5c0d58, later dashboard59212.
+ALL begin with original synapses and ordinary scripted intro, no loaded game
+state or assay weights. Validate repeated originals against historical401/402
+and label them SHARED controls, not independent replications. Follow the
+predeclared6k development gate, then4501/4502 practice and4601/4602 retention
+if passed. V11 fallback remains UNRUN unless a v10 gameplay/retention gate fails.
+
+2026-09-19 03:42 UTC: v10 BOTH curves COMPLETE;16990/52362 exited/drained.
+Final small paired/shuffled balanced scores:50165.30%/38.15%,60166.22%/39.04%.
+These are preliminary probes, not the independent recall gate.
+CURRENT ONLY TWO GPU JOBS: ALL final original/paired/shuffled frozen recall
+on9101..9104.501 session38475, visual-retention-probe-20260919T034213Z-71e281;
+601 session26864, visual-retention-probe-20260919T034227Z-f3a85a.
+After BOTH finish, run summarize_visual_retention.py over both reports.
+No v10 game run yet; if passed follow the registered6k401/402 queue below.
+V11 remains conditional/unrun. Source-only progress-screen commited/pushed
+ed014fe. Browser bootstrap now responds but reports the in-app browser absent;
+troubleshooting guidance read, no page interaction/rendered verification possible.
+
 2026-09-19 03:34 UTC: v10 paired8192 COMPLETE on both curves; small final
 probes65.30%/66.22% balanced. Shuffled arms continue in16990/52362, still
 the ONLY TWO GPU jobs. Finish all final arms before9101..9104 retention.

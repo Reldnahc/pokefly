@@ -1,5 +1,36 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Slower fixed-reference recall passes, 2026-09-19 03:55 UTC
+
+V10 changes only v9's update rate0.2->0.02. Its final8,192-decision brains
+pass the prospectively specified independent recall gate on both training seeds,
+with learning OFF, reset transient activity and four fresh noise seeds9101..9104.
+Scores are balanced accuracy conditional on Left/Right choices, not accuracy
+over all buttons and not Pokemon performance.
+
+| Training seed | Original | Rewarded | Shuffled | Rewarded left/right cue |
+| --- | ---: | ---: | ---: | --- |
+|501|41.93%|64.47%|36.60%|65.22% /63.72%|
+|601|41.93%|64.77%|40.46%|65.91% /63.64%|
+
+Both meet60% balanced,55% on each cue and five-point advantages over EACH
+control. The repeated original is shared, not another replication. No better
+intermediate checkpoint was selected. Audit:
+visual-retention-gate-20260919T035407Z-fc016f; complete source panels
+visual-retention-probe-20260919T034213Z-71e281 and ...T034227Z-f3a85a.
+This is retained visual association, not whole-game learning or proof of a
+biologically validated dopamine rule. The older/faster v9 failure still stands
+under its documented thresholds; the noise panels differ between those variants.
+
+The registered literal-application6k learn/frozen games now run on401/402,
+with opposite arm order, fresh original synapses and whole-game starts.
+No synthetic-test weights are loaded. Reports:
+visual-model-gameplay-20260919T035425Z-9d7a07 and ...T035447Z-db11a0.
+These gameplay results are pending; v10 is NOT the showcase default.
+Full CUDA-inclusive verification527 Python/26JavaScript/lint passes
+(verify-007236faea4e4bc6bd7130f2d263d1f2). This is software verification,
+not a gameplay result. The normal launcher remains visual-release-wide-v3.
+
 ## Prospective whole-game scoring, 2026-09-19 03:34 UTC
 
 The optional screen_game_retention.py re-audits complete fresh-game panels

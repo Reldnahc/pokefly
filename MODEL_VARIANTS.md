@@ -1061,7 +1061,12 @@ The conditional `visual-wide-anchored-slow-v10.json` fallback changes ONLY the
 synaptic learning rate from0.2 to the established0.02 rate, reusing the exact
 v9 reference. Its real-ROM exact-resume/frozen/no-reward smoke passes:
 internal-smoke-20260919T030819Z-2b6041. Its two paired/shuffled memory curves
-are now running after v9 failed; no memory gate or gameplay success is claimed.
+and independent frozen9101..9104 recall panels are complete. Both pass the
+registered generic-association gate: paired64.47%/64.77%, original41.93%,
+shuffled36.60%/40.46%, with both individual cues above55%. Audit
+visual-retention-gate-20260919T035407Z-fc016f. Full-new-game401/402 comparisons
+are now running with original synapses, not assay weights. No gameplay benefit
+or default promotion is claimed.
 The full protocol is registered in IMPROVEMENT_PLAN.md. It never loads a
 differently trained model or uses a favorable intermediate assay checkpoint.
 
