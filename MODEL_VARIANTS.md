@@ -1079,7 +1079,7 @@ evidence at a finite training budget, not proof that longer training cannot help
 The full protocol is registered in IMPROVEMENT_PLAN.md. It never loads a
 differently trained model or uses a favorable intermediate assay checkpoint.
 
-## Strong-vision likelihood candidate (v11; calibration running, not promoted)
+## Strong-vision likelihood candidate (v11; memory tests running, not promoted)
 
 `visual-wide-score-v11.json` combines the existing `sensorimotor-score-v2`
 local spike-likelihood rule with the current calibrated visual model. It keeps
@@ -1106,5 +1106,10 @@ our logistic hard-reset neurons and bounds differ from that paper's model.
 The plan predeclares generic sanity checks, both memory controls, and whole-game
 practice/retention; no battle-start practice and no synthetic game initialization.
 This queue was activated after the completed v10 gate failed on September19.
-Neutral calibration is running in intrinsic-probe-20260919T064348Z-ed09ca;
-no v11 behavioral result is available yet.
+Neutral calibration completed in intrinsic-probe-20260919T064348Z-ed09ca and
+passes the preset sanity checks: all mapped motor reset rates0.8626..1.2044Hz,
+finite activity, KC/MBON means below10Hz. Asset SHA256:
+6e899a4add8da3781a232eb100e847a508bd169d5965f8637da14c82067b9e43.
+The real-ROM exact-resume/frozen/no-reward smoke passes in
+internal-smoke-20260919T064635Z-d52285. Two paired/shuffled memory curves501/601
+are now running; no completed v11 behavioral result or gameplay claim yet.

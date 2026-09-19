@@ -1,5 +1,24 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 06:50 UTC: v11 neutral calibration COMPLETE and sanity PASS:
+reset301/302/303 motor rates0.8626..1.2044Hz, finite/KC/MBON limits pass.
+AssetSHA6e899a4add8da3781a232eb100e847a508bd169d5965f8637da14c82067b9e43.
+Calibration99164 exited. Actual-ROM smoke internal-smoke-20260919T064635Z-d52285
+passes exact20-decision resume/all arrays and rewards, frozen/no-reward weight
+invariance, retained-weight current effect, sparse-reference propagation and
+unchanged ROM;63845 exited. This is software stability, not gameplay learning.
+
+CURRENT ONLY TWO GPU JOBS: v11 paired/shuffled visual curves, sessions65056
+and24345. Seed501=visual-learning-curve-20260919T064743Z-94f579;
+seed601=visual-learning-curve-20260919T064743Z-c975ab. Registered512/2048/8192,
+unit correct/zero incorrect rewards, default left/right cues/buttons unchanged.
+Finish BOTH ALL arms, then final8192 recall panels on9201..9204,128neutral+
+128/cue; summarize_visual_retention.py applies the same registered two-seed
+gate. Do not select an intermediate peak or import any assay weight into a
+game. If qualified follow the03:24 v11 whole-game36k/4801/4802 protocol below.
+Process audit06:49 confirms only these2 workers plus venv launchers, no agents.
+Latest full suite554Python/26JS/lint. Normal default and user history unchanged.
+
 2026-09-19 06:44 UTC: BOTH v10 frozen18k panels COMPLETE;53942/88470
 exited/drained. Raw checkpoint/trajectory/ancestry audit and registered screen:
 game-retention-progress-screen-20260919T064322Z-3b8eec, BOTH lineages FAIL.
