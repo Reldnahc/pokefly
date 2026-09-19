@@ -1,5 +1,35 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Third additional whole-game attempts complete, September 19, 09:37 UTC
+
+Both histories now have 78,000 training decisions across FIVE whole games.
+Both automatically started their final registered fresh-game attempt, retaining
+their own final synapses. Results remain mixed; training seeds differ, so these
+are not controlled before/after measurements of learning.
+
+| Added attempt | Positions | Starter | First battle | Rival wins | Route1 |
+| --- | ---: | ---: | ---: | ---: | --- |
+|61003|317|not reached|not reached|0|no|
+|62003|343|17163|17300|1|no|
+
+The rival win at decision 17933 is independently checked by replaying the
+ENTIRE recorded opening: all 18,000 sampled states/rewards match. The player
+survived with 16 HP, the enemy had zero HP, and faint/trainer/end hooks agree.
+Artifact: `recorded-outcome-latency-20260919T093441Z-8d3f99`; trajectory SHA256
+`1f74af5ff82c9b3c6379ef0596a4e195319f4b4b54bb115b2b0aff0fc3b0dd5e`.
+This is an audit, not a new autonomous win or a battle-practice episode.
+
+The final accepted move at 17888 precedes reward by 45 decisions / 10.8 neural
+seconds. Passive decay of an isolated 0.6-second trace contribution is 1.52e-8,
+not a measurement of net eligibility or proof that this move caused the win.
+The victory reward was delivered correctly; no reward changes were made.
+
+Final training attempts are `internal-learn-20260919T093342Z-4ecfde` (61004)
+and `internal-learn-20260919T093400Z-c33016` (62004). The registered comparison
+still uses BOTH final 96k brains, BOTH preserved 24k parents, and a shared
+original on held-out seeds63001/63002. No favorable middle checkpoint or normal
+default promotion. Independent same-family confirmation remains required.
+
 ## Second additional whole-game attempts complete, September 19
 
 Each history now has 60,000 completed training decisions across FOUR full games.

@@ -1,5 +1,52 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 09:37 UTC: THIRD additional attempts COMPLETE; each history now
+has78k decisions/FIVE whole games. ONLY TWO GPU JOBS remain90734/44677 and
+automatically run the FINAL additional attempts:
+61004 internal-learn-20260919T093342Z-4ecfde, port59320;
+62004 internal-learn-20260919T093400Z-c33016, port59322.
+Both configs confirm intro=true/load_state=null and their own preceding final
+weights. Finish BOTH, then final96k/SIX-game five-arm63001/63002 panels below.
+Use ALL four checkpoints plus shared original; same-child63003/63004 only if
+the predeclared extension gate passes. No model/reward/default change.
+
+61003 internal-learn-20260919T085309Z-b5d8b1:317 positions, no starter/battle;
+checkpoint step-00018000-ef2acc7b, brain SHA256
+7cd483ae90768a6e61385af6aa432875213e16752ff695b95691d2a7d5e15efd.
+62003 internal-learn-20260919T085324Z-a917a0:343 positions, starter17163,
+first battle17300, rival WIN17933; level6, no Route1/capture/badge.
+Checkpoint step-00018000-9c412ea7, brain SHA256
+e01d764a4e88679ee650d2f5d16f72673f26c71224af8ceeda8705f0b54e1a09.
+These are different training seeds, NOT matched retained-learning evidence.
+
+Whole-opening CPU replay62003 COMPLETE, all18k states/rewards exact:
+recorded-outcome-latency-20260919T093441Z-8d3f99, trajectory SHA256
+1f74af5ff82c9b3c6379ef0596a4e195319f4b4b54bb115b2b0aff0fc3b0dd5e.
+Win17933: rawresult0, player16/enemy0, living party and faint/trainer hooks.
+Last accepted move17888 -> reward45 decisions/10.8 neural seconds; isolated
+0.6s decay1.523e-8 is NOT measured net eligibility or proof of causality.
+Seven accepted moves: six slot0/id10, one slot1/id45. This is a recording audit,
+not another autonomous trial or selected-stage training.47619 exited/drained.
+
+CPU-only checkpoint saturation read: both24k,42k,60k histories have zero edges
+within1e-5 of the individual0.25/4.0 factor bounds. Median absolute factor
+change at60k is0.06163/0.06184; no broad individual-bound saturation, but this
+does not measure useful learning or eliminate resource-constraint effects.
+No new neural diagnostic queued. Browser skill retry09:34/09:36 still reports
+iab unavailable; no rendered UI QA. Current code tests599CPU/26JS/lint, latest
+full CUDA575 predates34 assay-only tests. Full suite needs a free GPU slot.
+
+2026-09-19 09:14 UTC: same TWO GPU jobs90734/44677 continue61003/62003 (paths
+below), both around9k with no starter/battle/Route1 yet. No other neural job.
+Read-only wiring count: A233 positive edges, B842; direct positive inputs from
+visual_projection A0/B321 (Up3/Down0). This is NOT functional response/capacity
+evidence. All193 intrinsic A parents already occur in the existing DN-based
+one-hop scope; no missing-A-parent bug was found. LEARNING_MECHANISMS.md records
+the limits. No model, reward, scope or mapping change and no new study queued.
+Latest source-only push1a351ae records the second attempts. Current worktree
+changes are these new documentation notes only. Continue the registered96k
+whole-game study and final five-arm63001/63002 comparison as below.
+
 2026-09-19 08:58 UTC: second additional attempts COMPLETE; each history now
 has60k training decisions/four whole games. CURRENT ONLY TWO GPU JOBS are still
 series90734/44677, automatically on THIRD additional attempts:

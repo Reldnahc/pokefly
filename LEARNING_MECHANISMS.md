@@ -34,6 +34,41 @@ study. CPU regression: 599 Python tests, 26 JavaScript tests and lint,
 `verify-cfd77e710d704809af5c378822176f81`. The current whole-game extension and
 its retained tests retain priority; no delayed neural assay has run.
 
+### Command-channel evidence gap and read-only wiring check
+
+The strong-v10 association result tests left/right choices. The recorded older
+A/B and Up/Down failures used weaker-vision models; they do not establish the
+current model's command-channel capacity. No strong-v10 A/B assay has run.
+
+A CPU-only count of the installed original sparse graph (25,582,938 edges;
+166,700 neurons) finds 233 positive incoming edges to the two mapped A cells
+and 842 to the two B cells. Of these, B has 321 edges from neurons classified
+as visual_projection; A has none from that superclass. A nevertheless has
+positive inputs from descending, intrinsic, ascending and other motor cells:
+indirect visual information is possible. The mapped Up cells likewise have
+only three direct positive visual_projection inputs, and Down has none. These
+are graph/sign-classification counts, NOT measured response strengths or proof
+that any channel lacks usable vision or learning capacity.
+
+All 193 intrinsic neurons with direct edges into A are also parents of some
+descending neuron. Thus the existing optional DN-based one-hop plastic scope
+already includes those neurons; changing its selection to mention A would not
+by itself add this missing layer. No scope, weight, neuron or mapping was
+changed by the check. The fixed-neutral-screen motor-drift probe could test
+tonic activity after training, but it does not test A/B cue discrimination or
+gameplay skill. None of these observations changes the active whole-game
+extension protocol or constitutes a queued new neural study.
+
+### Individual weight limits are not broadly saturated
+
+A read-only CPU check of both families' completed 24k, 42k and 60k checkpoints
+finds zero of 495,962 plastic edges within 1e-5 of either individual factor
+limit (0.25 or 4.0). At 60k, median absolute changes from original factors are
+0.06163 and 0.06184; factor ranges are 0.25007..2.09829 and 0.25451..2.13254.
+Thus wholesale clipping at individual bounds is not observed in these saved
+brains. This does not exclude transient clipping, mean-input/resource limits,
+tonic motor drift, or ineffective learning. It is not another neural trial.
+
 ## What the current fly learns
 
 The wide-v3 showcase and timing-only v7 candidate modify existing positive
