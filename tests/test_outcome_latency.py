@@ -77,6 +77,41 @@ def test_move_history_does_not_cross_encounters(monkeypatch):
     assert m.summarize_outcomes(rewards, 12, .6)[0]["last_confirmed_move"] is None
 
 
+@pytest.mark.parametrize("timing", ["encounter-end-v1", "last-faint-v3"])
+@pytest.mark.parametrize("won", [True, False])
+def test_end_observer_keeps_unrewarded_encounters_and_never_changes_game_or_reward(
+    monkeypatch, timing, won,
+):
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    m = importlib.import_module("audit_outcome_latency")
+    memory = np.zeros(65536, np.uint8)
+    hp = 20 if won else 0
+    for address, value in {0xD057: 2, 0xD031: 25, 0xD163: 1, 0xD16D: hp,
+                           0xD016: hp, 0xD89C: 1, 0xCF0B: int(not won),
+                           0xCFE7: 0 if won else 15}.items():
+        memory[address] = value
+    original_memory = memory.copy()
+    config = RewardConfig(timing=timing)
+    observer = m.TimedRewards(config, lambda: 100)
+    control = m.GeneralRewards(config)
+    events = ["start", *(["faint", "trainer_win"] if won else []), "end"]
+    for name in events:
+        observer.event(name, memory)
+        control.event(name, memory)
+        assert observer.state() == control.state()
+        np.testing.assert_array_equal(memory, original_memory)
+    end = observer.history[1][-1]
+    assert end["hook"] == "end"
+    assert end["battle_result_raw"] == int(not won)
+    assert end["party_alive"] == won
+    assert end["player_hp"] == hp
+    assert end["enemy_hp"] == (0 if won else 15)
+    assert end["trainer_victory_observed"] == won
+    assert end["enemy_faint_observed"] == won
+    assert end["captured_species"] == 0
+    assert bool(observer.outcomes) == won
+
+
 @pytest.mark.parametrize("valid", [True, False])
 def test_move_observer_validates_rom_block_before_hooking(monkeypatch, valid):
     monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))

@@ -25,6 +25,14 @@ other activity, establish which move caused the win, or establish an effective
 replacement time constant. Both replays reproduce every logged state/reward;
 see the 00:49 UTC entry in `FOLLOWTHROUGH_RESULTS.md` for evidence paths.
 
+A later whole-opening replay of v10 practice4501 finds50 decisions/12 neural
+seconds between final accepted move and its legacy encounter-end victory
+reward. An isolated0.6-second contribution would retain2.061e-9, again not a
+measurement of the net trace after intervening activity. The reward itself is
+correct and the loss in practice4502 is independently verified with zero player
+HP/no surviving party. See the05:20 UTC follow-through entry. Current frozen
+tests are unchanged; this does not demonstrate that timing alone is a solution.
+
 The installed metadata includes 4,064 KC-prefixed cells, 97 MBON-prefixed cells,
 316 PAM-prefixed cells and 16 PPL1-prefixed cells. Merely containing these cells
 does not implement their biological memory mechanisms. The active sensorimotor

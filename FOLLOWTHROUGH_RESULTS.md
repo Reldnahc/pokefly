@@ -1,5 +1,40 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Actual practice outcomes replay-verified, 2026-09-19 05:20 UTC
+
+CPU-only playback from EACH original game opening reproduces all18,000 sampled
+states and rewards exactly, with the recorded buttons. No brain trains, no new
+actions are selected, and neither playback starts at a battle. These are audits
+of the existing practice data, not additional autonomous wins or trials.
+
+4502's unrewarded rival encounter ended at11,209: raw result1, no surviving
+party, live player HP0, enemy HP5, and no enemy-faint/trainer-victory hook. It was
+a real loss, not a missing victory reward.4501's reward at4,387 has raw result0,
+surviving party, enemy HP0 and both victory evidence hooks; the encounter ends.
+Artifacts: recorded-outcome-latency-20260919T051643Z-aaf9e2 (4502) and
+...T051803Z-9142dd (4501).
+
+Accepted menu choices were9 Growl/5 Scratch in the loss and7 Tail Whip/5 Tackle
+in the win. Move IDs and the non-damaging attack/defense-lowering effects are
+checked against [pinned move constants](https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/constants/move_constants.asm)
+and [move definitions](https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/data/moves/moves.asm).
+These choices/outcomes do not establish tactical understanding or their causal
+contribution; different starter/opponent behavior and game randomness matter.
+
+The win's final accepted move at4,337 precedes reward by50 decisions/12 neural
+seconds. An isolated0.6-second trace contribution would decay to2.061e-9;
+this is passive decay, NOT the measured total eligibility or gradient. Earlier
+reward delivery alone already failed the older v7 whole-game retention test.
+Do not silently change v10, queued v11, rewards, or the current held-out tests
+based on this descriptive observation. It remains an important credit concern.
+
+The observer now keeps end-state/history for unrewarded encounters as well as
+rewarded ones. Four fixtures verify it changes neither memory nor reward state;
+CPU-only regression534Python/26JavaScript/lint passes
+(verify-fc6542f76382446da505dbbe01b7c842). No runtime brain/game code changed.
+Both CPU playback sessions66759/55797 exited/drained. ONLY GPU panels53942/88470
+continue, unchanged; no retained-performance result or default promotion yet.
+
 ## Whole-game practice complete; retained comparison running, 2026-09-19 05:09 UTC
 
 Both v10 lineages carried their final6k synapses into a fresh18k-decision game,

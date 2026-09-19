@@ -1,5 +1,17 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 05:20 UTC: ONLY GPU panels53942/88470 continue from05:09 below.
+Observer-only end-state audit added;534 CPU tests/26JS/lint passes,51674 exited.
+CPU whole-opening recorded-button playbacks both verified18k exact states and
+rewards;66759/55797 exited.4502 actual loss: playerHP0/enemy5/no living party,
+end11209, no victory evidence.4501 completed win4387 confirmed. Winning last
+accepted move4337->reward4387:50 decisions/12 neural seconds, isolated.6s
+trace passive fraction2.061e-9 (NOT net trace/credit). Audit artifacts
+recorded-outcome-latency-20260919T051643Z-aaf9e2 and ...T051803Z-9142dd.
+No new neural trial, policy input, reward shaping, battle-stage start or model
+change. Current/fallback registered protocols remain unchanged. Useful
+retained whole-game learning is still pending4601/4602, not established.
+
 2026-09-19 05:09 UTC: BOTH v10 WHOLE fresh-game practices COMPLETE18k;
 51191/41934 exited/drained. Both final lineages now24k total training (6k+18k).
 4501:340 positions, starter3020, battle3481, completed rival win/reward4387,

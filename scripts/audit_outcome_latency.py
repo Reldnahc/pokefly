@@ -44,6 +44,18 @@ class TimedRewards(GeneralRewards):
             return
         history = self.history.setdefault(encounter["id"], [])
         marker = {"hook": name, "frame": self.frame_clock(), "sample": self.sample}
+        if name == "end":
+            # Observer-only raw state, including encounters that paid nothing.
+            # Do not infer a win/loss merely from overworld return or no reward.
+            marker.update(
+                battle_result_raw=int(memory[0xCF0B]),
+                party_alive=self._party_alive(memory),
+                player_hp=256 * int(memory[0xD015]) + int(memory[0xD016]),
+                enemy_hp=256 * int(memory[0xCFE6]) + int(memory[0xCFE7]),
+                enemy_faint_observed=encounter["fainted"],
+                trainer_victory_observed=encounter["trainer_won"],
+                captured_species=encounter["captured"],
+            )
         history.append(marker)
         events = self.pending[pending:]
         if events:
@@ -186,6 +198,8 @@ def main():
         "trajectory_sha256": sha256(args.run / "trajectory.jsonl"),
         "verified_samples": len(rows),
         "all_sampled_states_and_rewards_match": True,
+        "new_autonomous_trials": False,
+        "neural_training": False,
         "whole_game_start_required": args.whole_game_start,
         "move_confirmations_measured": args.move_confirmations,
         "symbols_revision": SYMBOLS_REVISION,
@@ -193,6 +207,10 @@ def main():
         "measurement_limit": "Hook-to-reward timing, not a measured neural credit contribution",
         "neural_dt_seconds": 0.02,
         "outcomes": results,
+        "encounter_histories": [
+            {"encounter": encounter, "history": history}
+            for encounter, history in rewards.history.items()
+        ],
     }
     write_json(output / "report.json", report)
     print(json.dumps(report), flush=True)
