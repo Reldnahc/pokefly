@@ -1,5 +1,43 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 08:15 UTC: first additional WHOLE-game attempts COMPLETE; both
+series automatically started their second, retaining their own final synapses.
+CURRENT ONLY TWO GPU JOBS remain90734/44677. Current61002 is
+internal-learn-20260919T081132Z-a1bc26 (port59320); current62002 is
+internal-learn-20260919T081134Z-b2e06a (port59322). Both configs confirm intro=true,
+load_state=null and their own61001/62001 latest-checkpoint as weights source.
+Allow61002..61004 and62002..62004 to finish, then the same five-arm63001/63002
+parent-versus-child panel. No intermediate checkpoint selection or promotion.
+
+Completed61001:394 positions, starter3699, first battle3903, Route1 first7274,
+no wins/capture/badge. Final checkpoint step-00018000-b5c6ddea, brain SHA256
+07c154ae62c2df2913f7180ceb6bc1a708f7bfc7e36fc723a2db936b5b3cfe90.
+Completed62001:361 positions, starter2337, first battle2610, Route1 first5811,
+no wins/capture/badge. Final checkpoint step-00018000-0157d32c, brain SHA256
+6f5f71a36b318062e1b823d74fc2a711dd915aefbb39015da76cfe59b3572ac1.
+These different training seeds are NOT matched before/after learning evidence.
+
+CPU WHOLE-opening recording audits COMPLETE, every18k state/reward matches.
+61001: recorded-outcome-latency-20260919T081212Z-6c0a04; trajectory SHA
+986539b9ac4b2a71140beecc4b81a6935dfdc0969d070acc2ae89a5ccb68e24c;
+rival loss4641, player0/enemy6, no living party; one wild end7533 rawresult2,
+party alive and no victory evidence.62001: ...T081212Z-fe1d98; trajectory SHA
+f0855712be5f146beafe3feb581dd89d435962dff7d56bb45764f7341807015a;
+rival loss3720, player0/enemy8; nine wild ends rawresult2 with surviving party,
+then wild loss7502/player0/no living party. No missing victory rewards found.
+These are recording audits, not new autonomous trials or battle practice.
+CPU sessions26046/3014 exited/drained. No extra neural job.
+
+Latest source-only push f532fe8 (delay diagnostic/recovery fix), all changes
+committed at08:00. CPU599Python/26JS/lint passes; last full CUDA suite575Python
+predates the34 new observer/assay tests. Browser skill retried08:03/08:04 after
+reading troubleshooting; iab remains unavailable. No rendered UI QA claimed.
+Process check08:05: only two project GPU Python workers10460/15668 plus their
+normal Windows launcher parents33928/36124; no stale test/probe jobs. No kills.
+08:17 integrity audit: ALL10 protected hashes still match the baseline manifest;
+ROM/fly-data/runs remain untracked and ignored. No original data or user history
+was altered by these experiments.
+
 2026-09-19 07:59 UTC: CPU-only diagnostic preparation complete; no new GPU job.
 Added explicit ROM-free reward delay to probe_visual_curve.py, with shared
 assay_feedback.py timing/shuffling helpers and exact recovery. Pending feedback

@@ -1,5 +1,38 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## First additional whole-game attempts complete, 2026-09-19 08:20 UTC
+
+Both first added attempts completed 18,000 decisions, bringing each training
+history to 42,000 decisions across three whole games. Both reached Route1;
+neither won a battle, caught a Pokemon or earned a badge. These are DIFFERENT
+training seeds, not matched before/after evidence that more training helped.
+
+| Added attempt | Positions | Starter | First battle | First Route1 visit | Wins |
+| --- | ---: | ---: | ---: | ---: | ---: |
+|61001|394|3699|3903|7274|0|
+|62001|361|2337|2610|5811|0|
+
+Whole-opening CPU replay reproduces every one of the 18,000 states and rewards
+in each recording. It confirms rival losses at 4641 (61001) and 3720 (62001):
+player HP zero, no surviving party, enemies still at 6/8 HP. The second recording
+also has nine wild encounter ends with surviving party and no victory evidence,
+then a wild loss at 7502. The first has one non-winning wild encounter. Missing
+victory rewards do not explain these outcomes. Replay artifacts:
+`recorded-outcome-latency-20260919T081212Z-6c0a04` and
+`recorded-outcome-latency-20260919T081212Z-fe1d98`. These are recording checks,
+not new autonomous trials or training episodes. Both CPU workers have exited.
+
+The same TWO GPU series automatically started seeds 61002/62002 from their own
+preceding final brains. Their configurations explicitly use a fresh intro,
+retained weights and no selected game state. Current run IDs:
+`internal-learn-20260919T081132Z-a1bc26` and
+`internal-learn-20260919T081134Z-b2e06a`. Both still have three scheduled full
+games to complete, counting the current attempt, before final retained testing.
+
+At 08:17 all ten protected checksums still match, including the ROM, original
+connectome and preserved user run. ROMs, model assets and histories remain
+ignored/untracked. No normal default or user history was changed.
+
 ## Longer whole-game practice active, 2026-09-19 07:40 UTC
 
 The v11 alternative completed its independent memory screen. Training seed 501
