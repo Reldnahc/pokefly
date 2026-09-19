@@ -1,5 +1,15 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 05:57 UTC: same TWO GPU panels53942/88470, still second arms
+(retained4501 on both seeds). Provisional4601: starter3462 vs original3918
+(11.64% sooner), firstbattle4252 vs4001 (later); no victory so far after returning
+to overworld.4602: starter3559, firstbattle3716, rival win1 and firstRoute1=6667,
+then returned to Pallet Town. Its matching original is the pending third arm.
+Do not call this retained progress proof or compare across mismatched seeds.
+All arms must still finish. Source/reference/defaults unchanged. Read-only
+review confirms older delayed-credit failures used different weak-vision/tight-
+bound models, not v10 anchored strong vision. No extra candidate or GPU run.
+
 2026-09-19 05:41 UTC: first arms in BOTH frozen panels COMPLETE18k, panels
 still running ONLY53942/88470.4601 original:379 positions, starter3918,
 battle4001, completed rival win1, no Route1/capture/badge; final

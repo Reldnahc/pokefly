@@ -33,6 +33,15 @@ correct and the loss in practice4502 is independently verified with zero player
 HP/no surviving party. See the05:20 UTC follow-through entry. Current frozen
 tests are unchanged; this does not demonstrate that timing alone is a solution.
 
+Historical delayed-credit failures also have a limited scope. The30-second
+covariance/dual profiles and impulse/noise-dual profiles used
+intrinsic-neutral-v1, uncalibrated hybrid vision and individual0.75..1.25 bounds;
+the noise-dual profile used perturb-v2. They were NOT the stronger calibrated
+visual circuit plus anchored mean-input rule in v10. Their registered failures
+still stand, but do not establish that a strong-vision/anchored delayed variant
+must fail. No such new variant is implemented or run here, and the conditional
+v11 queue has not been changed by this read-only comparison.
+
 The installed metadata includes 4,064 KC-prefixed cells, 97 MBON-prefixed cells,
 316 PAM-prefixed cells and 16 PPL1-prefixed cells. Merely containing these cells
 does not implement their biological memory mechanisms. The active sensorimotor
