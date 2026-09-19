@@ -1065,8 +1065,13 @@ and independent frozen9101..9104 recall panels are complete. Both pass the
 registered generic-association gate: paired64.47%/64.77%, original41.93%,
 shuffled36.60%/40.46%, with both individual cues above55%. Audit
 visual-retention-gate-20260919T035407Z-fc016f. Full-new-game401/402 comparisons
-are now running with original synapses, not assay weights. No gameplay benefit
-or default promotion is claimed.
+are complete: BOTH learners acquired starters and won the rival battle within6k;
+neither matched original acquired a starter. No Route1/capture/badge yet. Audit
+full-game-pair-audit-20260919T042349Z-a5210f validates both completed encounters.
+The originals exactly reproduce historical shared controls, not replications.
+Longer whole-new-game practice with both final brains is underway, followed by
+held-out frozen tests. Retained gameplay benefit is NOT established; no default
+promotion. The first positive games do not replace that required comparison.
 The full protocol is registered in IMPROVEMENT_PLAN.md. It never loads a
 differently trained model or uses a favorable intermediate assay checkpoint.
 

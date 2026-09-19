@@ -1,5 +1,33 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 04:24 UTC: v10 initial6k matched pairs COMPLETE and audited,
+full-game-pair-audit-20260919T042349Z-a5210f. Learners BOTH starters and
+completed rival wins; originals BOTH no starter/win. No Route1/capture/badge.
+401:297 vs268 positions; starter3588,battle4246,victory4572.
+402:191 vs188 positions; starter2363,battle3072,victory3793.
+Both new original controls reproduce ALL6000 physical/action/reward/input
+records and18 common final arrays exactly against historical originals. The
+extra fixed_release_reference is learning-only. Count SHARED controls once.
+Original pair sessions31236/34878 exited/drained. Gate PASSED, not retention
+proof. Source401 final step-00006000-21ab3bc4 brainSHA
+e6bb6fad5e25f7a698627ebfc3c8635e5ae5b979b28213afb0d7161137650669;
+source402 step-00006000-4899389f brainSHA
+b411f6f4167dc48eb340bd6bff51acec94b4ddcaffa4edc69c0f7c7a2fc003a9.
+
+CURRENT ONLY TWO GPU JOBS: longer WHOLE fresh-game practice, each18k,
+using the explicit04:17 amendment below. Final brains will have24k total
+training (initial6k+practice18k), not12k or36k.
+401->4501 session51191, retained-game-series-20260919T042413Z-96b924,
+actual internal-learn-20260919T042416Z-ad59e3, dashboard59220.
+402->4502 session41934, retained-game-series-20260919T042412Z-111c02,
+actual internal-learn-20260919T042415Z-c28307, dashboard59222.
+Both use --defer-evaluation and preserve original sources/checksums; scripts
+validated whole-game ancestry before starting. After BOTH complete, run two
+shared-control panels with ALL final practice brains, one each4601/4602 at18k.
+Then screen_game_retention.py re-audits/computes the predeclared progress gate.
+Reserve4603/4604 confirmation for the SAME winning lineage, keeping all arms.
+Do not promote merely because the initial games succeeded. V11 remains unrun.
+
 2026-09-19 04:17 UTC: EXPLICIT prospective v10 practice-budget amendment,
 BEFORE either4501/4502 practice or4601/4602 retention has started. After the
 registered initial6k pair screen/audit, BOTH saved learning brains will get

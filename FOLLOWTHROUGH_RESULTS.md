@@ -1,5 +1,42 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Two initial full-game rival wins, 2026-09-19 04:24 UTC
+
+The slower fixed-reference v10 candidate completes both registered6,000-decision
+learn/frozen comparisons. All arms began from the same normal intro with original
+synapses. No cue-trained weights, battle saves, routes or extra rewards were used.
+
+| Seed | Learning / original positions | Learning starter | First battle | Completed rival wins, learning / original |
+| --- | ---: | ---: | ---: | ---: |
+|401|297 /268|3,588|4,246|1 /0|
+|402|191 /188|2,363|3,072|1 /0|
+
+Neither original obtained a starter within the budget. Victory rewards arrived
+at4,572/3,793, and BOTH encounters completed; neither is a paid-but-open battle.
+All arms still had no Route1, capture or badge. The audit verifies every raw
+button source, model, starting state and final checkpoint:
+full-game-pair-audit-20260919T042349Z-a5210f. Pair reports are
+visual-model-gameplay-20260919T035425Z-9d7a07 and ...T035447Z-db11a0.
+This is promising within-run evidence, NOT yet retained whole-game improvement.
+
+Both fresh original controls reproduce their historical6k counterparts exactly
+in actions, delivered buttons, neural measurements, rewards and input windows,
+plus ALL18 shared final neural arrays. Only the immutable learning-reference
+array is new. These originals are explicitly SHARED controls, not extra
+independent replications. The candidate did not simply get more Up presses on
+401:1,300 versus1,293 original; similar counts alone do not establish contextual
+learning either. The subsequent frozen retained-brain comparison is necessary.
+
+Before new practice began, the next training budget was explicitly increased
+from6k to18k for BOTH whole-new-game attempts. This gives time beyond the
+opening and acknowledges the game's sparse/small rewards; it does not assume
+that more training must help. Initial comparison data are unchanged, as are
+the reserved18k frozen tests and criteria. Both final learned brains are now
+practicing from the beginning with their own synapses: seeds4501/4502,
+series retained-game-series-20260919T042413Z-96b924 and ...T042412Z-111c02.
+Each will have24k total training before held-out4601/4602 tests. No practice
+result, independent retention benefit or default promotion is claimed yet.
+
 ## Slower fixed-reference recall passes, 2026-09-19 03:55 UTC
 
 V10 changes only v9's update rate0.2->0.02. Its final8,192-decision brains
