@@ -1,5 +1,67 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 00:55 UTC: final clean CPU-only regression passes 420 Python /
+26 JavaScript / lint, `verify-57f958c6c8eb4791a21fa5f5d120acc0`.
+No active child agents. Only GPU sessions 64038/67732 remain; first panel arms
+are around 10,000/18,000. CPU replays and test processes have exited. Original
+3801 has a rival victory; retained_4102 on 3802 has a level-5 starter. These
+different-seed interim arms are NOT a matched comparison; finish all six arms.
+
+2026-09-19 00:49 UTC: CPU move-confirmation replays COMPLETE; session 37997
+exited/drained. Both source 402 victories reproduce all 18,000 sampled states
+and rewards from the whole-game start. Last confirmed move to final-faint
+reward: 8 decisions / 180 game frames / 1.92 neural seconds in its initial
+game; 9 / 209 / 2.16 in practice 4102. At the active 0.6 s eligibility constant,
+an isolated trace impulse decays to 4.08% / 2.73%. This is a passive-decay
+calculation, NOT measured remaining eligibility, causal move attribution or
+proof that extending the trace will help. Earlier long/dual-trace failures
+remain relevant. No new rewards or training episodes were generated.
+Artifacts `recorded-outcome-latency-20260919T004440Z-8c5c7f` and
+`...T004507Z-0776d6`. The accepted move hook is signature-checked against the
+pinned disassembly; the cursor-hover RAM field alone is not a confirmation.
+420 CPU Python tests pass; two line-length lint issues were then fixed, and
+lint plus 26 JavaScript tests pass separately. No CUDA tests were launched.
+
+Practice 4101's first sampled battle is 15,271. Frozen panels 64038/67732
+continue unchanged; do not launch a third GPU job. No new predictive-memory
+model is implemented. Such a proposal needs verified internal anatomy and
+controlled tests, not a trained external critic or invented MBON button labels.
+
+2026-09-19 00:45 UTC: both whole-game practice runs FINISHED at 18,000 decisions.
+Sessions 50606/39030 exited and were drained. Each lineage now has 36,000
+actual-game training decisions across two fresh starts, with unchanged v7.
+
+- Source 401 -> 4101: 204 positions, starter 13,640, reaches rival battle but
+  it is unfinished at cutoff; no victory/Route 1. B in 12,112/18,000 windows.
+  Final `internal-learn-20260919T000217Z-c17cf7/checkpoints/step-00018000-9e259df9`,
+  brain SHA256 `90493985dc1f1bcf9a1d96d13277ebbc1b7ac78645433e8752fe9a425b7455a0`.
+- Source 402 -> 4102: 351 positions, starter 4,822, first sampled battle 4,880,
+  rival victory reward 5,962, final level 6; no Route 1. B in 5,562/18,000 windows.
+  Final `internal-learn-20260919T000218Z-e62826/checkpoints/step-00018000-0af9bc24`,
+  brain SHA256 `457f6ecbfec2ebd8b4942cdf9b44e5c2b5b09781e7df88877ffa0502c906711c`.
+
+These are practice observations on new noise seeds, NOT matched improvements.
+Both registered frozen panels NOW RUNNING, ONLY TWO GPU jobs:
+- 3801: session 64038, `game-retention-panel-20260919T003820Z-25c5e2`.
+  Arm order original, retained_4101, retained_4102. First actual run
+  `internal-frozen-20260919T003823Z-68739b`.
+- 3802: session 67732, `game-retention-panel-20260919T003821Z-6e893d`.
+  Arm order retained_4102, retained_4101, original. First actual run
+  `internal-frozen-20260919T003823Z-30d20e`.
+Each arm gets 18,000 decisions from the same whole fresh game, all weights
+frozen. Do not call a single seed or a partial arm a successful panel. Audit
+BOTH reports afterward with summarize_game_retention_panel.py; reserved
+3803/3804 confirmation if the complete result looks beneficial. V8 stays queued.
+
+CPU-only full-game move-to-outcome replay is session 37997: source 402's two
+recorded victories, never battle-start practice or new wins. It is measuring
+accepted move selection, not the RAM field that also changes on cursor hover.
+Pending; no new timing result yet. The earlier v7 pair audit was recomputed
+with battle-access timings: `full-game-pair-audit-20260919T003615Z-fd7c0e`.
+No new trials: first battle learn/original is 3,622/6,400 (401),
+11,818/7,915 (402). The snapshot state becomes battle-active slightly before
+the game's battle-start execution hook; distinguish those measurements.
+
 2026-09-19 00:30 UTC: queued v8 behavioral protocol, AFTER the already registered
 v7 practice/3801+3802 retained tests (and reserved confirmation if promising).
 Use the existing one-factor runner, factor=rule, 6,000 whole-game decisions on

@@ -9,11 +9,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+from contextlib import nullcontext
 from pathlib import Path
 
 from pokefly.checkpoint import read_checkpoint, sha256
 from pokefly.emulator import RedEmulator
-from pokefly.rewards import GeneralRewards, RewardConfig, RewardHooks
+from pokefly.rewards import (
+    SOURCE_REVISION,
+    SYMBOLS_REVISION,
+    GeneralRewards,
+    RewardConfig,
+    RewardHooks,
+)
 from pokefly.rom import resolve_rom
 from pokefly.runner import run_directory, write_json
 
@@ -44,7 +52,45 @@ class TimedRewards(GeneralRewards):
             )
 
 
-def summarize_outcomes(rewards, brain_steps):
+class MoveConfirmationHooks:
+    """Observer only: successful menu selection, not a causal damage attribution.
+
+    Pinned pokered engine/battle/core.asm, SelectMenuItem.transformedMoveSelected:
+    the hook is AFTER the accepted move is written, not cursor highlighting.
+    Automatic/repeated/Struggle moves need not pass this selection path.
+    https://github.com/pret/pokered/blob/a1a22aaf84d1675bcdbaeb194592379d586d838e/engine/battle/core.asm
+    """
+
+    bank, block, address = 15, 0x538D, 0x539B
+    signature = bytes.fromhex("fa26cc211cd04f0600097eeadcccafc9")
+
+    def __init__(self, game, rewards):
+        self.game, self.rewards = game, rewards
+
+    def record(self, _context=None):
+        rewards = self.rewards
+        if rewards.active is None:
+            return
+        memory = self.game.pyboy.memory
+        rewards.history.setdefault(rewards.active["id"], []).append({
+            "hook": "move_confirmed", "frame": rewards.frame_clock(), "sample": rewards.sample,
+            "move_id": int(memory[0xCCDC]), "slot": int(memory[0xCC2E]),
+        })
+
+    def __enter__(self):
+        actual = bytes(self.game.pyboy.memory[
+            self.bank, self.block:self.block + len(self.signature)
+        ])
+        if actual != self.signature:
+            raise ValueError("Move-confirmation observer ROM signature mismatch")
+        self.game.pyboy.hook_register(self.bank, self.address, self.record, None)
+        return self
+
+    def __exit__(self, *_args):
+        self.game.pyboy.hook_deregister(self.bank, self.address)
+
+
+def summarize_outcomes(rewards, brain_steps, eligibility_seconds=None):
     results = []
     for outcome in rewards.outcomes:
         delivered = outcome["delivered_at"]
@@ -52,7 +98,7 @@ def summarize_outcomes(rewards, brain_steps):
         markers = [h for h in history
                    if h["hook"] in ("faint", "trainer_win", "ball_done")
                    and h["frame"] <= delivered["frame"]]
-        results.append({
+        result = {
             **outcome, "history": list(history),
             "encounter_finished": any(h["hook"] == "end" for h in history),
             "delays": [{
@@ -60,7 +106,25 @@ def summarize_outcomes(rewards, brain_steps):
                 "decisions": delivered["sample"] - h["sample"],
                 "neural_seconds": (delivered["sample"] - h["sample"]) * brain_steps * .02,
             } for h in markers],
-        })
+        }
+        choices = [h for h in history if h["hook"] == "move_confirmed"
+                   and h["frame"] <= delivered["frame"]]
+        if choices:
+            choice = choices[-1]
+            decisions = delivered["sample"] - choice["sample"]
+            neural_seconds = decisions * brain_steps * .02
+            result["last_confirmed_move"] = {
+                **choice, "game_frames_to_reward": delivered["frame"] - choice["frame"],
+                "decisions_to_reward": decisions, "neural_seconds_to_reward": neural_seconds,
+                "confirmed_choices_before_outcome": len(choices),
+                "isolated_trace_decay_fraction": math.exp(-neural_seconds / eligibility_seconds)
+                if eligibility_seconds else None,
+                "caveat": "Last observed choice, not proof it caused the outcome; decay excludes "
+                          "new inputs and uses decision-bucket timing, not measured eligibility",
+            }
+        else:
+            result["last_confirmed_move"] = None
+        results.append(result)
     return results
 
 
@@ -69,7 +133,11 @@ def main():
     p.add_argument("--run", type=Path, required=True)
     p.add_argument("--whole-game-start", action="store_true",
                    help="Reject resumed/stage-start sources; replay the full recorded game opening")
+    p.add_argument("--move-confirmations", action="store_true",
+                   help="Measure accepted move-to-reward delays; requires --whole-game-start")
     args = p.parse_args()
+    if args.move_confirmations and not args.whole_game_start:
+        p.error("Move confirmation audit requires a whole-game replay, not a battle reset")
     if not (args.run / "summary.json").exists():
         p.error("A completed source run is required")
     config = json.loads((args.run / "config.json").read_text())
@@ -102,13 +170,16 @@ def main():
             rewards.baseline(game.state())
             if game.state().battle:
                 rewards.start(game.pyboy.memory)
-        with RewardHooks(game, rewards):
+        with (RewardHooks(game, rewards),
+              MoveConfirmationHooks(game, rewards) if args.move_confirmations else nullcontext()):
             for row in rows:
                 rewards.sample = row["sample"]
                 game.act(row["action"], config["config"]["frames"])
                 assert game.state().telemetry() == row["telemetry"], row["sample"]
                 assert rewards.drain() == (row["reward"], row["reward_events"]), row["sample"]
-    results = summarize_outcomes(rewards, config["config"]["brain"]["brain_steps"])
+    brain_config = config["config"]["brain"]
+    results = summarize_outcomes(rewards, brain_config["brain_steps"],
+                                brain_config["plasticity"]["eligibility_seconds"])
     report = {
         "scope": __doc__,
         "source_run": str(args.run),
@@ -116,7 +187,10 @@ def main():
         "verified_samples": len(rows),
         "all_sampled_states_and_rewards_match": True,
         "whole_game_start_required": args.whole_game_start,
-        "measurement_limit": "Outcome-hook to reward emission, not move-selection credit latency",
+        "move_confirmations_measured": args.move_confirmations,
+        "symbols_revision": SYMBOLS_REVISION,
+        "source_revision": SOURCE_REVISION,
+        "measurement_limit": "Hook-to-reward timing, not a measured neural credit contribution",
         "neural_dt_seconds": 0.02,
         "outcomes": results,
     }

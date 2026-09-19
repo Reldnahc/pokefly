@@ -17,12 +17,29 @@ Consequently, verifying that a victory reward arrives at the final knockout
 does not establish that the earlier move choice still receives useful credit.
 The actual-game reward ledger and the learning rule must be evaluated separately.
 
+Whole-game replays of source 402's two victories now measure 8/9 decisions
+from the last accepted move selection to the earlier final-knockout reward
+(1.92/2.16 neural seconds). Passive decay of an isolated 0.6 s trace contribution
+would leave 4.08%/2.73%. This does not measure the net eligibility trace after
+other activity, establish which move caused the win, or establish an effective
+replacement time constant. Both replays reproduce every logged state/reward;
+see the 00:49 UTC entry in `FOLLOWTHROUGH_RESULTS.md` for evidence paths.
+
 The installed metadata includes 4,064 KC-prefixed cells, 97 MBON-prefixed cells,
 316 PAM-prefixed cells and 16 PPL1-prefixed cells. Merely containing these cells
 does not implement their biological memory mechanisms. The active sensorimotor
 rule does not also train KC-to-MBON connections. Historical compartment-only
 variants exist; they failed their earlier controlled association tests. Do not
 present them as a new untested solution or assume longer traces alone solve it.
+
+A read-only sparse-graph count finds 4,407 direct visual-KC-to-MBON edges,
+10,164 visual-KC-to-PAM edges, 1,500 visual-KC-to-PPL1 edges, and 2,119/419
+MBON-to-PAM/PPL1 edges. Thus some relevant anatomical connections exist; this
+does not establish their functional learning signals. The installed builder
+assigns fast connection signs from broad neurotransmitter classes, treating
+types outside its inhibitory list as positive. That is not dopamine receptor
+kinetics or a learned reward predictor. No extra plastic scope or critic was
+enabled by this connectivity inspection.
 
 ## What the literature supports—and does not
 

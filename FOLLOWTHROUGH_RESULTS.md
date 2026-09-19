@@ -1,5 +1,39 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Whole-game practice completed; retained tests running, 2026-09-19 00:49 UTC
+
+Both v7 flies completed a second 18,000-decision fresh game with their own
+previously learned synapses: 36,000 training decisions each, no battle resets.
+
+| Lineage / new noise seed | Positions | First starter | First battle | Outcome at cutoff |
+| --- | --- | --- | --- | --- |
+| 401 / 4101 | 204 | 13,640 | 15,271 | Rival battle unfinished; level 5 |
+| 402 / 4102 | 351 | 4,822 | 4,880 | Completed rival victory; level 6 |
+
+Neither reached Route 1 during this practice game. Source 402's new game was
+faster than its previous game, but the changed noise seed prevents attributing
+that contrast to learning. Source 401 was slower and B-heavy. Both final brains
+are included in the registered 3801/3802 frozen panels, with one shared original
+control per seed and 18,000 decisions per arm. Those tests are RUNNING, not a
+completed success. Reports `game-retention-panel-20260919T003820Z-25c5e2` and
+`...T003821Z-6e893d`. The default showcase profile is unchanged.
+
+Two whole-game CPU replays measure the last **confirmed** move before each
+source 402 victory—not merely the move highlighted by the cursor. All 18,000
+recorded states and rewards reproduce in each replay. Move-to-reward gaps are
+8/9 decisions, or 1.92/2.16 neural seconds. An isolated contribution to the
+0.6 s eligibility trace would decay to 4.08%/2.73%; these are mathematical
+decay estimates, not actual remaining credit or proof of a causal move.
+The delayed-credit concern remains despite reward delivery at the final faint.
+Earlier long-trace failures are not invalidated by this finding.
+Artifacts `recorded-outcome-latency-20260919T004440Z-8c5c7f` and
+`...T004507Z-0776d6`. Replays are not new autonomous victories or training.
+
+Verification: the final clean CPU run passes 420 Python tests, 26 JavaScript
+tests and lint (`verify-57f958c6c8eb4791a21fa5f5d120acc0`). No new GPU tests
+competed with the two retained-game panels. Further mechanism notes, explicitly not an
+implemented predictive model, are in [LEARNING_MECHANISMS.md](LEARNING_MECHANISMS.md).
+
 ## Reward delivery and evaluation checks, 2026-09-19 00:23 UTC
 
 A replay from the beginning of v7 learning 402 matches every recorded state
