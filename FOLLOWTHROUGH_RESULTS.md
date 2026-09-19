@@ -1,5 +1,23 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Prospective whole-game scoring, 2026-09-19 03:34 UTC
+
+The optional screen_game_retention.py re-audits complete fresh-game panels
+before applying the registered development threshold: the SAME final retained
+brain must preserve the original's completed milestones, add progression,
+and improve the SAME arrival endpoint by at least10% on both held-out seeds.
+An unreached original arrival is explicitly right-censored, not time zero.
+Missing arms, mixed training lineages, extra tiles alone, and paid-but-open
+battles cannot substitute for this check. No value enters neural control or
+rewards; passing would still require independent confirmation.
+
+517 CPU Python tests/26JavaScript/lint pass
+(verify-a522cee39ad64af9b81d05538e5771a7). Read-only re-audit of the old v7
+panels rejects both lineages (game-retention-progress-screen-20260919T033241Z-c1953b).
+That is an accounting regression, not more autonomous trials or a newly
+prospective v7 result. The current v10 shuffled controls are still running;
+its two final rewarded small probes are65.30%/66.22%, not a final recall gate.
+
 ## Fixed-reference memory result, 2026-09-19 03:08 UTC
 
 V9 fails its predeclared independent two-cue memory screen. Every final8,192

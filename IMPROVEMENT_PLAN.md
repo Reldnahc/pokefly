@@ -1,5 +1,19 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 03:34 UTC: v10 paired8192 COMPLETE on both curves; small final
+probes65.30%/66.22% balanced. Shuffled arms continue in16990/52362, still
+the ONLY TWO GPU jobs. Finish all final arms before9101..9104 retention.
+The complete physical model/default and game queue remain unchanged.
+
+Observer-only prospective progress screen implemented/tested:517 CPU Python,
+26JS/lint pass (verify-a522cee39ad64af9b81d05538e5771a7). CUDA unit module
+was explicitly skipped while both GPU slots are occupied; no live neural
+math changed. Read-only application to the old v7 raw panels rejects BOTH
+lineages (game-retention-progress-screen-20260919T033241Z-c1953b); that is
+audit regression evidence, not new gameplay trials or a prospective v7 test.
+CPU audit27485 exited/drained. Conditional v11 profile/source and v9 results
+were source-only committed/pushed8845514. V11 still has NO calibration/run.
+
 2026-09-19 03:26 UTC: CPU regression after v11 profile preparation passes
 501 Python/26JavaScript/lint, verify-a8f6084f249844d09cf27786265882dc.
 Only GPU jobs remain the two v10 curves16990/52362. All ten protected
@@ -41,6 +55,14 @@ milestone, and >=10% earlier first-starter OR first-battle on BOTH held-out
 seeds for at least one SAME lineage before confirmation. Report every arm.
 This is a development threshold, not a significance test or endgame guarantee.
 No default promotion without independent confirmation and fresh safety checks.
+
+03:31 UTC prospective scoring clarification BEFORE any v11 run: require the
+SAME faster arrival endpoint on both seeds, not starter on one and battle on
+the other. If the original never arrives, use the evaluation budget as a
+conservative lower bound on its time; retained must arrive by90% of that budget.
+Missing arrivals never count as time zero. Preserve completed rival/capture/gym
+outcomes too. The observer-only screen_game_retention.py re-audits all source
+panels, scores every lineage, and never feeds measurements back to the brain.
 
 2026-09-19 03:18 UTC: v10 software/live smoke checks PASSED, not gameplay
 learning proof. Full CUDA regression510 Python/26JavaScript/lint:
