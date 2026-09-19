@@ -48,8 +48,11 @@ def panels(tmp_path, monkeypatch):
             })
         write(path / "report.json", report)
     monkeypatch.setattr(m, "read_checkpoint", lambda path: snapshots[str(path)])
-    monkeypatch.setattr(m, "completed_game_source",
-                        lambda path: sources[[s[2]["run"] for s in sources].index(str(path))])
+    def checked_source(path, *, heldout_seeds):
+        assert heldout_seeds in ([1601], [1602])
+        return sources[[s[2]["run"] for s in sources].index(str(path))]
+
+    monkeypatch.setattr(m, "completed_game_source", checked_source)
     return m, paths, snapshots, sources
 
 

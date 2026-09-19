@@ -1,5 +1,22 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Whole-game holdout safety, 2026-09-19 06:39 UTC
+
+Held-out-seed validation now checks every fresh-game launch in a trained brain's
+ancestry, including games before the final practice. Previously the launchers
+checked only the most recent source seed. Exact resumes keep the original random
+stream, so their unused launch-seed argument does not create a training start.
+The panel launcher, raw panel auditor, practice scheduler and neutral motor
+audit share this guard; unknown ancestral seeds fail closed when validating a
+holdout. No neural equation, reward, decoder, history file or raw report changed.
+
+Both current v10 sources pass the stronger check for4601..4604; their pinned
+brain hashes remain unchanged. Ten new regression cases cover ancestral overlap,
+exact resume, malformed seeds, and source pinning; wrapper fixtures also check
+that evaluation seeds actually reach the guard.544 CPU Python/26JS/lint passes
+(verify-fb9e784f57e045d49c51cf748fce21d5). The two GPU panels still run unchanged;
+this is evidence-safety verification, not another learning result.
+
 ## Mixed retained-game observations, 2026-09-19 06:20 UTC
 
 The18k frozen tests are not yet all complete. Retained4501 finished BOTH seeds:

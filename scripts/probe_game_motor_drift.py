@@ -49,7 +49,7 @@ def main():
     args = parser.parse_args()
     if len(set(args.seeds)) != len(args.seeds) or len(args.seeds) < 3:
         parser.error("At least three distinct noise seeds required")
-    sources = [completed_game_source(path) for path in args.source_runs]
+    sources = [completed_game_source(path, heldout_seeds=args.seeds) for path in args.source_runs]
     if len({str(source[0]) for source in sources}) != len(sources):
         parser.error("Duplicate source checkpoint")
     if any(source[1] != sources[0][1] for source in sources):

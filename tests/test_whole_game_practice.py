@@ -43,9 +43,11 @@ def test_whole_game_training_carries_each_final_brain_and_never_uses_stage_reset
     output.mkdir()
     initial.mkdir()
     snapshots, calls = {}, []
-    monkeypatch.setattr(m, "completed_game_source", lambda path: (
-        initial, {}, {"source_launch_seed": 401, "checkpoint": str(initial)},
-    ))
+    def checked_source(path, *, heldout_seeds):
+        assert heldout_seeds == [3801, 3802]
+        return initial, {}, {"source_launch_seed": 401, "checkpoint": str(initial)}
+
+    monkeypatch.setattr(m, "completed_game_source", checked_source)
     monkeypatch.setattr(m, "run_directory", lambda name: output)
     monkeypatch.setattr(m, "resolve_rom", lambda *args: Path("unused.gb"))
     monkeypatch.setattr(m, "read_checkpoint", lambda path: ({}, snapshots[str(path)]))

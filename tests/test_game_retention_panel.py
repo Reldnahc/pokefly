@@ -67,7 +67,11 @@ def test_shared_control_panel_freezes_all_sources_and_avoids_duplicate_originals
         )
         return path
 
-    monkeypatch.setattr(m, "completed_game_source", lambda path: data[int(path.name) - 401])
+    def checked_source(path, *, heldout_seeds):
+        assert heldout_seeds == seeds
+        return data[int(path.name) - 401]
+
+    monkeypatch.setattr(m, "completed_game_source", checked_source)
     monkeypatch.setattr(m, "read_checkpoint", lambda path: snapshots[str(path)])
     monkeypatch.setattr(m, "train", train)
     monkeypatch.setattr(m, "measure", lambda path: {"samples": 16,

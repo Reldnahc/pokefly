@@ -1,5 +1,18 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 06:39 UTC: ONLY GPU panels53942/88470 continue, third/final arms
+around16k/18k. CPU-only ancestry guard now excludes test seeds used by ANY
+ancestral whole-game launch, not just the final practice. Exact resumes retain
+their parent's RNG and do not count an unused launch-seed option. Panel launch,
+whole-game practice scheduling, panel audit and neutral motor audit use the
+guard. Source-provenance/report formats and actual controller are unchanged.
+Both CURRENT source lineages pass4601..4604 exclusion, with unchanged brain
+hashes.544 CPU Python/26JS/lint passes, verify-fb9e784f57e045d49c51cf748fce21d5;
+11951 and prior34051 exited/drained. Full CUDA regression awaits a free slot.
+At06:29 all10 protected ROM/model/old-user-run hashes matched. At06:31 browser
+skill retry still unavailable; no rendered UI validation or replacement browser.
+No v11 run yet. Finish/audit BOTH panels before the conditional next candidate.
+
 2026-09-19 06:20 UTC: second arms COMPLETE18k; ONLY existing GPU panels
 53942/88470 now run their THIRD/final arms.4601 retained4502 actual
 internal-frozen-20260919T061144Z-d41ea6;4602 original actual

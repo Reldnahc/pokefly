@@ -44,7 +44,7 @@ def main():
     args = p.parse_args()
     if args.steps < 1:
         p.error("Positive preselected evaluation budget required")
-    sources = [completed_game_source(path) for path in args.source_runs]
+    sources = [completed_game_source(path, heldout_seeds=args.seeds) for path in args.source_runs]
     fixed = validate_sources(sources, args.seeds)
     output = run_directory("game-retention-panel")
     config = output / "fixed-config.json"

@@ -21,13 +21,19 @@ from pokefly.rom import resolve_rom
 from pokefly.runner import run_directory, write_json
 
 
-def verify_whole_game_lineage(path):
+def verify_whole_game_lineage(path, *, heldout_seeds=()):
     '''Reject stage-reset ancestry, while allowing exact own-game continuations.
 
     Reads original run metadata and checksummed parent checkpoints only. No
     state is loaded into an emulator and no synapses or old reports are edited.
+    Optional held-out seeds must exclude EVERY ancestral fresh-game launch.
+    Exact resume keeps its parent's random stream, not its unused launch seed.
     A copied checkpoint without its provenance is deliberately insufficient.
     '''
+    heldout_seeds = tuple(heldout_seeds)
+    if any(type(seed) is not int for seed in heldout_seeds):
+        raise ValueError('Held-out seeds must be integers')
+    heldout = frozenset(heldout_seeds)
     visited, expected, rom = set(), None, None
     while True:
         path = Path(path).resolve()
@@ -36,6 +42,12 @@ def verify_whole_game_lineage(path):
         visited.add(path)
         stored = json.loads((path / 'config.json').read_text())
         options = stored['options']
+        if heldout and not options.get('resume'):
+            seed = options.get('seed')
+            if type(seed) is not int:
+                raise ValueError('Whole-game ancestry is missing a valid training launch seed')
+            if seed in heldout:
+                raise ValueError('Held-out seed overlaps ancestral whole-game training')
         model = ExperimentConfig.from_dict(stored['config'], checkpoint=True)
         if rom is None:
             rom = stored['rom_sha1']
@@ -64,13 +76,13 @@ def verify_whole_game_lineage(path):
         path = directory.parent.parent
 
 
-def completed_game_source(path):
+def completed_game_source(path, *, heldout_seeds=()):
     """Pin an actual game checkpoint; ROM-free assay .npz files are not accepted."""
     stored = json.loads((path / "config.json").read_text())
     summary = json.loads((path / "summary.json").read_text())
     if stored["options"]["mode"] != "learn" or summary["reason"] != "step_limit":
         raise ValueError("Initial source must be a completed actual-game learning run")
-    verify_whole_game_lineage(path)
+    verify_whole_game_lineage(path, heldout_seeds=heldout_seeds)
     _, saved = read_checkpoint(path / "latest-checkpoint.json")
     if (
         saved["experiment"]["mode"] != "learn"
@@ -153,7 +165,9 @@ def main():
     config = output / "fixed-config.json"
     initial, provenance = None, None
     if args.initial_game_run:
-        initial, source_config, provenance = completed_game_source(args.initial_game_run)
+        initial, source_config, provenance = completed_game_source(
+            args.initial_game_run, heldout_seeds=args.eval_seeds,
+        )
         if provenance["source_launch_seed"] in args.eval_seeds:
             p.error("Evaluation seed overlaps the source training launch")
         write_json(config, source_config)

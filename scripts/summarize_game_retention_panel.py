@@ -35,7 +35,8 @@ def audit(paths):
         fixed = asdict(load_config(Path(report["config"])))
         if sha256(Path(report["config"])) != report["config_sha256"]:
             raise ValueError("Panel configuration changed")
-        current_sources = [completed_game_source(Path(s["run"])) for s in report["sources"]]
+        current_sources = [completed_game_source(Path(s["run"]), heldout_seeds=report["seeds"])
+                           for s in report["sources"]]
         if [s[2] for s in current_sources] != report["sources"]:
             raise ValueError("A registered training source changed")
         if validate_sources(current_sources, report["seeds"]) != fixed:

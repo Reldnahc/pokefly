@@ -16,7 +16,7 @@ def lineage(tmp_path, monkeypatch):
         run.mkdir()
         checkpoint = run / 'checkpoints' / 'step-00000016-fixture'
         checkpoint.mkdir(parents=True)
-        options = {'mode': 'learn', 'intro': index < 2, 'load_state': None,
+        options = {'mode': 'learn', 'seed': 401 + index, 'intro': index < 2, 'load_state': None,
                    'weights': str(runs[0] / 'latest-checkpoint.json') if index == 1 else None,
                    'resume': str(runs[1] / 'latest-checkpoint.json') if index == 2 else None}
         stored = {'options': options, 'config': {}, 'rom_sha1': 'same-rom'}
@@ -108,3 +108,41 @@ def test_damaged_parent_checkpoint_is_not_treated_as_fresh_brain(tmp_path, monke
     monkeypatch.setattr(module, 'read_checkpoint', corrupt)
     with pytest.raises(ValueError, match='Incomplete or modified'):
         module.verify_whole_game_lineage(runs[-1])
+
+
+@pytest.mark.parametrize('seed', [401, 402])
+def test_heldout_seeds_exclude_every_ancestral_fresh_game(tmp_path, monkeypatch, seed):
+    module, runs, _ = lineage(tmp_path, monkeypatch)
+    with pytest.raises(ValueError, match='overlaps ancestral'):
+        module.verify_whole_game_lineage(runs[-1], heldout_seeds=[seed, 9001])
+
+
+def test_unseen_seeds_and_unused_exact_resume_launch_seed_are_allowed(tmp_path, monkeypatch):
+    module, runs, _ = lineage(tmp_path, monkeypatch)
+    before = [(run / 'config.json').read_bytes() for run in runs]
+    module.verify_whole_game_lineage(runs[-1], heldout_seeds=[403, 9001])
+    assert before == [(run / 'config.json').read_bytes() for run in runs]
+
+
+@pytest.mark.parametrize('seed', [None, True, '401'])
+def test_unknown_ancestral_training_seed_fails_closed_when_testing_holdout(
+    tmp_path, monkeypatch, seed,
+):
+    module, runs, _ = lineage(tmp_path, monkeypatch)
+    change(runs[0], lambda value: value['options'].update(seed=seed))
+    with pytest.raises(ValueError, match='valid training launch seed'):
+        module.verify_whole_game_lineage(runs[-1], heldout_seeds=[9001])
+
+
+def test_completed_source_checks_heldout_ancestry_before_loading_weights(tmp_path, monkeypatch):
+    module, runs, _ = lineage(tmp_path, monkeypatch)
+    (runs[-1] / 'summary.json').write_text(json.dumps({'reason': 'step_limit', 'samples': 16}))
+    with pytest.raises(ValueError, match='overlaps ancestral'):
+        module.completed_game_source(runs[-1], heldout_seeds=[401, 9001])
+
+
+@pytest.mark.parametrize('seeds', [[True], ['401'], [1, True]])
+def test_holdout_seed_types_are_explicit(tmp_path, monkeypatch, seeds):
+    module, runs, _ = lineage(tmp_path, monkeypatch)
+    with pytest.raises(ValueError, match='must be integers'):
+        module.verify_whole_game_lineage(runs[-1], heldout_seeds=seeds)
