@@ -1,5 +1,40 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Longer whole-game practice active, 2026-09-19 07:40 UTC
+
+The v11 alternative completed its independent memory screen. Training seed 501
+passes: 64.26% paired recall versus 44.61% shuffled and 44.91% original, with
+both individual cues above 55%. Seed 601 reaches 61.40% overall, but one cue is
+53.70%, below the registered threshold. Thus the required two-seed screen fails;
+this is positive association evidence, not a qualified replacement. No v11
+full-game study or default promotion follows. Raw audit:
+`visual-retention-gate-20260919T073022Z-acc0fd`.
+
+The previously registered fallback is now running: each of the two preserved
+v10 gameplay brains receives FOUR additional fresh 18,000-decision games,
+carrying forward its preceding final synapses. This brings each history from
+24,000 to 96,000 training decisions across SIX whole-game attempts. There are
+no battle starts, selected-stage resets, new rewards, synthetic assay weights,
+or favorable intermediate-checkpoint selection.
+
+- Parent 4501: series `retained-game-series-20260919T073051Z-db71a2`, seeds
+  61001 through 61004; dashboard port 59320.
+- Parent 4502: series `retained-game-series-20260919T073051Z-f7b4fc`, seeds
+  62001 through 62004; dashboard port 59322.
+
+After both finish, all FOUR checkpoints (two 24k parents and two final 96k
+children) will be tested with a shared original brain on fresh frozen games,
+seeds 63001/63002. The extension must improve on both the original and its own
+parent under the registered progression/preservation screen. Only a qualifying
+child triggers confirmation on 63003/63004; the SAME child must confirm. These
+are two related training families, not four independent replicas. Actual
+training outcomes and weight changes alone will not establish retained skill.
+
+The normal showcase default and user history remain unchanged. Source-only
+verification passes 575 Python tests, 26 JavaScript tests and lint
+(`verify-49fcff341c944c128408dbb22e713cc7`). Rendered dashboard verification is
+still unavailable because the in-app browser backend is unavailable.
+
 ## V10 retained whole-game panel complete, 2026-09-19 06:44 UTC
 
 All six frozen18k fresh-game arms completed. Both learned lineages had24k total

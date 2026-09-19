@@ -3,6 +3,14 @@
 2026-09-19. Research notes, not an implemented new circuit or a gameplay result.
 The registered whole-game practice and retained-weight tests take priority.
 
+Current status at 07:40 UTC: v11's alternative local likelihood rule failed
+the required two-seed memory screen (one cue at 53.70%, below 55%), despite
+positive overall association effects. The unchanged v10 model is now getting
+four more WHOLE fresh games per retained brain: 96k total decisions across six
+attempts. Final retained tests will compare each child with its 24k parent and
+the original brain. This is a training-dose test, not a new circuit or proof
+that more experience will work; see `FOLLOWTHROUGH_RESULTS.md` for artifact IDs.
+
 ## What the current fly learns
 
 The wide-v3 showcase and timing-only v7 candidate modify existing positive

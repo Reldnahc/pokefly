@@ -1079,7 +1079,7 @@ evidence at a finite training budget, not proof that longer training cannot help
 The full protocol is registered in IMPROVEMENT_PLAN.md. It never loads a
 differently trained model or uses a favorable intermediate assay checkpoint.
 
-## Strong-vision likelihood candidate (v11; memory tests running, not promoted)
+## Strong-vision likelihood candidate (v11; memory screen failed, not promoted)
 
 `visual-wide-score-v11.json` combines the existing `sensorimotor-score-v2`
 local spike-likelihood rule with the current calibrated visual model. It keeps
@@ -1111,8 +1111,12 @@ passes the preset sanity checks: all mapped motor reset rates0.8626..1.2044Hz,
 finite activity, KC/MBON means below10Hz. Asset SHA256:
 6e899a4add8da3781a232eb100e847a508bd169d5965f8637da14c82067b9e43.
 The real-ROM exact-resume/frozen/no-reward smoke passes in
-internal-smoke-20260919T064635Z-d52285. Two paired/shuffled memory curves501/601
-are now running; no completed v11 behavioral result or gameplay claim yet.
+internal-smoke-20260919T064635Z-d52285. Both paired/shuffled curves and final
+independent9201..9204 recall are COMPLETE.501 passes (paired64.26%, both cues
+above55%, shuffled44.61%, original44.91%).601 reaches61.40% balanced but its
+weaker cue is53.70%, below55%; shuffled46.01%. The required two-seed gate
+therefore FAILS, despite positive association effects. Full raw audit:
+visual-retention-gate-20260919T073022Z-acc0fd. No model/default promotion.
 
 Before its full-game training study starts, the06:59 UTC prospective amendment
 extends practice to SIX whole-game attempts per lineage: initial18k followed
@@ -1121,4 +1125,5 @@ lineages receive the same budget; the70-decision smoke and synthetic weights
 are excluded. This tests substantially more whole-game experience, not a new
 reward or rule. The original two-seed memory gate,18k final frozen4801/4802
 comparison, progression criteria and same-lineage4803/4804 confirmation remain
-unchanged. Exact seeds/order/source requirements are in IMPROVEMENT_PLAN.md.
+unchanged. This full-game study was NOT activated because the memory gate
+failed. Exact seeds/order/source requirements remain in IMPROVEMENT_PLAN.md.

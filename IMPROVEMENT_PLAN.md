@@ -1,5 +1,51 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 07:31 UTC: v11 recall COMPLETE and raw-audited in
+visual-retention-gate-20260919T073022Z-acc0fd.501 PASSES: paired64.2579%,
+individual62.9268%/65.5889%, shuffle44.6062%.601 FAILS each-cue threshold:
+paired61.4037%, individual69.1038%/53.7037%, shuffle46.0069%. Shared original
+44.9132%, all original raw actions identical. OVERALL required two-seed gate
+FAILS; not zero learning, but no v11 full-game108k study or promotion.31785/
+45632 exited/drained. All sources/final8192 checkpoints retained unselected.
+
+CURRENT ONLY TWO GPU JOBS: registered v10 longer WHOLE-game practice,4 extra
+fresh18k attempts each, final96k total/SIX games per brain. No model/reward/
+decoder change.4501 family session90734, series
+retained-game-series-20260919T073051Z-db71a2, seeds61001..61004, dashboard59320;
+current61001 actual internal-learn-20260919T073054Z-9944ac.
+4502 family session44677, series retained-game-series-20260919T073051Z-f7b4fc,
+seeds62001..62004, dashboard59322;current62001 actual
+internal-learn-20260919T073054Z-896c7b. BOTH use --defer-evaluation and their
+own preserved24k parent checkpoints, no synthetic weights or selected stages.
+Allow ALL FOUR attempts to finish in each existing process; no extra GPU job.
+
+After BOTH series complete, read each final training row's actual run path.
+Evaluate ALL FOUR brains (original24k parents4501/4502 and final96k61004/62004)
+with one shared original, whole-fresh/frozen18k panels63001/63002. Then run
+screen_training_extension.py --reports <both> --families 4501:61004 4502:62004.
+Use the07:09 registered parent-relative and original-relative gate below;
+reserve63003/63004 SAME-child confirmation if triggered. The normal default
+and user history stay unchanged. Current full verification575Python/26JS/lint.
+
+2026-09-19 07:24 UTC: BOTH v11 paired/shuffled curves COMPLETE8192;65056/24345
+exited/drained. Short final probes501 paired54.83%,shuffle42.66%;601 paired57.54%,
+shuffle46.26%. These do NOT replace the registered independent recall gate.
+CURRENT ONLY TWO GPU JOBS are final frozen recall, ALL arms9201..9204:
+501 session31785, visual-retention-probe-20260919T072111Z-d645fa;
+601 session45632, visual-retention-probe-20260919T072210Z-0b161a.
+Both use128 neutral+128 decisions/cue; original first arm for501 is44.9132%
+balanced. No qualification conclusion until BOTH complete and raw-audited with
+summarize_visual_retention.py --reports <both paneldirs>. No original brain,
+weights, rewards, profile or gate modified during these experiments.
+
+Full CUDA-inclusive regression NOW575Python/26JS/lint PASS,
+verify-49fcff341c944c128408dbb22e713cc7;39454 exited/drained. Latest source-only
+commit7e407f1 pushed, includes extension observer and its21 tests. If BOTH v11
+lineages pass, use the06:59 amended SIX-game/108k whole-game protocol, not the
+old36k plan. If v11 fails, use the07:09 unchanged-v10 FOUR-additional-game/96k
+parent-versus-child study, after all current recall arms finish. BOTH training
+families retained in either branch. Never promote on a small positive probe.
+
 2026-09-19 07:17 UTC: conditional extension observer IMPLEMENTED/CPU-verified,
 not run as a neural study. scripts/screen_training_extension.py re-audits ALL
 five-arm panels, scores only the assigned children for extension success,
