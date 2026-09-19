@@ -1,5 +1,33 @@
 # Follow-through: movement, internal learning and actual gameplay
 
+## Mixed retained-game observations, 2026-09-19 06:20 UTC
+
+The18k frozen tests are not yet all complete. Retained4501 finished BOTH seeds:
+on4601 it got a starter11.64% sooner than the original (3462 vs3918), but reached
+the first battle later (4252 vs4001) and lost the rival battle that the original
+won. This already fails the registered preservation requirement for that brain.
+On4602 it obtained a starter3559, first battle3716, rival victory4111, Route1
+at6667, and a wild victory16645. Its matching original is still running, so
+this stronger single run is not a matched retained-learning improvement claim.
+It visited410 total positions,45 on Route1, reaching y24. No capture or badge.
+The4601 rival loss is also verified by whole-opening playback: end6070,
+playerHP0/no surviving party, enemyHP4 and no victory evidence. Its replay
+reproduces all18k states/rewards; artifact
+recorded-outcome-latency-20260919T062118Z-61cc94. Both CPU audits exited.
+
+CPU playback of the ENTIRE4602 recording reproduces every sampled state and
+reward, with no brain loaded or new actions chosen. It confirms both completed
+wins and a later wild loss17171 (playerHP0, no surviving party). The return to
+Red's house was therefore not evidence of deliberate healing. Other wild
+encounters ended with raw result2 and surviving party, without victory evidence.
+Artifact: recorded-outcome-latency-20260919T061840Z-a161f8; source trajectory SHA
+f33b9e112f11ffccbfdd15a34cef3f8852666796cde01fdcc2840bb149480b8c.
+This replay is a recording audit, NOT another autonomous trial or battle reset.
+
+Both original panels continue their third/final arms: retained4502 on4601 and
+original on4602. ALL arms and the same predeclared gate still count, including
+regressions. Normal defaults, user learning history and game rewards unchanged.
+
 ## Actual practice outcomes replay-verified, 2026-09-19 05:20 UTC
 
 CPU-only playback from EACH original game opening reproduces all18,000 sampled

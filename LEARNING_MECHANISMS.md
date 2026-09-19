@@ -92,6 +92,24 @@ weights from that model are deployed here.
 
 ## Constraints on a future investigation
 
+### Upstream recheck, September19
+
+The current [fly.ai README](https://github.com/alextitonis/fly.ai) still lists
+internal plasticity as missing/future work. Its interface-learning examples
+are not an internally learning replacement for Pokefly. The current
+[DOOMFLY protocol](https://github.com/nftechie/doomfly/blob/main/docs/doom-live-training.md)
+explicitly retains failed visual, conditioning and survival gates; enabling its
+learning rule on a stream did not establish retained skill.
+
+The authors of [fly-api](https://github.com/dtch1997/fly-api) report odor-specific
+KC-to-MBON depression, but their navigation demonstration uses a reduced
+olfactory circuit and an engineered lower-MBON-valence steering/arrival rule.
+That is not the unchanged anatomical motor pathway required here. It does not
+provide a validated pixel-driven, delayed whole-game learner to import. These
+are checks of the authors' documented methods, not independent replications;
+no external code, dependencies, learned weights or replacement controller were
+installed. The current tests and conditional candidate queue remain unchanged.
+
 ### Assay reward scale is not gameplay reward scale
 
 Read-only counts from v10's completed first401 game (6,000 decisions) find

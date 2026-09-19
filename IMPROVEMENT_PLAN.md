@@ -1,5 +1,24 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 06:20 UTC: second arms COMPLETE18k; ONLY existing GPU panels
+53942/88470 now run their THIRD/final arms.4601 retained4502 actual
+internal-frozen-20260919T061144Z-d41ea6;4602 original actual
+internal-frozen-20260919T061224Z-ebd29f. Both whole fresh openings, no updates.
+Completed4601 retained4501:331 positions, starter3462, battle4252, zero wins,
+no Route1/capture/badge; final step-00018000-2255acc4. It regresses against
+original4601's rival win, so cannot satisfy the registered preservation gate.
+Completed4602 retained4501:410 positions, starter3559, battle3716, Route1=6667,
+45 Route1 positions/northernmost y24, rival win1 and wild win1, no capture/badge;
+final step-00018000-ea49f120. Its original comparison is still pending.
+CPU replay audit recorded-outcome-latency-20260919T061840Z-a161f8 reproduces
+ALL18k sampled states/rewards: rival win4111, wild win16645, actual wild loss
+17171 (playerHP0/no living party). Return home is NOT evidence of planned
+healing. Audit session12632 exited/drained; no new autonomous trial/training.
+Finish BOTH panels and screen ALL sources/seeds as registered below; no default
+promotion, no battle-start practice, no intermediate-checkpoint selection.
+V11 remains conditional/unrun. Only documentation and observer analysis since
+last code verification. Latest current third arms have no starter at~4.5k.
+
 2026-09-19 05:57 UTC: same TWO GPU panels53942/88470, still second arms
 (retained4501 on both seeds). Provisional4601: starter3462 vs original3918
 (11.64% sooner), firstbattle4252 vs4001 (later); no victory so far after returning
