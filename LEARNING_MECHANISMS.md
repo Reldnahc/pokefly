@@ -145,9 +145,12 @@ CPU-only regression530 Python/26JavaScript/lint passes
 memory panels still passes, visual-retention-gate-20260919T043929Z-b1c63b;
 this is not a new neural trial or independent replication.
 
-First finish the registered whole-game retained tests and the queued internal
-homeostatic candidate. The latter addresses accumulated mean-input bias, not
-long-horizon prediction. Its numerical success is not behavioral success.
+The v10 fixed-reference homeostatic candidate completed its24k-budget retained
+game tests with faster starters for one lineage but inconsistent later progress;
+both failed the registered preservation screen. V11's immediate cue-memory
+tests now run. Neither local likelihood credit nor the prospectively enlarged
+whole-game practice budget implements a learned long-horizon value predictor.
+More exposure is a hypothesis to test, not a demonstrated fix for reward delay.
 
 Any subsequent memory-circuit proposal needs a reproducible anatomical mapping,
 explicitly justified signs/modulation, controlled acquisition and retention,

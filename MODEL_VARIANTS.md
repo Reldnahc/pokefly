@@ -1113,3 +1113,12 @@ finite activity, KC/MBON means below10Hz. Asset SHA256:
 The real-ROM exact-resume/frozen/no-reward smoke passes in
 internal-smoke-20260919T064635Z-d52285. Two paired/shuffled memory curves501/601
 are now running; no completed v11 behavioral result or gameplay claim yet.
+
+Before its full-game training study starts, the06:59 UTC prospective amendment
+extends practice to SIX whole-game attempts per lineage: initial18k followed
+by five fresh18k games carrying each previous final brain (108k total). Both
+lineages receive the same budget; the70-decision smoke and synthetic weights
+are excluded. This tests substantially more whole-game experience, not a new
+reward or rule. The original two-seed memory gate,18k final frozen4801/4802
+comparison, progression criteria and same-lineage4803/4804 confirmation remain
+unchanged. Exact seeds/order/source requirements are in IMPROVEMENT_PLAN.md.

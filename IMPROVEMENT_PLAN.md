@@ -1,5 +1,34 @@
 # Pokefly: neural-control and learning improvement plan
 
+2026-09-19 06:59 UTC: EXPLICIT PROSPECTIVE v11 practice-budget amendment.
+Its70-decision software smoke has completed, but NO full-game training study
+has begun. The TWO current ROM-free curves65056/24345 and ALL their registered
+memory/holdout criteria are UNCHANGED. V11 still needs BOTH final cue-memory
+panels to pass before the game study. Smoke/assay weights never seed that study.
+
+If qualified, keep the initial18k learn/frozen pairs401 learn-first and402
+frozen-first as registered. Then give EACH final learner FIVE whole fresh18k
+practice games, not one:401 lineage uses4701,4703,4705,4707,4709;
+402 lineage uses4702,4704,4706,4708,4710. Every attempt keeps its own previous
+FINAL synapses, resets the whole game/novelty/transient state, and chooses every
+post-intro button itself. This is SIX actual whole-game attempts and108,000
+training decisions per lineage (18k+5*18k), replacing the03:24 total36k plan.
+No early-game gate skips a lineage and no intermediate successful brain is
+selected. Use train_game_series.py --initial-game-run <initial learner>
+--training-seeds <its five seeds> --steps 18000 --evaluation-steps 18000
+--eval-seeds 4801 4802 --defer-evaluation; separate ports for the two workers.
+
+Then ALL final4709/4710 brains plus shared originals get unchanged whole-fresh
+frozen18k tests4801/4802, whole-game-progress-v1, and4803/4804 confirmation if
+triggered for the SAME lineage. Model, reward values/timing, decoder and all
+success criteria remain fixed. Normal-user defaults/history are unchanged.
+Motivation: v10's two-attempt result shows faster starters but mixed later
+progress, and game reward exposure is much sparser than the cue assay. This is
+a larger-training-budget hypothesis, not evidence that time fixes delayed
+credit and not an amendment to v10's FAILED completed screen. It directly tests
+sustained learning across entire games. User informed before this amendment.
+Maximum TWO GPU jobs still applies. No battle/stage starts or new source model.
+
 2026-09-19 06:50 UTC: v11 neutral calibration COMPLETE and sanity PASS:
 reset301/302/303 motor rates0.8626..1.2044Hz, finite/KC/MBON limits pass.
 AssetSHA6e899a4add8da3781a232eb100e847a508bd169d5965f8637da14c82067b9e43.
